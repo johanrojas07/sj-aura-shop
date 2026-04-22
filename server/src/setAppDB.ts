@@ -19,6 +19,12 @@ export const setAppDB = (app: NestExpressApplication): void => {
           .map((o) => o.trim())
           .filter(Boolean)
       : ['http://localhost:3000', 'http://localhost:4200', 'http://127.0.0.1:3000', 'http://127.0.0.1:4200'];
+  if ((process.env.VERCEL === '1' || process.env.VERCEL) && !originEnv) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[CORS] ORIGIN no está definido. Las peticiones desde el front (p. ej. Firebase) se bloquean en el navegador. En Vercel, define ORIGIN con la URL de tu app (p. ej. https://ecommerce-….web.app).',
+    );
+  }
   app.use(
     cors({
       credentials: true,
