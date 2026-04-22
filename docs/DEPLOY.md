@@ -21,7 +21,7 @@ Si el remoto ya existe, usa: `git remote set-url origin https://github.com/johan
 2. **Framework Preset:** Other, o dejar en automático; lo importante:
    - **Build Command:** `npm run vercel-build` o `npm run build:server`
    - **Install Command:** `npm install`
-   - **Output:** vacío o “No” (no hay app estática en este proyecto; solo `api/` + `server/dist`).
+   - **Output Directory:** `public` (carpeta mínima con `index.html` para que Vercel acepte el despliegue; el tráfico sigue yendo a la API con las reglas de `vercel.json`).
 3. Añade **variables de entorno** (Production y Preview según toque), al menos:
    - `ORIGIN` — orígenes del front, separados por comas, por ejemplo: `https://TU-PROYECTO.web.app,https://tudominio.com`
    - Mismas claves que en local: `COOKIE_KEY`, credenciales Firebase Admin (las que ya uses en el servidor: JSON o variables), Stripe, `NODE_ENV=production` si aplica, etc.

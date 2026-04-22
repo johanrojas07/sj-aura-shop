@@ -91,6 +91,3 @@ server/dist
 *.yml
 
 /.angular
-
-# Public builded files
-public
