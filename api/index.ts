@@ -84,6 +84,13 @@ function getHandler(): Promise<H> {
   return handlerPromise;
 }
 
+if (process.env.VERCEL === '1' || process.env.VERCEL) {
+  getHandler().catch((err) => {
+    // eslint-disable-next-line no-console
+    console.error('[vercel] createNestServer / serverless init:', err);
+  });
+}
+
 export default async (req: import('http').IncomingMessage, res: import('http').ServerResponse) => {
   /* Preflight sin levantar Nest: evita timeout en 1.ª carga mientras congela el cold start. */
   if (req.method === 'OPTIONS') {

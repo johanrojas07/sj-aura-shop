@@ -30,6 +30,8 @@ Si el remoto ya existe, usa: `git remote set-url origin https://github.com/johan
 
 Notas: las funciones usan límite de memoria y tiempo; `vercel.json` ajusta `maxDuration` y `includeFiles` del build `server/dist/`. En local, `node server/dist/main` sigue sirviendo para probar el API clásico.
 
+**504 en `GET` pero `OPTIONS` 204:** el preflight (CORS) responde sin levantar Nest; el `GET` sí arranca Nest + Firestore. En el plan **Hobby** el **tiempo máximo** de la función suele ser **10 s**; un *cold start* de Nest + varias peticiones en paralelo al abrir la tienda puede superarlo y Vercel devuelve 504. Opciones: subir a un plan con **límite ≥ 60 s** (o ver que el despliegue respete `maxDuration` del proyecto), activar en el plan Pro **mínima 1 instancia** en la función del API (menos fríos en paralelo), o recargar la página para que, con la instancia ya caliente, los `GET` respondan.
+
 ## 3. Front (Angular) en Firebase Hosting
 
 1. En `client/src/environments/environment.prod.ts`, rellena:
