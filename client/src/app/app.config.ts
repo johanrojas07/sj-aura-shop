@@ -25,6 +25,21 @@ export function configureMaterialSymbols(registry: MatIconRegistry) {
   };
 }
 
+/**
+ * Evita 2 fríos a la API en paralelo: primero /api/eshop/config, luego inicia traducciones
+ * (p. ej. /api/translations) para que el segundo a menudo aterrice en instancia ya calentada.
+ */
+function bootApiSequenceFactory(
+  env: EnvConfigurationService,
+  translate: TranslateService,
+) {
+  return () =>
+    (async () => {
+      await firstValueFrom(env.load());
+      await translate.use('');
+    })();
+}
+
 export const appConfig: ApplicationConfig = {
   providers: [
     importProvidersFrom(MatDialogModule),
@@ -42,20 +57,14 @@ export const appConfig: ApplicationConfig = {
       useClass: BrowserHttpInterceptor,
       multi: true,
     },
-     {
-      provide: APP_INITIALIZER,
-      useFactory: (translateService: TranslateService) => () => translateService.use(''),
-      deps: [TranslateService],
-      multi: true
-    },
     {
       provide: WindowService,
       useFactory: (WindowFactory)
     },
     {
       provide: APP_INITIALIZER,
-      useFactory: (envConfigService: EnvConfigurationService) => () => firstValueFrom(envConfigService.load()),
-      deps: [EnvConfigurationService],
+      useFactory: bootApiSequenceFactory,
+      deps: [EnvConfigurationService, TranslateService],
       multi: true,
     },
     {
