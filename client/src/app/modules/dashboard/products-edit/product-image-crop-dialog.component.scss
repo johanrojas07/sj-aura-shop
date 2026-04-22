@@ -1,0 +1,75 @@
+.dialog-title-icon {
+  margin-right: 0.4rem;
+  vertical-align: middle;
+  color: #b83d6f;
+}
+
+.img-crop-dlg__body {
+  max-width: 380px;
+}
+
+.img-crop-dlg__intro {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: #52525b;
+}
+
+.img-crop-dlg__name {
+  margin: 0 0 0.85rem;
+  font-size: 0.75rem;
+  color: #a1a1aa;
+  word-break: break-all;
+}
+
+.img-crop-dlg__frame {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem;
+  background: #fafafa;
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+}
+
+.img-crop-dlg__canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.img-crop-dlg__zoom {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+
+  mat-icon {
+    color: #7c3aed;
+    flex-shrink: 0;
+  }
+}
+
+.img-crop-dlg__slider {
+  flex: 1;
+  min-width: 0;
+}
+
+.img-crop-dlg__hint {
+  margin: 0.4rem 0 0;
+  font-size: 0.75rem;
+  color: #71717a;
+}
+
+.img-crop-dlg__actions {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+:host ::ng-deep mat-spinner {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.35rem;
+}

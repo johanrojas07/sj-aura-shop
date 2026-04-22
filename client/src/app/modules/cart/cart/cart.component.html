@@ -1,0 +1,282 @@
+<div class="main cart-page">
+  <div class="container cart-page__container">
+    @if (!(cart$ | async)) {
+    <mat-progress-bar class="cart-page__progress" mode="indeterminate" />
+    }
+    @if (cart$ | async; as cart) {
+    <header class="cart-page__head">
+      <p class="cart-page__kicker">{{ 'CART_PAGE_KICKER' | translate | async }}</p>
+      <h1 class="cart-page__title">{{ 'Cart_title' | translate | async }}</h1>
+    </header>
+
+    @if (!cart?.items?.length) {
+      @if (order$ | async; as order) {
+      <div class="cart-page__order-feedback">
+        @if (order.outcome?.seller_message === 'WITH_PAYMENT') {
+        <div class="cart-feedback cart-feedback--success" role="status">
+          <mat-icon class="cart-feedback__icon" aria-hidden="true">check_circle</mat-icon>
+          <p>{{ 'SuccessPayment' | translate | async }}</p>
+        </div>
+        } @if (order.outcome?.seller_message === 'PAYMENT_ON_DELIVERY') {
+        <div class="cart-feedback cart-feedback--success" role="status">
+          <mat-icon class="cart-feedback__icon" aria-hidden="true">mark_email_read</mat-icon>
+          <p>{{ 'CART_ORDER_SENT_WHATSAPP' | translate | async }}</p>
+        </div>
+        }
+      </div>
+      } @else {
+      <div class="cart-empty">
+        <div class="cart-empty__inner">
+          <mat-icon class="cart-empty__icon" aria-hidden="true">shopping_bag</mat-icon>
+          <h2 class="cart-empty__title">{{ 'CART_PAGE_EMPTY_TITLE' | translate | async }}</h2>
+          <p class="cart-empty__text">{{ 'CART_PAGE_EMPTY_LEAD' | translate | async }}</p>
+          @if (lang$ | async; as cartLang) {
+          <a
+            mat-flat-button
+            class="cart-empty__cta"
+            [routerLink]="['/', cartLang, 'product', 'all']"
+            [queryParams]="{ page: 1, sort: 'newest' }"
+          >
+            {{ 'CART_DRAWER_BROWSE' | translate | async }}
+          </a>
+          }
+        </div>
+      </div>
+      }
+    } @else {
+    <div class="cart-checkout">
+      <section class="cart-bag" aria-labelledby="cart-bag-heading">
+        <div class="cart-bag__head">
+          <div class="cart-bag__head-main">
+            <h2 id="cart-bag-heading" class="cart-bag__title">{{ 'CART_YOUR_ITEMS' | translate | async }}</h2>
+            <span class="cart-bag__count">{{ cart.totalQty }}</span>
+          </div>
+          @if (lang$ | async; as cartBrowseLang) {
+          <a
+            mat-stroked-button
+            class="cart-bag__add-more"
+            [routerLink]="['/', cartBrowseLang, 'product', 'all']"
+            [queryParams]="{ page: 1, sort: 'newest' }"
+          >
+            {{ 'CART_ADD_MORE_PRODUCTS' | translate | async }}
+          </a>
+          }
+        </div>
+
+        <ul class="cart-line-list">
+          @for (cartItem of cart.items; track cartItem.item?._id ?? cartItem.item?.titleUrl ?? $index) {
+          <li class="cart-line">
+            <a
+              class="cart-line__media"
+              [routerLink]="['/' + (lang$ | async) + '/product/' + cartItem?.item?.titleUrl]"
+              [attr.aria-label]="cartItem?.item?.title"
+            >
+              <img class="cart-line__img" [src]="cartItem?.item?.mainImage?.url" [alt]="cartItem?.item?.title || ''" width="80" height="100" />
+            </a>
+            <div class="cart-line__body">
+              <a class="cart-line__title" [routerLink]="['/' + (lang$ | async) + '/product/' + cartItem?.item?.titleUrl]">{{
+                cartItem?.item?.title
+              }}</a>
+              <p class="cart-line__meta">
+                <span class="cart-line__unit-price">{{ cartItem.price | priceFormat }} {{ 'CART_UNIT_EACH' | translate | async }}</span>
+              </p>
+              <div class="cart-line__qty-row">
+                <button
+                  type="button"
+                  class="cart-line__qty-btn"
+                  (click)="decrementLineQty(cartItem?.item?._id)"
+                  [disabled]="(loading$ | async) === true"
+                  [attr.aria-label]="('CART_QTY_DECREASE' | translate | async) || ''"
+                >
+                  −
+                </button>
+                <span class="cart-line__qty-value" aria-live="polite">{{ cartItem.qty }}</span>
+                <button
+                  type="button"
+                  class="cart-line__qty-btn"
+                  (click)="incrementLineQty(cartItem?.item?._id)"
+                  [disabled]="(loading$ | async) === true"
+                  [attr.aria-label]="('CART_QTY_INCREASE' | translate | async) || ''"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <div class="cart-line__subtotal">
+              <span class="cart-line__subtotal-label">{{ 'CART_COL_SUBTOTAL' | translate | async }}</span>
+              <span class="cart-line__subtotal-value">{{ cartItem.price * cartItem.qty | priceFormat }}</span>
+            </div>
+            <button
+              type="button"
+              mat-icon-button
+              class="cart-line__remove"
+              (click)="removeFromCart(cartItem?.item?._id)"
+              [attr.aria-label]="('CART_REMOVE_LINE' | translate | async) || ''"
+            >
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </li>
+          }
+          @if (cart.shippingType) {
+          <li class="cart-line cart-line--shipping">
+            <div class="cart-line__body cart-line__body--wide">
+              <span class="cart-line__ship-label">{{ 'Shipping' | translate | async }} ({{ cart.shippingType | translate | async }})</span>
+            </div>
+            <div class="cart-line__subtotal">
+              <span class="cart-line__subtotal-value">{{ cart.shippingCost | priceFormat }}</span>
+            </div>
+          </li>
+          }
+          <li class="cart-line cart-line--total">
+            <div class="cart-line__body cart-line__body--wide">
+              <span class="cart-line__total-label">{{ 'Summary' | translate | async }}</span>
+              <span class="cart-line__total-qty">{{ cart.totalQty }} {{ 'CART_UNITS' | translate | async }}</span>
+            </div>
+            <div class="cart-line__subtotal cart-line__subtotal--grand">
+              <span class="cart-line__subtotal-value">{{ cart.totalPrice | priceFormat }}</span>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <aside class="cart-aside" aria-labelledby="cart-checkout-heading">
+        <div class="cart-aside__inner">
+          @if (loading$ | async) {
+          <div class="cart-aside__busy-strip">
+            <mat-progress-bar mode="indeterminate" />
+            <span class="cart-aside__busy-text">{{ 'CART_LOADING_CHECKOUT' | translate | async }}</span>
+          </div>
+          }
+          <p class="cart-aside__trust">{{ 'CART_TRUST_LINE' | translate | async }}</p>
+          <h2 id="cart-checkout-heading" class="cart-aside__title">{{ 'CART_ORDER_SECTION_TITLE' | translate | async }}</h2>
+          <form [formGroup]="orderForm" class="cart-checkout-form">
+            <mat-horizontal-stepper [linear]="false" #stepper class="cart-stepper">
+              <mat-step [stepControl]="orderForm">
+                <ng-template matStepLabel>{{ 'Address' | translate | async }}</ng-template>
+                <div class="cart-shipping-form">
+                  <p class="cart-shipping-form__intro">{{ 'CART_FORM_SHIPPING_INTRO' | translate | async }}</p>
+
+                  <div class="cart-country-pill" role="status">
+                    <mat-icon class="cart-country-pill__icon" aria-hidden="true">flag</mat-icon>
+                    <div class="cart-country-pill__text">
+                      <span class="cart-country-pill__label">{{ 'CART_COUNTRY_ONLY' | translate | async }}</span>
+                      <strong class="cart-country-pill__name">{{ shippingCountry }}</strong>
+                    </div>
+                  </div>
+
+                  <mat-form-field class="order-field" appearance="outline" subscriptSizing="dynamic">
+                    <mat-icon matPrefix class="cart-field-icon" aria-hidden="true">person</mat-icon>
+                    <mat-label>
+                      {{ 'Firstname' | translate | async }}
+                      {{ 'and' | translate | async }}
+                      {{ 'Surname' | translate | async }}
+                    </mat-label>
+                    <input matInput formControlName="name" type="text" name="name" autocomplete="name" />
+                  </mat-form-field>
+                  <mat-form-field class="order-field" appearance="outline" subscriptSizing="dynamic">
+                    <mat-icon matPrefix class="cart-field-icon" aria-hidden="true">mail</mat-icon>
+                    <mat-label>Email</mat-label>
+                    <input matInput formControlName="email" type="email" name="email" autocomplete="email" />
+                  </mat-form-field>
+                  <mat-form-field class="order-field" appearance="outline" subscriptSizing="dynamic">
+                    <mat-icon matPrefix class="cart-field-icon" aria-hidden="true">chat</mat-icon>
+                    <mat-label>{{ 'CART_PHONE_LABEL' | translate | async }}</mat-label>
+                    <input matInput formControlName="phone" type="tel" name="phone" autocomplete="tel" />
+                    <mat-hint>{{ 'CART_PHONE_HINT' | translate | async }}</mat-hint>
+                  </mat-form-field>
+                  <mat-form-field class="order-field" appearance="outline" subscriptSizing="dynamic">
+                    <mat-icon matPrefix class="cart-field-icon" aria-hidden="true">home_pin</mat-icon>
+                    <mat-label>{{ 'Address' | translate | async }}</mat-label>
+                    <input matInput formControlName="address" type="text" name="address" autocomplete="street-address" />
+                  </mat-form-field>
+                  <mat-form-field class="order-field" appearance="outline" subscriptSizing="dynamic">
+                    <mat-icon matPrefix class="cart-field-icon" aria-hidden="true">location_city</mat-icon>
+                    <mat-label>{{ 'City' | translate | async }}</mat-label>
+                    <input matInput formControlName="city" type="text" name="city" autocomplete="address-level2" />
+                  </mat-form-field>
+                  <mat-form-field class="order-field" appearance="outline" subscriptSizing="dynamic">
+                    <mat-icon matPrefix class="cart-field-icon" aria-hidden="true">edit_note</mat-icon>
+                    <mat-label>{{ 'Notes' | translate | async }}</mat-label>
+                    <textarea matInput formControlName="notes" name="notes" rows="2"></textarea>
+                  </mat-form-field>
+                  <div class="cart-step-actions">
+                    <button
+                      type="button"
+                      mat-flat-button
+                      color="primary"
+                      class="cart-step-actions__primary"
+                      matStepperNext
+                      [disabled]="orderForm.invalid || (loading$ | async) === true"
+                    >
+                      {{ 'Next' | translate | async }}
+                    </button>
+                  </div>
+                </div>
+              </mat-step>
+              <mat-step>
+                <ng-template matStepLabel>{{ 'CART_ORDER_STEP_SUMMARY' | translate | async }}</ng-template>
+                <p class="cart-confirm-hint">
+                  <mat-icon class="cart-confirm-hint__icon" aria-hidden="true">chat</mat-icon>
+                  <span>{{ 'CART_ORDER_WHATSAPP_HINT' | translate | async }}</span>
+                </p>
+                <p class="cart-step2-edit-intro">{{ 'CART_STEP2_EDIT_INTRO' | translate | async }}</p>
+                <div class="cart-step2-fields">
+                  <mat-form-field class="order-field order-field--compact" appearance="outline" subscriptSizing="dynamic">
+                    <mat-icon matPrefix class="cart-field-icon" aria-hidden="true">person</mat-icon>
+                    <mat-label>
+                      {{ 'Firstname' | translate | async }}
+                      {{ 'and' | translate | async }}
+                      {{ 'Surname' | translate | async }}
+                    </mat-label>
+                    <input matInput formControlName="name" type="text" autocomplete="name" />
+                  </mat-form-field>
+                  <mat-form-field class="order-field order-field--compact" appearance="outline" subscriptSizing="dynamic">
+                    <mat-icon matPrefix class="cart-field-icon" aria-hidden="true">mail</mat-icon>
+                    <mat-label>Email</mat-label>
+                    <input matInput formControlName="email" type="email" autocomplete="email" />
+                  </mat-form-field>
+                  <mat-form-field class="order-field order-field--compact" appearance="outline" subscriptSizing="dynamic">
+                    <mat-icon matPrefix class="cart-field-icon" aria-hidden="true">chat</mat-icon>
+                    <mat-label>{{ 'CART_PHONE_LABEL' | translate | async }}</mat-label>
+                    <input matInput formControlName="phone" type="tel" autocomplete="tel" />
+                  </mat-form-field>
+                  <mat-form-field class="order-field order-field--compact" appearance="outline" subscriptSizing="dynamic">
+                    <mat-icon matPrefix class="cart-field-icon" aria-hidden="true">home_pin</mat-icon>
+                    <mat-label>{{ 'Address' | translate | async }}</mat-label>
+                    <input matInput formControlName="address" type="text" autocomplete="street-address" />
+                  </mat-form-field>
+                  <mat-form-field class="order-field order-field--compact" appearance="outline" subscriptSizing="dynamic">
+                    <mat-icon matPrefix class="cart-field-icon" aria-hidden="true">location_city</mat-icon>
+                    <mat-label>{{ 'City' | translate | async }}</mat-label>
+                    <input matInput formControlName="city" type="text" autocomplete="address-level2" />
+                  </mat-form-field>
+                  <mat-form-field class="order-field order-field--compact order-field--full" appearance="outline" subscriptSizing="dynamic">
+                    <mat-icon matPrefix class="cart-field-icon" aria-hidden="true">edit_note</mat-icon>
+                    <mat-label>{{ 'Notes' | translate | async }}</mat-label>
+                    <textarea matInput formControlName="notes" rows="2"></textarea>
+                  </mat-form-field>
+                </div>
+                <p class="cart-step2-country">{{ 'CART_COUNTRY_ONLY' | translate | async }}: <strong>{{ shippingCountry }}</strong></p>
+
+                <button
+                  mat-flat-button
+                  color="primary"
+                  type="button"
+                  class="cart-submit-cod"
+                  [disabled]="orderForm.invalid || (loading$ | async)"
+                  (click)="submit('COP')"
+                >
+                  {{ 'CART_SEND_ORDER_BUTTON' | translate | async }}
+                </button>
+                <div class="cart-step-actions">
+                  <button type="button" mat-stroked-button matStepperPrevious>{{ 'Back' | translate | async }}</button>
+                </div>
+              </mat-step>
+            </mat-horizontal-stepper>
+          </form>
+        </div>
+      </aside>
+    </div>
+    } }
+  </div>
+</div>

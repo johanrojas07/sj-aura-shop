@@ -1,0 +1,120 @@
+<div class="order-detail">
+  <div class="order-detail-inner">
+    <div class="order-detail-toolbar">
+      <button type="button" mat-stroked-button color="primary" (click)="goBack()" class="order-back">
+        <span class="material-icons order-back-icon" aria-hidden="true">arrow_back</span>
+        {{ 'Back' | translate | async }}
+      </button>
+    </div>
+
+    @if (!order$()) {
+      <mat-progress-bar mode="indeterminate" class="order-detail-progress"></mat-progress-bar>
+    }
+
+    @if (order$(); as ord) {
+      <mat-card class="order-hero" appearance="outlined">
+        <mat-card-content class="order-hero-content">
+          <div class="order-hero-main">
+            <p class="order-hero-label">{{ 'ORDER_RECEIPT_NUMBER' | translate | async }}</p>
+            <h1 class="order-hero-id">{{ ord.orderId }}</h1>
+            <div class="order-hero-meta">
+              <span class="order-hero-chip" [attr.data-status]="ord.status">
+                {{ ('ORDER_STATUS_' + ord.status) | translate | async }}
+              </span>
+              <span class="order-hero-time" [title]="ord.dateAdded | date: 'medium'">
+                {{ 'ORDER_CARD_CREATED' | translate | async }}:
+                {{ ord.dateAdded | relativeTime: (lang$ | async) }}
+              </span>
+              <span class="order-hero-abs">
+                ({{ 'ORDER_DETAIL_ABSOLUTE_DATE' | translate | async }}: {{ ord.dateAdded | date: 'medium' }})
+              </span>
+            </div>
+          </div>
+          <div class="order-hero-side">
+            <p class="order-hero-side-label">{{ 'Amount' | translate | async }}</p>
+            <p class="order-hero-amount">{{ ord.amount | priceFormat }} <span class="order-hero-cur">{{ ord.currency }}</span></p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      @if (type === 'EDIT') {
+        <mat-card class="order-status-card" appearance="outlined">
+          <mat-card-content class="order-card-pad">
+            <h2 class="order-section-title">{{ 'ORDER_DETAIL_STATUS_TITLE' | translate | async }}</h2>
+            <p class="order-section-lead">{{ 'ORDER_DETAIL_STATUS_HINT' | translate | async }}</p>
+            <form class="order-status-form" [formGroup]="statusForm" (ngSubmit)="submit()">
+              <mat-form-field appearance="outline" class="order-status-field" subscriptSizing="fixed">
+                <mat-label>{{ 'ORDER_CARD_CHANGE_STATUS' | translate | async }}</mat-label>
+                <mat-select formControlName="status">
+                  @for (st of orderStatuses; track st) {
+                    <mat-option [value]="st">{{ ('ORDER_STATUS_' + st) | translate | async }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <button
+                mat-flat-button
+                color="primary"
+                type="submit"
+                class="order-status-save"
+                [disabled]="statusForm.invalid || statusForm.value?.status === ord.status"
+              >
+                {{ 'ORDER_DETAIL_SAVE_STATUS' | translate | async }}
+              </button>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      <mat-card class="order-info-card" appearance="outlined">
+        <mat-card-content class="order-info-grid order-card-pad">
+          <div>
+            @if (ord.description) {
+              <p><strong>{{ 'Description' | translate | async }}:</strong> {{ ord.description }}</p>
+            }
+            <p><strong>{{ 'Customer' | translate | async }}:</strong> {{ ord.customerEmail }}</p>
+            <p><strong>{{ 'Paid' | translate | async }}:</strong> {{ ord.outcome?.seller_message || '—' }}</p>
+            <p><strong>{{ 'Total_price' | translate | async }}:</strong> {{ ord.cart?.totalPrice | priceFormat }}</p>
+            <p><strong>{{ 'Total_quantity' | translate | async }}:</strong> {{ ord.cart?.totalQty }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <div class="order-detail-columns">
+        @if (ord.addresses?.[0]; as address) {
+          <mat-card class="order-subcard" appearance="outlined">
+            <mat-card-content class="order-card-pad">
+              <h2 class="order-section-title">{{ 'About_customer' | translate | async }}</h2>
+              <p><strong>{{ 'City' | translate | async }}:</strong> {{ address.city }}</p>
+              <p><strong>{{ 'Country' | translate | async }}:</strong> {{ address.country }}</p>
+              <p><strong>{{ 'Address' | translate | async }}:</strong> {{ address.line1 }}</p>
+              <p><strong>{{ 'Zip' | translate | async }}:</strong> {{ address.zip }}</p>
+              @if (address.name) {
+                <p><strong>{{ 'Name' | translate | async }}:</strong> {{ address.name }}</p>
+              }
+            </mat-card-content>
+          </mat-card>
+        }
+
+        <mat-card class="order-subcard order-subcard--wide" appearance="outlined">
+          <mat-card-content class="order-card-pad">
+            <h2 class="order-section-title">{{ 'ORDER_RECEIPT_ITEMS' | translate | async }}</h2>
+            <div class="order-cart-list">
+              @for (cartItem of ord.cart?.items; track cartItem.item?._id ?? cartItem.item?.titleUrl ?? $index) {
+                <div class="order-cart-row">
+                  <a class="order-cart-thumb" [routerLink]="['/' + (lang$ | async) + '/product/' + cartItem?.item?.titleUrl]">
+                    <img [src]="cartItem?.item?.mainImage?.url" [alt]="cartItem?.item?.title || ''" />
+                  </a>
+                  <div class="order-cart-info">
+                    <span class="order-cart-qty">{{ cartItem.qty }}×</span>
+                    <span class="order-cart-title">{{ cartItem?.item?.title }}</span>
+                    <span class="order-cart-price">{{ cartItem.price | priceFormat }} {{ ord.currency }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    }
+  </div>
+</div>

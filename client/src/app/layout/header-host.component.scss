@@ -1,0 +1,22 @@
+:host {
+  display: block;
+}
+
+.header-host {
+  display: block;
+}
+
+/** Misma altura aproximada que el mat-toolbar del header real (evita CLS hasta el chunk). */
+.header-host__placeholder {
+  min-height: 56px;
+  box-sizing: border-box;
+}
+
+.header-host__fallback {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  padding: 0 1rem;
+  font-weight: 600;
+  opacity: 0.85;
+}

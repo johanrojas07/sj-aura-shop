@@ -1,0 +1,17 @@
+{
+  "name": "SJ AURA",
+  "short_name": "SJ AURA",
+  "description": "Moda y accesorios — SJ AURA",
+  "icons": [
+    {
+      "src": "assets/default.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000"
+}

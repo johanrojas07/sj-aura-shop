@@ -1,0 +1,50 @@
+/**
+ * Boutique futurista: rosas, cristal y acentos suaves.
+ * Montserrat + Source Sans 3. Los tokens --accent-brand-green* conservan el nombre por compatibilidad pero son tonos rosa.
+ */
+
+:root {
+  /* Base cálida: menos “plano hospital”, más boutique */
+  --page-bg: #f6f0f3;
+  --page-bg-mid: #faf6f7;
+  --page-bg-deep: #efe6ea;
+  --surface: #fffbfc;
+  --surface-muted: #f5e8ec;
+  --surface-blush: #f8dfe5;
+  --section-tint: #f5e6ea;
+  --section-warm: #f0e4e8;
+  --text-primary: #2a2426;
+  --text-secondary: #5c5356;
+  --text-muted: #8f8588;
+  --border-subtle: #ead5dc;
+  --border-strong: #d4b8c4;
+  --accent-gold: #b8a078;
+  --accent-gold-hover: #9d865f;
+  --accent-blush: #e8c9d4;
+  --accent-champagne: #f8ebe3;
+  /* Acento “marca” (nombre histórico; valores = rosa futurista). */
+  --accent-brand-green: #a84872;
+  --accent-brand-green-mid: #e878a8;
+  --accent-brand-green-soft: #fde8f2;
+  --accent-neon-line: #ff8ec8;
+  --accent-glass-highlight: rgba(255, 255, 255, 0.55);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-full: 9999px;
+  --shadow-xs: 0 1px 2px rgba(26, 26, 26, 0.04);
+  --shadow-sm: 0 2px 8px rgba(26, 26, 26, 0.06);
+  --shadow-md: 0 8px 24px rgba(26, 26, 26, 0.08);
+  --shadow-card-hover: 0 12px 32px rgba(26, 26, 26, 0.1);
+  --nav-height: 56px;
+  /* Una sola fila de toolbar (mega menú desplegable no suma altura). */
+  --nav-stack-height: var(--nav-height);
+  /* Franja fija de anuncios (home con carrito); HomeComponent la pone a ~1.75rem. */
+  --site-announcement-height: 0px;
+  --font-sans: 'Source Sans 3', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-display: 'Montserrat', 'Source Sans 3', system-ui, sans-serif;
+  --font-nav: 'Montserrat', 'Source Sans 3', system-ui, sans-serif;
+  --transition: 200ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --transition-slow: 320ms cubic-bezier(0.25, 0.1, 0.25, 1);
+}

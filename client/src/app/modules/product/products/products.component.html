@@ -1,0 +1,167 @@
+<mat-drawer-container class="products-sidebar-container" autosize hasBackdrop>
+  <mat-drawer #sideBar [(opened)]="sidebarOpened" class="products-sidebar" mode="over">
+    <app-sidebar
+      [class.disabled]="loadingProducts()"
+      [categories]="categories()"
+      [price]="filterPrice()"
+      [priceMinFilter]="filterPriceMin()"
+      [usePriceRange]="true"
+      [maxPrice]="maxPrice()"
+      [minPrice]="minPrice()"
+      [activeCategory]="category()"
+      [isCatalogAllView]="true"
+      [selectedCategorySlugs]="effectiveCategorySlugs()"
+      [sortOptions]="sortOptions"
+      [currency]="currency()"
+      [lang]="lang()"
+      [choosenSort]="sortBy()"
+      (changePrice)="priceRange($event)"
+      (changePriceRange)="priceRangeSpan($event)"
+      (changeSort)="changeSort($event)"
+      (changeCategory)="changeCategory()"
+      (categoriesFilterChange)="applyCategoryFilters($event)"
+      (clearCategoryFilters)="clearCategoryFiltersOnly()"
+      (clearAllFiltersRequest)="clearAllFilters()"
+    >
+    </app-sidebar>
+  </mat-drawer>
+  <mat-drawer-content>
+    <div class="main">
+      <div class="products-primary-header">
+        <div class="products-primary-container">
+          <div class="products-mobile-filter" (click)="toggleSidebar()">
+            <i class="material-icons md-16">filter_list</i>
+            <span>{{ 'Filter' | translate | async }}</span>
+          </div>
+          @if (!(categoryInfo())) {
+          <h1 class="products-title">{{ 'Products' | translate | async }}</h1>
+          } @if ((categoryInfo()); as categoryInfo) {
+
+          <h1 class="products-title">{{ categoryInfo.title }}</h1>
+          @if (categoryInfo.description) {
+          <p class="products-description">{{ categoryInfo.description }}</p>
+          } }
+        </div>
+      </div>
+      <div class="container products-content">
+        @if (loadingProducts()) {
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        } @if (products(); as products) {
+        <div class="sidebar-layout">
+          <div class="sidebar-wrap">
+            <app-sidebar
+              class="products-sidebar-desktop"
+              [class.disabled]="loadingProducts()"
+              [categories]="categories()"
+              [price]="filterPrice()"
+              [priceMinFilter]="filterPriceMin()"
+              [usePriceRange]="true"
+              [maxPrice]="maxPrice()"
+              [minPrice]="minPrice()"
+              [activeCategory]="category()"
+              [isCatalogAllView]="true"
+              [selectedCategorySlugs]="effectiveCategorySlugs()"
+              [sortOptions]="sortOptions"
+              [currency]="currency()"
+              [lang]="lang()"
+              [choosenSort]="sortBy()"
+              (changePrice)="priceRange($event)"
+              (changePriceRange)="priceRangeSpan($event)"
+              (changeSort)="changeSort($event)"
+              (changeCategory)="changeCategory()"
+              (categoriesFilterChange)="applyCategoryFilters($event)"
+              (clearCategoryFilters)="clearCategoryFiltersOnly()"
+              (clearAllFiltersRequest)="clearAllFilters()"
+            >
+            </app-sidebar>
+          </div>
+          <div class="main-wrap">
+            @if (hasActiveCatalogFilters()) {
+            <section class="products-active-filters" [attr.aria-label]="('Active_filters' | translate | async) || ''">
+              <div class="products-active-filters__toolbar">
+                <div class="products-active-filters__brand">
+                  <span class="products-active-filters__title">{{ 'Active_filters' | translate | async }}</span>
+                  <span class="products-active-filters__badge" [attr.title]="('Filters_count_hint' | translate | async) || ''">{{
+                    activeFilterCount()
+                  }}</span>
+                </div>
+                <div class="products-active-filters__actions">
+                  @if (effectiveCategorySlugs().length) {
+                  <button type="button" mat-button class="products-active-filters__action" (click)="clearCategoryFiltersOnly()">
+                    {{ 'Clear_categories_only' | translate | async }}
+                  </button>
+                  }
+                  @if ((filterPrice() ?? 0) > 0 || (filterPriceMin() ?? 0) > 0) {
+                  <button type="button" mat-button class="products-active-filters__action" (click)="clearPriceFilterOnly()">
+                    {{ 'Clear_price_only' | translate | async }}
+                  </button>
+                  }
+                  <button type="button" mat-flat-button color="primary" class="products-active-filters__clearall" (click)="clearAllFilters()">
+                    <i class="material-icons md-18" aria-hidden="true">layers_clear</i>
+                    {{ 'Clear_all_filters' | translate | async }}
+                  </button>
+                </div>
+              </div>
+              <div class="products-active-filters__chips" role="list">
+                @for (slug of effectiveCategorySlugs(); track slug + '') {
+                <button
+                  type="button"
+                  class="products-filter-chip"
+                  role="listitem"
+                  (click)="removeCategoryFilter(slug)"
+                  [attr.aria-label]="(('Remove_filter' | translate | async) || 'Quitar') + ': ' + categoryTitle(slug)"
+                >
+                  <span class="products-filter-chip__text" [attr.title]="categoryTitle(slug)">{{ categoryTitle(slug) }}</span>
+                  <i class="material-icons md-16" aria-hidden="true">close</i>
+                </button>
+                }
+                @if ((filterPrice() ?? 0) > 0 || (filterPriceMin() ?? 0) > 0) {
+                <button
+                  type="button"
+                  class="products-filter-chip products-filter-chip--price"
+                  role="listitem"
+                  (click)="clearPriceFilterOnly()"
+                  [attr.aria-label]="('Clear_price_only' | translate | async) || ''"
+                >
+                  @if ((filterPriceMin() ?? 0) > 0) {
+                  <span class="products-filter-chip__label">{{ 'Price_from' | translate | async }}</span>
+                  <span class="products-filter-chip__text">{{ filterPriceMin() | priceFormat }}</span>
+                  }
+                  @if ((filterPriceMin() ?? 0) > 0 && (filterPrice() ?? 0) > 0) {
+                  <span class="products-filter-chip__mid" aria-hidden="true">·</span>
+                  }
+                  @if ((filterPrice() ?? 0) > 0) {
+                  <span class="products-filter-chip__label">{{ 'Price_to' | translate | async }}</span>
+                  <span class="products-filter-chip__text">{{ filterPrice() | priceFormat }}</span>
+                  }
+                  <i class="material-icons md-16" aria-hidden="true">close</i>
+                </button>
+                }
+              </div>
+            </section>
+            }
+            @if ((subCategories()); as subCategories) {
+              @if (subCategories.length && (pagination()).page === 1) {
+            <app-categories-list [categories]="subCategories" [lang]="lang()" [withSlider]="false"> </app-categories-list>
+              }
+            }
+            <app-recent-products-strip [lang]="lang()" />
+            <app-products-list
+              [class.disabled]="loadingProducts()"
+              [products]="products"
+              [cartIds]="cartIds()"
+              [currency]="currency()"
+              [lang]="lang()"
+              (addProduct)="addToCart($event)"
+            >
+            </app-products-list>
+            @if ((pagination()); as pagination) {
+            <app-pagination [class.disabled]="loadingProducts()" [pagination]="pagination" (changePage)="changePage($event)"> </app-pagination>
+            }
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+  </mat-drawer-content>
+</mat-drawer-container>

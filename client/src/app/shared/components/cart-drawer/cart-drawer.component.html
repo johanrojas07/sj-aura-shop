@@ -1,0 +1,227 @@
+<div
+  class="cart-drawer"
+  [class.cart-drawer--split]="(cart()?.items?.length ?? 0) > 0 && similarRailVisible()"
+  [class.cart-drawer--quick-open]="quickViewOpen()"
+>
+  @if (cart(); as c) {
+    @if (!c.items?.length) {
+      <header class="cart-drawer-header">
+        <h2 class="cart-drawer-title">{{ 'Cart_title' | translate | async }}</h2>
+        <button type="button" class="cart-drawer-close" (click)="close()" aria-label="Cerrar">
+          <mat-icon>close</mat-icon>
+        </button>
+      </header>
+      <div class="cart-drawer-empty-block">
+        <p class="cart-drawer-empty">{{ 'CART_DRAWER_EMPTY' | translate | async }}</p>
+        <a
+          mat-stroked-button
+          class="cart-drawer-empty-cta"
+          [routerLink]="['/', lang(), 'product', 'all']"
+          [queryParams]="{ page: 1, sort: 'newest' }"
+          (click)="close()"
+        >
+          {{ 'CART_DRAWER_BROWSE' | translate | async }}
+        </a>
+      </div>
+    } @else {
+      @if (similarRailVisible()) {
+        <aside class="cart-drawer-similar" role="region">
+          <h3 class="cart-drawer-similar-title">{{ 'CART_ALSO_LIKE' | translate | async }}</h3>
+          @if (relatedLoading()) {
+            <div class="cart-drawer-similar-loading">
+              <mat-progress-spinner diameter="28" mode="indeterminate" />
+            </div>
+          } @else {
+            <div class="cart-drawer-similar-list">
+              @for (p of relatedProducts(); track p._id ?? p.titleUrl) {
+                <article class="cart-drawer-similar-card">
+                  <button
+                    type="button"
+                    class="cart-drawer-similar-media"
+                    (click)="openQuickView(p)"
+                    [attr.aria-label]="lineProductTitle(p.title)"
+                  >
+                    <span class="cart-drawer-similar-media-inner">
+                      <img [src]="p.mainImage?.url" alt="" loading="lazy" />
+                    </span>
+                  </button>
+                  <div class="cart-drawer-similar-body">
+                    <p class="cart-drawer-similar-name">{{ lineProductTitle(p.title) }}</p>
+                    <div class="cart-drawer-similar-price-wrap">
+                      @if (relatedShowPromo(p)) {
+                        <p class="cart-drawer-similar-price-line">
+                          <span class="cart-drawer-similar-price-before">{{ p.regularPrice | priceFormat }}</span>
+                          <span class="cart-drawer-similar-price-sep" aria-hidden="true">·</span>
+                          <span class="cart-drawer-similar-price-now">{{ p.salePrice | priceFormat }}</span>
+                        </p>
+                      } @else {
+                        <span class="cart-drawer-similar-price">{{ p.salePrice | priceFormat }}</span>
+                      }
+                    </div>
+                    <div class="cart-drawer-similar-actions">
+                      <button
+                        type="button"
+                        mat-icon-button
+                        class="cart-drawer-similar-act cart-drawer-similar-act--qv"
+                        (click)="openQuickView(p)"
+                        [matTooltip]="('CART_QUICK_VIEW' | translate | async) ?? ''"
+                        matTooltipPosition="above"
+                      >
+                        <mat-icon>visibility</mat-icon>
+                      </button>
+                      @if (p._id && inCartIds(c).has(p._id)) {
+                        <span
+                          class="cart-drawer-similar-act cart-drawer-similar-act--inbag"
+                          [matTooltip]="('ALREADY_IN_CART' | translate | async) ?? ''"
+                          matTooltipPosition="above"
+                          role="status"
+                        >
+                          <mat-icon>shopping_bag</mat-icon>
+                        </span>
+                      } @else {
+                        <button
+                          type="button"
+                          mat-icon-button
+                          class="cart-drawer-similar-act cart-drawer-similar-act--add"
+                          (click)="addRelated(p)"
+                          [disabled]="!p._id"
+                          [matTooltip]="('ADD_TO_CART' | translate | async) ?? ''"
+                          matTooltipPosition="above"
+                        >
+                          <mat-icon>add_shopping_cart</mat-icon>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                </article>
+              }
+            </div>
+          }
+        </aside>
+      }
+
+      <div class="cart-drawer-main">
+        <header class="cart-drawer-header">
+          <h2 class="cart-drawer-title">{{ 'Cart_title' | translate | async }}</h2>
+          <button type="button" class="cart-drawer-close" (click)="close()" aria-label="Cerrar">
+            <mat-icon>close</mat-icon>
+          </button>
+        </header>
+
+        <div class="cart-drawer-body">
+          <ul class="cart-drawer-list">
+            @for (row of c.items; track row.item?._id ?? $index) {
+              <li class="cart-drawer-row">
+                <a
+                  class="cart-drawer-thumb"
+                  [routerLink]="linkFor(row.item?.titleUrl)"
+                  (click)="close()"
+                  [attr.aria-label]="lineProductTitle(row.item?.title)"
+                >
+                  <img [src]="row.item?.mainImage?.url" alt="" width="72" height="96" />
+                </a>
+                <div class="cart-drawer-meta">
+                  <a class="cart-drawer-name" [routerLink]="linkFor(row.item?.titleUrl)" (click)="close()">{{
+                    lineProductTitle(row.item?.title)
+                  }}</a>
+                  <div class="cart-drawer-price-line">{{ row.price | priceFormat }} <span class="cart-drawer-cop">c/u</span></div>
+                  <div class="cart-drawer-line-actions">
+                    <div class="cart-drawer-qty-row">
+                      <button type="button" class="cart-drawer-qty-btn" (click)="decrementQty(row.item?._id)" aria-label="Menos">−</button>
+                      <input
+                        type="number"
+                        class="cart-drawer-qty-input"
+                        inputmode="numeric"
+                        min="0"
+                        max="999"
+                        step="1"
+                        [value]="row.qty"
+                        [attr.aria-label]="'Cantidad'"
+                        (blur)="commitLineQty(row, $event)"
+                        (keydown.enter)="blurQtyInput($event)"
+                      />
+                      <button type="button" class="cart-drawer-qty-btn" (click)="incrementQty(row.item?._id)" aria-label="Más">+</button>
+                    </div>
+                    <button type="button" class="cart-drawer-remove" (click)="removeLine(row.item?._id, row.qty)" aria-label="Eliminar producto">
+                      <mat-icon>delete_outline</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
+
+        @if (c.shippingType) {
+          <div class="cart-drawer-row cart-drawer-row--muted">
+            <span>{{ 'Shipping' | translate | async }} ({{ c.shippingType | translate | async }})</span>
+            <span>{{ c.shippingCost | priceFormat }}</span>
+          </div>
+        }
+
+        <footer class="cart-drawer-footer">
+          <p class="cart-drawer-footer-hint">{{ 'CART_DRAWER_CHECKOUT_HINT' | translate | async }}</p>
+          <div class="cart-drawer-total">
+            <span class="cart-drawer-total-label">{{ 'Summary' | translate | async }}</span>
+            <strong class="cart-drawer-total-value">{{ c.totalPrice | priceFormat }}</strong>
+          </div>
+          <a
+            mat-flat-button
+            class="cart-drawer-cta"
+            [routerLink]="['/', lang(), 'cart']"
+            (click)="close()"
+          >
+            <span class="cart-drawer-cta-text">{{ 'CART_DRAWER_GO_FULL_CART' | translate | async }}</span>
+            <mat-icon class="cart-drawer-cta-icon" aria-hidden="true">open_in_new</mat-icon>
+          </a>
+          <button type="button" mat-stroked-button class="cart-drawer-continue" (click)="close()">
+            {{ 'CART_KEEP_SHOPPING' | translate | async }}
+          </button>
+        </footer>
+      </div>
+    }
+  } @else {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  }
+
+  @if (quickViewOpen() && quickViewProduct(); as qv) {
+    <div
+      class="cart-drawer-quick-overlay"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="lineProductTitle(qv.title)"
+      (click)="onQuickViewBackdrop($event)"
+    >
+      <div class="cart-drawer-quick-panel" (click)="$event.stopPropagation()">
+        <header class="cart-drawer-quick-head">
+          <button type="button" mat-stroked-button class="cart-drawer-quick-back" (click)="closeQuickView()">
+            <mat-icon>arrow_back</mat-icon>
+            <span>{{ 'Back' | translate | async }}</span>
+          </button>
+          <h3 class="cart-drawer-quick-title">{{ lineProductTitle(qv.title) }}</h3>
+          <button type="button" class="cart-drawer-quick-close" (click)="closeQuickView()" aria-label="Cerrar vista rápida">
+            <mat-icon>close</mat-icon>
+          </button>
+        </header>
+        @if (quickViewLoading()) {
+          <div class="cart-drawer-quick-loading">
+            <mat-progress-spinner diameter="36" mode="indeterminate" />
+          </div>
+        }
+        <div class="cart-drawer-quick-scroll" [class.cart-drawer-quick-scroll--dim]="quickViewLoading()">
+          <app-product-content
+            layout="editorial"
+            [fullGalleryStack]="true"
+            [product]="qv"
+            [categoriesInput]="categories() || []"
+            [cartIds]="cartIdsRecord()"
+            [currency]="currency()"
+            [lang]="lang()"
+            [withLink]="true"
+            (addProduct)="onQuickViewAdd($event)"
+          />
+        </div>
+      </div>
+    </div>
+  }
+</div>

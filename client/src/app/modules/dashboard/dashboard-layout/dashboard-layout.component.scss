@@ -1,0 +1,268 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  --dash-brand: #b83d6f;
+  --dash-brand-deep: #9d174d;
+  --dash-accent: #7c3aed;
+  --dash-surface: #fafaf9;
+  --dash-ink: #1c1917;
+  --dash-muted: #78716c;
+  --dash-line: #e7e5e4;
+}
+
+.dash-shell {
+  display: grid;
+  grid-template-columns: 16rem 1fr;
+  min-height: 100vh;
+  background: linear-gradient(145deg, #fafaf9 0%, #fdf4ff 42%, #fff7ed 100%);
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  &__aside {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    z-index: 4;
+    min-height: 100vh;
+    padding: 1.5rem 0.9rem 1rem;
+    background: linear-gradient(180deg, #ffffff 0%, #fffafc 55%, #faf5ff 100%);
+    border-right: 1px solid rgba(184, 61, 111, 0.12);
+    box-shadow: 6px 0 32px rgba(124, 58, 237, 0.06);
+    display: flex;
+    flex-direction: column;
+
+    @media (max-width: 900px) {
+      position: relative;
+      min-height: 0;
+      border-right: none;
+      border-bottom: 1px solid var(--dash-line);
+      box-shadow: 0 8px 28px rgba(28, 25, 23, 0.06);
+    }
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.35rem;
+    padding: 0 0.35rem 1.1rem;
+    border-bottom: 1px solid rgba(231, 229, 228, 0.9);
+  }
+
+  &__brand-mark {
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: 0.6rem;
+    display: grid;
+    place-items: center;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: #fff;
+    background: linear-gradient(135deg, var(--dash-brand) 0%, #db2777 48%, var(--dash-accent) 100%);
+    flex-shrink: 0;
+    box-shadow:
+      0 4px 14px rgba(184, 61, 111, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  }
+
+  &__brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+    min-width: 0;
+  }
+
+  &__brand-title {
+    font-weight: 800;
+    font-size: 1.02rem;
+    letter-spacing: -0.03em;
+    color: var(--dash-ink);
+  }
+
+  &__brand-sub {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #a8a29e;
+    background: linear-gradient(90deg, var(--dash-brand), var(--dash-accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  &__main {
+    min-width: 0;
+    padding: clamp(1rem, 2.5vw, 1.75rem) clamp(1.25rem, 3vw, 2rem) clamp(1.25rem, 3vw, 2rem);
+    max-width: 1200px;
+  }
+}
+
+.dash-shell__topbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.dash-shell__store {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--dash-brand-deep);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(184, 61, 111, 0.22);
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.06);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+
+  mat-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    font-size: 1.125rem;
+    color: var(--dash-accent);
+  }
+
+  &:hover {
+    background: #fff;
+    border-color: var(--dash-brand);
+    transform: translateY(-1px);
+    color: var(--dash-ink);
+
+    mat-icon {
+      color: var(--dash-brand);
+    }
+  }
+}
+
+.dash-nav {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  &__group-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #a8a29e;
+    padding: 0 0.5rem 0.35rem;
+  }
+
+  &__link {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.52rem 0.65rem;
+    border-radius: 0.55rem;
+    text-decoration: none;
+    color: #44403c;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition:
+      background 0.16s ease,
+      color 0.16s ease,
+      box-shadow 0.16s ease;
+
+    mat-icon {
+      width: 1.25rem;
+      height: 1.25rem;
+      font-size: 1.25rem;
+      color: #a8a29e;
+      flex-shrink: 0;
+      transition: color 0.16s ease;
+    }
+
+    &:hover {
+      background: linear-gradient(90deg, rgba(184, 61, 111, 0.08) 0%, rgba(124, 58, 237, 0.05) 100%);
+      color: var(--dash-ink);
+
+      mat-icon {
+        color: var(--dash-brand);
+      }
+    }
+
+    &--active {
+      font-weight: 700;
+      color: var(--dash-brand-deep);
+      background: linear-gradient(90deg, rgba(184, 61, 111, 0.14) 0%, rgba(124, 58, 237, 0.06) 100%);
+      box-shadow: inset 3px 0 0 0 var(--dash-brand);
+
+      mat-icon {
+        color: var(--dash-accent);
+      }
+    }
+  }
+
+}
+
+/* Botones Material en admin: color de marca + primario del tema si está definido */
+.dash-shell__main {
+  --dash-btn-primary: var(--primary-color, #b83d6f);
+  --dash-btn-primary-contrast: #fff;
+
+  ::ng-deep {
+    .mat-mdc-unelevated-button.mat-primary,
+    .mat-mdc-raised-button.mat-primary,
+    .mat-mdc-flat-button.mat-primary {
+      border-radius: 0.5rem !important;
+      font-weight: 600 !important;
+      letter-spacing: 0 !important;
+      box-shadow: 0 4px 14px rgba(184, 61, 111, 0.22) !important;
+      background: linear-gradient(135deg, var(--dash-btn-primary), #a21caf) !important;
+      color: var(--dash-btn-primary-contrast) !important;
+    }
+
+    .mat-mdc-outlined-button.mat-primary,
+    .mat-mdc-stroked-button.mat-primary {
+      border-radius: 0.5rem !important;
+      font-weight: 600 !important;
+      border-color: var(--dash-btn-primary) !important;
+      color: var(--dash-btn-primary) !important;
+    }
+
+    .mat-mdc-outlined-button.mat-warn,
+    .mat-mdc-stroked-button.mat-warn {
+      border-radius: 0.5rem !important;
+      font-weight: 600 !important;
+      border-color: #b4534a !important;
+      color: #991b1b !important;
+    }
+
+    .mat-mdc-unelevated-button.mat-accent,
+    .mat-mdc-flat-button.mat-accent {
+      border-radius: 0.5rem !important;
+      font-weight: 600 !important;
+      background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+      color: #fff !important;
+      box-shadow: 0 4px 14px rgba(124, 58, 237, 0.25) !important;
+    }
+
+    .mat-mdc-mini-fab.mat-accent {
+      background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+      color: #fff !important;
+    }
+
+    .mat-mdc-button-base {
+      letter-spacing: 0.01em;
+    }
+  }
+}

@@ -1,0 +1,50 @@
+<div class="slider-container" [class.slider-with-background]="withBackground" #slideContainer>
+  @if (showArrows && showArrowsSig()) {
+  <button class="slider-arrow slider-arrow-left" [class.slider-arrow-absolute]="absoluteArrows" mat-raised-button (click)="onClickLeft()">
+    <i class="nav-cart-icon material-icons md-18">keyboard_arrow_left</i>
+  </button>
+  }
+  <div class="slides" #slides (touchstart)="onDrag($event, 'down')" (touchend)="onDrag($event, 'up')" (touch)="onDrag($event, 'move')">
+    <ng-content></ng-content>
+  </div>
+  @if (showArrows && showArrowsSig()) {
+  <button class="slider-arrow slider-arrow-right" [class.slider-arrow-absolute]="absoluteArrows" mat-raised-button (click)="onClickRight()">
+    <i class="nav-cart-icon material-icons md-24">keyboard_arrow_right</i>
+  </button>
+  }
+  @if (showDots && slideCount() > 1) {
+  <div class="slider-dots" role="tablist" [attr.aria-label]="'Carousel, ' + slideCount() + ' slides'">
+    @for (i of slideIndices(); track i) {
+    <button
+      type="button"
+      class="slider-dot"
+      [class.slider-dot--active]="activeIndex() === i"
+      (click)="goToSlide(i)"
+      [attr.aria-label]="'Go to slide ' + (i + 1) + ' of ' + slideCount()"
+      [attr.aria-selected]="activeIndex() === i"
+    >
+      @if (activeIndex() === i) {
+      @for (_ of [animKey()]; track animKey()) {
+      <span class="slider-dot-ring-wrap" aria-hidden="true">
+        <svg class="slider-dot-svg" viewBox="0 0 20 20" width="22" height="22">
+          <circle class="slider-dot-track" cx="10" cy="10" r="7" pathLength="100" />
+          <circle
+            class="slider-dot-progress"
+            cx="10"
+            cy="10"
+            r="7"
+            pathLength="100"
+            transform="rotate(-90 10 10)"
+            [style.animation-duration]="intervalForSlider + 'ms'"
+          />
+        </svg>
+      </span>
+      }
+      } @else {
+      <span class="slider-dot-idle" aria-hidden="true"></span>
+      }
+    </button>
+    }
+  </div>
+  }
+</div>

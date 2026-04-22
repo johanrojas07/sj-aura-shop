@@ -1,0 +1,40 @@
+<div class="main product-pdp">
+  <div class="container product-pdp-inner">
+    <button type="button" class="product-pdp-back" mat-stroked-button (click)="goBack()">
+      <i class="material-icons md-18">arrow_back</i>
+      {{ 'Back' | translate | async }}
+    </button>
+
+    @if (!(product$()) || (productLoading$())) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    }
+
+    @if (product$()) {
+    @if (!productLoading$()) {
+    @if (product$().visibility && product$().salePrice) {
+    <section class="product-pdp-card">
+      <app-product-content
+        layout="editorial"
+        [product]="product$()"
+        [categoriesInput]="categories$ | async"
+        [cartIds]="cartIds$ | async"
+        [currency]="currency$ | async"
+        [lang]="lang$ | async"
+        (addProduct)="cartEvent($event, 'add')"
+      >
+      </app-product-content>
+
+      <section class="product-pdp-extra" aria-labelledby="pdp-desc-heading">
+        <h2 id="pdp-desc-heading" class="product-pdp-section-title">{{ 'Description' | translate | async }}</h2>
+        <div class="product-pdp-tab-body">
+          @for (block of product$()?.descriptionFull || []; track $index) {
+          <div class="product-pdp-prose" [innerHTML]="block"></div>
+          }
+        </div>
+      </section>
+    </section>
+    }
+    }
+    }
+  </div>
+</div>

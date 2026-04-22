@@ -1,0 +1,34 @@
+@use '@angular/material' as mat;
+@use 'palettes' as *;
+
+@include mat.core();
+
+$eshop-app-primary: mat.m2-define-palette($material-primary-color);
+$eshop-app-accent: mat.m2-define-palette($material-secondary-color);
+// mat.$red-palette es M3 (tonos 0–100); m2-define-palette exige mapa M2 (50–900).
+$eshop-warn: mat.m2-define-palette(mat.$m2-red-palette);
+
+$eshop-typography: mat.m2-define-typography-config(
+  $font-family: "'Inter', 'Roboto', system-ui, -apple-system, sans-serif",
+  $headline-1: mat.m2-define-typography-level(2rem, 2.5rem, 500),
+  $headline-2: mat.m2-define-typography-level(1.5rem, 2rem, 500),
+  $headline-3: mat.m2-define-typography-level(1.25rem, 1.65rem, 500),
+  $headline-4: mat.m2-define-typography-level(1.05rem, 1.45rem, 500),
+  $body-1: mat.m2-define-typography-level(1rem, 1.55rem, 400),
+  $body-2: mat.m2-define-typography-level(0.875rem, 1.4rem, 400),
+  $subtitle-1: mat.m2-define-typography-level(0.9375rem, 1.5rem, 500),
+  $subtitle-2: mat.m2-define-typography-level(0.8125rem, 1.25rem, 500),
+  $button: mat.m2-define-typography-level(0.8125rem, 1.25rem, 500),
+);
+
+$eshop-app-theme: mat.m2-define-light-theme((
+  color: (
+    primary: $eshop-app-primary,
+    accent: $eshop-app-accent,
+    warn: $eshop-warn,
+  ),
+  typography: $eshop-typography,
+));
+
+@include mat.all-component-typographies($eshop-typography);
+@include mat.all-component-themes($eshop-app-theme);

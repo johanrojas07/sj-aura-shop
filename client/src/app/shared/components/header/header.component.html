@@ -1,0 +1,303 @@
+<div class="header-shell nav-fixed" id="header-shell">
+  <mat-toolbar class="nav nav-toolbar nav-toolbar-layout" id="navbar">
+    <div class="nav-mobile">
+      <button
+        type="button"
+        mat-icon-button
+        class="nav-mobile-trigger"
+        (click)="toggleMobileNav()"
+        [attr.aria-expanded]="mobileNavOpen()"
+        aria-label="Menú"
+      >
+        @if (mobileNavOpen()) {
+          <mat-icon>close</mat-icon>
+        } @else {
+          <mat-icon>menu</mat-icon>
+        }
+      </button>
+    </div>
+
+    <div class="nav-brand-logo">
+      <a class="nav-brand-link" [routerLink]="['/']" (click)="scrollToTop(); closeMobileNav()" [attr.aria-label]="brandName + ' — inicio'">
+        <span class="nav-brand-lockup">
+          <span class="nav-brand-wordmark">{{ brandWordmark }}</span>
+          <span class="nav-brand-tagline">{{ brandTagline }}</span>
+        </span>
+      </a>
+    </div>
+    @if (lang$ | async; as navLang) {
+      <app-nav-shop-menu [lang]="navLang" [categories]="categories()" />
+    }
+
+    <div class="nav-part-right">
+      @if (lastViewed(); as lv) {
+        @if (lang$ | async; as hdrLang) {
+          <a
+            class="nav-last-viewed"
+            [routerLink]="['/', hdrLang, 'product', lv.titleUrl]"
+            [attr.title]="lv.title"
+            [attr.aria-label]="(('GO_TO_LAST_VIEWED' | translate | async) || 'Último visto') + ': ' + lv.title"
+          >
+            <mat-icon class="nav-last-viewed__icon" aria-hidden="true">history</mat-icon>
+            <span class="nav-last-viewed__text">{{ 'GO_TO_LAST_VIEWED_SHORT' | translate | async }}</span>
+          </a>
+        }
+      }
+      <button
+        type="button"
+        mat-icon-button
+        class="nav-search-toggle"
+        (click)="toggleSearch()"
+        [attr.aria-expanded]="searchOpen()"
+        [attr.aria-label]="('Find' | translate | async) || 'Buscar'"
+      >
+        <mat-icon>search</mat-icon>
+      </button>
+
+      <div class="nav-basic">
+        @if (cart$(); as cart) {
+          <button
+            type="button"
+            class="nav-cart-btn"
+            (click)="openCartDrawer()"
+            [attr.aria-label]="(( 'Cart_title' | translate | async) || 'Carrito') + (cart?.totalQty ? ' — ' + cart.totalQty : '')"
+          >
+            <span class="nav-cart-btn__ring" aria-hidden="true">
+              <mat-icon class="nav-cart-btn__icon">shopping_bag</mat-icon>
+              @if ((cart?.totalQty ?? 0) > 0) {
+                <span class="nav-cart-btn__badge">{{ cart.totalQty > 99 ? '99+' : cart.totalQty }}</span>
+              }
+            </span>
+          </button>
+        }
+        <select class="browser-default nav-lang-select" aria-label="Language" [ngModel]="lang$ | async" (ngModelChange)="setLang($event)">
+          @for (option of languageOptions; track option) {
+            <option [value]="option">{{ option }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="nav-desktop-acct">
+        @if (!user$()) {
+          <a
+            mat-icon-button
+            class="nav-acct-entry nav-acct-entry--signin"
+            [routerLink]="['/' + (lang$ | async) + '/authorize/signin']"
+            [attr.aria-label]="('Login' | translate | async) || 'Iniciar sesión'"
+          >
+            <mat-icon class="nav-acct-icon">person_outline</mat-icon>
+          </a>
+        } @else {
+          <span class="nav-user-greet" [attr.title]="user$()?.email ?? ''">
+            <span class="nav-user-greet__hi">{{ 'NAV_HELLO' | translate | async }}</span>
+            <span class="nav-user-greet__name">{{ accountMenuLabel(user$()) }}</span>
+          </span>
+          <span
+            class="nav-loyalty-pill"
+            [attr.title]="('LOYALTY_NAV_TOOLTIP' | translate | async) || ''"
+            [attr.aria-label]="('LOYALTY_NAV_TOOLTIP' | translate | async) || ''"
+          >
+            <mat-icon class="nav-loyalty-pill__icon" aria-hidden="true">loyalty</mat-icon>
+            <span class="nav-loyalty-pill__value">{{ user$()?.loyaltyPoints ?? 0 }}</span>
+            <span class="nav-loyalty-pill__suffix">{{ 'LOYALTY_NAV_POINTS' | translate | async }}</span>
+          </span>
+          <button
+            mat-icon-button
+            type="button"
+            class="nav-acct-entry"
+            [matMenuTriggerFor]="acctMenu"
+            [attr.aria-label]="('NAV_MY_PROFILE' | translate | async) || 'Cuenta'"
+          >
+            <mat-icon class="nav-acct-icon">person</mat-icon>
+          </button>
+          <mat-menu #acctMenu="matMenu" [overlapTrigger]="false">
+            <a mat-menu-item [routerLink]="['/' + (lang$ | async) + '/account']" routerLinkActive="nav-active-link">
+              <mat-icon>badge</mat-icon>
+              <span class="nav-link">{{ 'NAV_MY_PROFILE' | translate | async }}</span>
+            </a>
+            @if (user$()?.roles?.includes('admin')) {
+              <a mat-menu-item [routerLink]="['/' + (lang$ | async) + '/dashboard/orders']" routerLinkActive="nav-active-link">
+                <mat-icon>assignment</mat-icon>
+                <span class="nav-link">{{ 'Orders' | translate | async }}</span>
+              </a>
+            } @else {
+              <a mat-menu-item [routerLink]="['/' + (lang$ | async) + '/orders']" routerLinkActive="nav-active-link">
+                <mat-icon>assignment</mat-icon>
+                <span class="nav-link">{{ 'Orders' | translate | async }}</span>
+              </a>
+            }
+            @if (user$()?.roles?.includes('admin')) {
+              <a mat-menu-item [routerLink]="['/' + (lang$ | async) + '/dashboard']" routerLinkActive="nav-active-link">
+                <mat-icon>dashboard</mat-icon>
+                <span class="nav-link">{{ 'Dashboard' | translate | async }}</span>
+              </a>
+            }
+            <button mat-menu-item type="button" (click)="onLogout()">
+              <mat-icon>exit_to_app</mat-icon>
+              <span class="nav-link">{{ 'Logout' | translate | async }}</span>
+            </button>
+          </mat-menu>
+        }
+      </div>
+    </div>
+  </mat-toolbar>
+
+  @if (mobileNavOpen()) {
+    <div class="nav-mobile-drawer-backdrop" (click)="closeMobileNav()" aria-hidden="true"></div>
+    <aside
+      class="nav-mobile-drawer"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="('Categories' | translate | async) || 'Menú'"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="nav-mobile-drawer-head">
+        <div class="nav-mobile-drawer-head-text">
+          <span class="nav-mobile-drawer-kicker">{{ brandWordmark }}</span>
+          <span class="nav-mobile-drawer-title">{{ brandTagline }}</span>
+        </div>
+        <button type="button" mat-icon-button class="nav-mobile-drawer-close" (click)="closeMobileNav()" aria-label="Cerrar menú">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <nav class="nav-mobile-drawer-body">
+        @if (lang$ | async; as mLang) {
+          @for (item of topNavCategories(categories()); track item.titleUrl) {
+            @if (item.virtualNav === 'home') {
+              <a class="nav-mobile-drawer-link" [routerLink]="['/']" (click)="closeMobileNav()">{{ item.title }}</a>
+            } @else if (item.virtualNav === 'products-all') {
+              <a
+                class="nav-mobile-drawer-link"
+                [class.nav-mobile-drawer-link--promo]="item.titleUrl === 'en-promocion'"
+                [class.nav-mobile-drawer-link--sale]="item.titleUrl === 'ofertas'"
+                [class.nav-mobile-drawer-link--newin]="item.titleUrl === 'lo-nuevo'"
+                [class.nav-mobile-drawer-link--moda]="item.titleUrl === 'moda'"
+                [routerLink]="['/', mLang, 'product', 'all']"
+                [queryParams]="item.virtualNavQuery || {}"
+                (click)="closeMobileNav()"
+                >{{ item.title }}</a
+              >
+            } @else if (megaChildrenFor(categories(), item.titleUrl).length) {
+              <details class="nav-mobile-details">
+                <summary class="nav-mobile-details-summary">{{ item.title }}</summary>
+                <div class="nav-mobile-details-panel">
+                  @for (sub of megaChildrenFor(categories(), item.titleUrl); track sub.titleUrl) {
+                    <a
+                      class="nav-mobile-drawer-sublink"
+                      [routerLink]="['/', mLang, 'product', 'category', sub.titleUrl]"
+                      (click)="closeMobileNav()"
+                      >{{ sub.title }}</a
+                    >
+                  }
+                  <a
+                    class="nav-mobile-drawer-sublink nav-mobile-drawer-sublink--cta"
+                    [routerLink]="['/', mLang, 'product', 'category', item.titleUrl]"
+                    (click)="closeMobileNav()"
+                    >Ver todo</a
+                  >
+                </div>
+              </details>
+            } @else {
+              <a
+                class="nav-mobile-drawer-link"
+                [routerLink]="['/', mLang, 'product', 'category', item.titleUrl]"
+                (click)="closeMobileNav()"
+                >{{ item.title }}</a
+              >
+            }
+          }
+        }
+      </nav>
+      <div class="nav-mobile-drawer-footer">
+        @if (!user$()) {
+          <a
+            class="nav-mobile-drawer-foot-link nav-mobile-drawer-foot-link--signin"
+            [routerLink]="['/' + (lang$ | async) + '/authorize/signin']"
+            (click)="closeMobileNav()"
+          >
+            <mat-icon class="nav-mobile-drawer-foot-link__icon" aria-hidden="true">person_outline</mat-icon>
+            {{ 'Login' | translate | async }}
+          </a>
+        }
+        @if (user$(); as mu) {
+          <div class="nav-mobile-drawer-user">
+            <span class="nav-mobile-drawer-user__greet">{{ 'NAV_HELLO' | translate | async }}</span>
+            <span class="nav-mobile-drawer-user__name">{{ accountMenuLabel(mu) }}</span>
+          </div>
+          <a class="nav-mobile-drawer-foot-link" [routerLink]="['/' + (lang$ | async) + '/account']" (click)="closeMobileNav()">
+            <mat-icon class="nav-mobile-drawer-foot-link__icon" aria-hidden="true">badge</mat-icon>
+            {{ 'NAV_MY_PROFILE' | translate | async }}
+          </a>
+          @if (mu.roles?.includes('admin')) {
+            <a class="nav-mobile-drawer-foot-link" [routerLink]="['/' + (lang$ | async) + '/dashboard']" (click)="closeMobileNav()">{{
+              'Dashboard' | translate | async
+            }}</a>
+          }
+          @if (mu.roles?.includes('admin')) {
+            <a
+              class="nav-mobile-drawer-foot-link"
+              [routerLink]="['/' + (lang$ | async) + '/dashboard/orders']"
+              (click)="closeMobileNav()"
+              >{{ 'Orders' | translate | async }}</a
+            >
+          } @else {
+            <a class="nav-mobile-drawer-foot-link" [routerLink]="['/' + (lang$ | async) + '/orders']" (click)="closeMobileNav()">{{
+              'Orders' | translate | async
+            }}</a>
+          }
+          <div class="nav-mobile-drawer-loyalty" [attr.aria-label]="('LOYALTY_NAV_TOOLTIP' | translate | async) || ''">
+            <mat-icon class="nav-mobile-drawer-loyalty__icon" aria-hidden="true">loyalty</mat-icon>
+            <span class="nav-mobile-drawer-loyalty__value">{{ mu.loyaltyPoints ?? 0 }}</span>
+            <span class="nav-mobile-drawer-loyalty__suffix">{{ 'LOYALTY_NAV_POINTS' | translate | async }}</span>
+          </div>
+          <button type="button" class="nav-mobile-drawer-foot-btn nav-mobile-drawer-foot-btn--ghost" (click)="onLogout(); closeMobileNav()">
+            {{ 'Logout' | translate | async }}
+          </button>
+        }
+      </div>
+    </aside>
+  }
+
+  @if (searchOpen()) {
+    <div class="nav-search-overlay" (click)="closeSearch()">
+      <div class="nav-search-panel" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="'Find' | translate | async">
+        <div class="nav-search-panel-head">
+          <mat-icon class="nav-search-panel-icon">search</mat-icon>
+          <input
+            type="search"
+            class="nav-search-panel-input"
+            [formControl]="query"
+            [placeholder]="('GLOBAL_SEARCH_PLACEHOLDER' | translate | async) || 'Buscar prendas…'"
+          />
+          <button type="button" mat-icon-button (click)="closeSearch()" aria-label="Cerrar">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div class="nav-search-hits">
+          @for (p of productSearchHits(); track trackHit($index, p)) {
+            <div class="nav-search-hit">
+              <a class="nav-search-hit-media" [routerLink]="['/' + (lang$ | async) + '/product/' + p.titleUrl]" (click)="closeSearch()">
+                <span class="nav-search-hit-img" [style.background-image]="'url(' + p.mainImage?.url + ')'"></span>
+              </a>
+              <div class="nav-search-hit-body">
+                <a class="nav-search-hit-title" [routerLink]="['/' + (lang$ | async) + '/product/' + p.titleUrl]" (click)="closeSearch()">{{
+                  p.title
+                }}</a>
+                <div class="nav-search-hit-price">{{ p.salePrice | priceFormat }}</div>
+              </div>
+              <button type="button" mat-stroked-button class="nav-search-hit-add" (click)="addHitToCart(p._id, $event)">
+                {{ ('ADD_TO_CART' | translate | async) || 'Agregar' }}
+              </button>
+            </div>
+          } @empty {
+            @if (query.value?.length) {
+              <p class="nav-search-empty">{{ ('SEARCH_NO_RESULTS' | translate | async) || 'Sin resultados' }}</p>
+            } @else {
+              <p class="nav-search-empty">{{ ('SEARCH_TYPE_HINT' | translate | async) || 'Escribe para ver productos' }}</p>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,250 @@
+<div class="sidebar">
+  @if (isCatalogAllView && (slugsForCheckboxUi().length > 0 || hasActivePriceFilter())) {
+  <div class="sidebar-applied" aria-live="polite">
+    <div class="sidebar-applied__head">
+      <span class="sidebar-applied__title">{{ 'Applied_filters_sidebar' | translate | async }}</span>
+    </div>
+    <ul class="sidebar-applied__list">
+      @for (slug of slugsForCheckboxUi(); track slug + '') {
+      <li class="sidebar-applied__item">{{ slugDisplayTitle(slug) }}</li>
+      }
+      @if (hasActivePriceFilter()) {
+      <li class="sidebar-applied__item sidebar-applied__item--price">
+        @if ((priceFloorValue() ?? 0) > 0) {
+        <span class="sidebar-applied__price-part"
+          ><span class="sidebar-applied__price-k">{{ 'Price_from' | translate | async }}</span>
+          {{ priceFloorValue() | priceFormat }}</span
+        >
+        }
+        @if ((priceFloorValue() ?? 0) > 0 && (priceCeilingValue() ?? 0) > 0) {
+        <span class="sidebar-applied__price-sep" aria-hidden="true">→</span>
+        }
+        @if ((priceCeilingValue() ?? 0) > 0) {
+        <span class="sidebar-applied__price-part"
+          ><span class="sidebar-applied__price-k">{{ 'Price_to' | translate | async }}</span>
+          {{ priceCeilingValue() | priceFormat }}</span
+        >
+        }
+      </li>
+      }
+    </ul>
+    <button type="button" mat-stroked-button class="sidebar-applied__clear" (click)="onClearAllFiltersClick()">
+      {{ 'Clear_all_filters' | translate | async }}
+    </button>
+  </div>
+  }
+
+  <div class="sidebar-section sidebar-section--categories">
+    <div class="sidebar-header sidebar-header--section">
+      <h3 class="sidebar-title">{{ 'Categories' | translate | async }}</h3>
+    </div>
+    <div class="sidebar-categories-scroll" role="navigation">
+      @if (isCatalogAllView) {
+      <button
+        type="button"
+        class="sidebar-item sidebar-item--all"
+        [class.active]="slugsForCheckboxUi().length === 0"
+        (click)="onClearCategoryFiltersClick()"
+      >
+        <span class="sidebar-item__text">{{ 'All' | translate | async }} {{ 'products' | translate | async }}</span>
+      </button>
+      @for (category of topLevelSidebarCategories(); track category.titleUrl) {
+        @if (sidebarChildren(category.titleUrl).length === 0) {
+        <label
+          class="sidebar-filter-row"
+          [class.sidebar-filter-row--checked]="isCategorySlugChecked(category.titleUrl)"
+        >
+          <span class="sidebar-filter-row__text" [attr.title]="category.title">{{ category.title }}</span>
+          <input
+            type="checkbox"
+            class="sidebar-filter-row__check"
+            [checked]="isCategorySlugChecked(category.titleUrl)"
+            (click)="onCategoryCheckboxClick(category.titleUrl, $event)"
+          />
+        </label>
+        } @else {
+        <div
+          class="sidebar-group"
+          [class.sidebar-group--open]="isParentExpanded(category.titleUrl)"
+          [class.sidebar-group--active-branch]="isActiveUnderParent(category.titleUrl)"
+        >
+          <div class="sidebar-group-head sidebar-group-head--multi">
+            <button
+              type="button"
+              class="sidebar-group-toggle"
+              [attr.aria-expanded]="isParentExpanded(category.titleUrl)"
+              [attr.aria-controls]="'subcat-' + category.titleUrl"
+              [attr.aria-label]="(category.title || '') + ' — ' + (('Toggle_subcategories' | translate | async) || '')"
+              (click)="toggleParentGroup(category.titleUrl, $event)"
+            >
+              <i class="material-icons md-20" aria-hidden="true">expand_more</i>
+            </button>
+            <button
+              type="button"
+              class="sidebar-item sidebar-item--parent sidebar-item--browse"
+              [class.active]="isParentWholeBranchFilterSelected(category.titleUrl)"
+              [attr.aria-pressed]="isParentWholeBranchFilterSelected(category.titleUrl)"
+              (click)="onParentWholeBranchClick(category.titleUrl, $event)"
+            >
+              <span class="sidebar-item__text">{{ category.title }}</span>
+            </button>
+          </div>
+          @if (isParentExpanded(category.titleUrl)) {
+          <div class="sidebar-group-subs" [id]="'subcat-' + category.titleUrl" role="group">
+            @for (sub of sidebarChildren(category.titleUrl); track sub.titleUrl) {
+            <label
+              class="sidebar-filter-row sidebar-filter-row--sub"
+              [class.sidebar-filter-row--checked]="isCategorySlugChecked(sub.titleUrl)"
+            >
+              <span class="sidebar-filter-row__text" [attr.title]="sub.title">{{ sub.title }}</span>
+              <input
+                type="checkbox"
+                class="sidebar-filter-row__check"
+                [checked]="isCategorySlugChecked(sub.titleUrl)"
+                (click)="onCategoryCheckboxClick(sub.titleUrl, $event)"
+              />
+            </label>
+            }
+          </div>
+          }
+        </div>
+        }
+      }
+      } @else {
+      <a
+        class="sidebar-item"
+        [routerLink]="['/' + lang + '/product/all']"
+        [class.active]="!activeCategory"
+        (click)="changeCategory.emit()"
+      >
+        <span class="sidebar-item__text">{{ 'All' | translate | async }} {{ 'products' | translate | async }}</span>
+      </a>
+      @for (category of topLevelSidebarCategories(); track category.titleUrl) {
+        @if (sidebarChildren(category.titleUrl).length === 0) {
+        <a
+          class="sidebar-item"
+          (click)="changeCategory.emit(category.titleUrl)"
+          [routerLink]="['/' + lang + '/product/category/' + category.titleUrl]"
+          [class.active]="activeCategory == category.titleUrl"
+        >
+          <span class="sidebar-item__text">{{ category.title }}</span>
+        </a>
+        } @else {
+        <div
+          class="sidebar-group"
+          [class.sidebar-group--open]="isParentExpanded(category.titleUrl)"
+          [class.sidebar-group--active-branch]="isActiveUnderParent(category.titleUrl)"
+        >
+          <div class="sidebar-group-head">
+            <button
+              type="button"
+              class="sidebar-group-toggle"
+              [attr.aria-expanded]="isParentExpanded(category.titleUrl)"
+              [attr.aria-controls]="'subcat-' + category.titleUrl"
+              [attr.aria-label]="(category.title || '') + ' — ' + (('Toggle_subcategories' | translate | async) || '')"
+              (click)="toggleParentGroup(category.titleUrl, $event)"
+            >
+              <i class="material-icons md-20" aria-hidden="true">expand_more</i>
+            </button>
+            <a
+              class="sidebar-item sidebar-item--parent"
+              (click)="changeCategory.emit(category.titleUrl)"
+              [routerLink]="['/' + lang + '/product/category/' + category.titleUrl]"
+              [class.active]="activeCategory == category.titleUrl"
+            >
+              <span class="sidebar-item__text">{{ category.title }}</span>
+            </a>
+          </div>
+          @if (isParentExpanded(category.titleUrl)) {
+          <div class="sidebar-group-subs" [id]="'subcat-' + category.titleUrl" role="group">
+            @for (sub of sidebarChildren(category.titleUrl); track sub.titleUrl) {
+            <a
+              class="sidebar-item sidebar-item--sub"
+              (click)="changeCategory.emit(sub.titleUrl)"
+              [routerLink]="['/' + lang + '/product/category/' + sub.titleUrl]"
+              [class.active]="activeCategory == sub.titleUrl"
+            >
+              <span class="sidebar-item__text">{{ sub.title }}</span>
+            </a>
+            }
+          </div>
+          }
+        </div>
+        }
+      }
+      }
+    </div>
+  </div>
+
+  <div class="sidebar-section sidebar-section--sort">
+    <div class="sidebar-header sidebar-header--section">
+      <h3 class="sidebar-title">{{ 'Sorting' | translate | async }}</h3>
+    </div>
+    <mat-form-field class="sidebar-select" appearance="fill" subscriptSizing="dynamic">
+      <mat-select
+        aria-label="Sort"
+        panelClass="eshop-sidebar-sort-panel"
+        [hideSingleSelectionIndicator]="true"
+        [ngModel]="choosenSort || 'newest'"
+        (ngModelChange)="onInputChange($event)"
+      >
+        @for (option of sortOptions; track option.id) {
+        <mat-option [value]="option.id">
+          {{ option.name | translate | async }}
+        </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="sidebar-section sidebar-section--price">
+    <div class="sidebar-header sidebar-header--section">
+      <h3 class="sidebar-title">{{ 'PriceRange' | translate | async }}</h3>
+      <p class="sidebar-section__hint">{{ 'Price_range_hint' | translate | async }}</p>
+    </div>
+    <div class="sidebar-price-slider-wrap">
+      @if (usePriceRange && priceRangeUsable()) {
+      <mat-slider
+        class="sidebar-range sidebar-range--dual"
+        [min]="catalogSliderMin()"
+        [max]="catalogSliderMax()"
+        [step]="priceSliderStep()"
+      >
+        <input
+          matSliderStartThumb
+          [(ngModel)]="rngStart"
+          (ngModelChange)="onRangeThumbChange()"
+          [attr.aria-label]="('Price_from' | translate | async) || ''"
+        />
+        <input
+          matSliderEndThumb
+          [(ngModel)]="rngEnd"
+          (ngModelChange)="onRangeThumbChange()"
+          [attr.aria-label]="('Price_to' | translate | async) || ''"
+        />
+      </mat-slider>
+      } @else {
+      <mat-slider
+        aria-label="Range"
+        class="sidebar-range sidebar-range--single"
+        [max]="catalogSliderMax()"
+        [min]="catalogSliderMin()"
+        [step]="priceSliderStep()"
+      >
+        <input matSliderThumb [(ngModel)]="price" (change)="onChangePrice(maxPrice < price ? maxPrice : price)" />
+      </mat-slider>
+      }
+    </div>
+    <div class="sidebar-price-range" aria-live="polite">
+      <div class="sidebar-price-range__row">
+        <span class="sidebar-price-range__label">{{ 'Price_from' | translate | async }}</span>
+        <span class="sidebar-price-range__val">{{ displayPriceFrom() | priceFormat }}</span>
+      </div>
+      <span class="sidebar-price-range__sep" aria-hidden="true">—</span>
+      <div class="sidebar-price-range__row">
+        <span class="sidebar-price-range__label">{{ 'Price_to' | translate | async }}</span>
+        <span class="sidebar-price-range__val">{{ displayPriceTo() | priceFormat }}</span>
+      </div>
+    </div>
+  </div>
+</div>

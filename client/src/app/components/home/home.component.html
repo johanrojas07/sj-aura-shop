@@ -1,0 +1,182 @@
+<div class="home">
+  <div class="main">
+      @if (cart(); as cart) {
+      <div
+        class="home-promo announcement-bar"
+        role="region"
+        [attr.aria-label]="('ANNOUNCE_BAR_ARIA' | translate | async) || 'Anuncios de la tienda'"
+      >
+        <div class="announcement-bar__sheen" aria-hidden="true"></div>
+        <div class="announcement-bar__inner">
+          <span class="announcement-bar__spark" aria-hidden="true"></span>
+          <div class="announcement-bar__marquee-viewport">
+            <div class="announcement-bar__marquee-track">
+              <div class="announcement-bar__chips announcement-bar__chips-repeat">
+                @for (chipKey of announcementChipKeys(); track chipKey) {
+                  @if (chipKey === shippingChipToken) {
+                    <span [class]="announcementChipClass(chipKey)">
+                      {{ 'Free_shipping_limit' | translate | async }} {{ cart.shippingLimit | priceFormat }}
+                    </span>
+                  } @else {
+                    <span [class]="announcementChipClass(chipKey)">
+                      {{ chipKey | translate | async }}
+                    </span>
+                  }
+                }
+              </div>
+              <div class="announcement-bar__chips announcement-bar__chips-repeat" aria-hidden="true">
+                @for (chipKey of announcementChipKeys(); track chipKey) {
+                  @if (chipKey === shippingChipToken) {
+                    <span [class]="announcementChipClass(chipKey)">
+                      {{ 'Free_shipping_limit' | translate | async }} {{ cart.shippingLimit | priceFormat }}
+                    </span>
+                  } @else {
+                    <span [class]="announcementChipClass(chipKey)">
+                      {{ chipKey | translate | async }}
+                    </span>
+                  }
+                }
+              </div>
+            </div>
+          </div>
+          <span class="announcement-bar__spark announcement-bar__spark--end" aria-hidden="true"></span>
+        </div>
+      </div>
+      }
+      @if (products(); as products) {
+      <div class="home-product">
+        <app-carousel [intervalForSlider]="44000" [absoluteArrows]="true" (activeSlideIndex)="onHeroCarouselSlide($event)">
+          <div class="home-promo-slide">
+            <div class="home-promo-slide-background"></div>
+            @if (video) {
+              <video #videoRef autoplay muted playsinline loop class="home-promo-slide-video">
+                <source [src]="video" type="video/mp4">
+              </video>
+            }
+            <div class="home-promo-slide-scrim" aria-hidden="true"></div>
+            <div class="home-promo-slide-cta">
+              <div class="home-promo-slide-hero-card">
+                <p class="home-promo-slide-kicker">{{ siteBrandName }}</p>
+                <h2 class="home-promo-slide-headline">
+                  {{ 'Eshop_subtitle' | translate | async }}
+                </h2>
+                @if (('Home_promo_text_link' | translate | async); as promoText) {
+                  @if (('Home_promo_link' | translate | async); as promoLink) {
+                    <div class="home-promo-slide-actions">
+                      @if (isDefaultHeroPromoLink(promoLink)) {
+                        <a class="home-promo-slide-cta-btn" [routerLink]="['/', lang() || 'es', 'product', 'all']">{{ promoText }}</a>
+                      } @else {
+                        <a class="home-promo-slide-cta-btn" [href]="promoLink">{{ promoText }}</a>
+                      }
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+          </div>
+          @if (heroSpotlightSlides().length) {
+            @for (slide of heroSpotlightSlides(); track spotlightSlideTrack(slide); let slideIdx = $index) {
+          <div
+            class="home-product-top home-product-top--featured home-product-top--showcase"
+            [class.home-product-top--showcase-solo]="slide.length === 1"
+          >
+            <div class="home-product-top-content home-product-top--featured-inner home-product-showcase-panel">
+              <h2 class="home-product-showcase-title home-product-showcase-title--minimal" [id]="'hero-spotlight-h-' + slideIdx">
+                {{ 'HERO_SPOTLIGHT' | translate | async }}
+              </h2>
+              <div
+                class="home-product-showcase-grid home-product-showcase-grid--spotlight"
+                role="list"
+                [attr.aria-labelledby]="'hero-spotlight-h-' + slideIdx"
+              >
+                @for (product of slide; track product?._id) {
+                <div class="home-product-showcase-cell" role="listitem">
+                  <app-product-content
+                    [product]="product"
+                    [categoriesInput]="categories()"
+                    [cartIds]="cartIds()"
+                    [currency]="currency()"
+                    [lang]="lang()"
+                    [withLink]="true"
+                    (addProduct)="addToCart($event)"
+                  >
+                  </app-product-content>
+                </div>
+                }
+              </div>
+            </div>
+          </div>
+            }
+          }
+        </app-carousel>
+      </div>
+      } @if ((categories())?.length) {
+      <div class="home-primary-header">
+        <div class="home-primary-container">
+          <a
+            class="home-mobile-catalog-cta"
+            [routerLink]="['/' + lang() + '/product/all']"
+            [queryParams]="{ page: 1, sort: 'newest' }"
+            [attr.aria-label]="('HOME_VIEW_ALL_PRODUCTS_ARIA' | translate | async) || ('HOME_VIEW_ALL_PRODUCTS' | translate | async) || 'Ver productos'"
+          >
+            {{ ('HOME_VIEW_ALL_PRODUCTS' | translate | async) || 'Ver productos' }}
+          </a>
+          <div class="home-categories-links-wrap">
+            <div class="home-categories-links">
+              @for (cat of categories(); track cat.titleUrl) {
+              @if (!cat.menuHidden && !cat.parentTitleUrl && !cat.virtualNav) {
+              <a class="home-title-category" [routerLink]="['/' + lang() + '/product/category/' + cat.titleUrl]">
+                {{ cat.title }}
+              </a>
+              }
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+      <div class="container">
+        @if (loadingProducts()) {
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        } @if (categories(); as categories) {
+        <div>
+          <app-categories-list
+            [categories]="categories"
+            [lang]="lang()"
+            [expandCarouselCategories]="true"
+          >
+          </app-categories-list>
+        </div>
+        }
+      </div>
+      @if (products()) {
+      <div class="home-primary-header">
+        <div class="home-primary-container">
+          <h1 class="home-title">{{ 'Products' | translate | async }}</h1>
+        </div>
+      </div>
+      }
+      <div class="container">
+        @if (loadingProducts()) {
+        <mat-spinner class="home-spinner"></mat-spinner>
+        }
+        @if (products(); as products) {
+        <div>
+          <app-recent-products-strip [lang]="lang()" />
+          <app-products-list
+            [class.disabled]="loadingProducts()"
+            [products]="products"
+            [cartIds]="cartIds()"
+            [currency]="currency()"
+            [lang]="lang()"
+            (addProduct)="addToCart($event)"
+          >
+          </app-products-list>
+          @if (pagination(); as pagination) {
+          <app-pagination [class.disabled]="loadingProducts()" [pagination]="pagination" (changePage)="changePage($event)"> </app-pagination>
+          }
+        </div>
+        }
+      </div>
+  </div>
+</div>

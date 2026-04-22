@@ -1,0 +1,28 @@
+:host {
+  display: block;
+  position: relative;
+  padding: 1rem 0 1.5rem;
+
+  ::ng-deep .mat-mdc-paginator {
+    background: transparent;
+    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    color: var(--text-secondary);
+  }
+
+  ::ng-deep .mat-mdc-paginator-container {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  ::ng-deep .mat-mdc-icon-button {
+    border-radius: var(--radius-sm);
+    transition: background var(--transition), color var(--transition);
+
+    &:hover {
+      background: rgba(79, 70, 229, 0.08);
+      color: var(--primary-color);
+    }
+  }
+}

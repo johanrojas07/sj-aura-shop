@@ -1,0 +1,38 @@
+<footer class="footer">
+  <div class="footer__surface">
+    <div class="footer__inner container">
+      <section class="footer__brand" aria-labelledby="footer-brand-title">
+        <h2 id="footer-brand-title" class="footer__title">{{ 'ESHOP_TITLE' | translate | async }}</h2>
+        <p class="footer__tagline">{{ 'ESHOP_DESCRIPTION' | translate | async }}</p>
+      </section>
+
+      <nav class="footer__nav" aria-labelledby="footer-nav-title">
+        <h3 id="footer-nav-title" class="footer__nav-heading">{{ 'LINKS' | translate | async }}</h3>
+        <ul class="footer__links">
+          <li>
+            <a class="footer__link" [routerLink]="['/' + lang + '/eshop/contact']">
+              {{ 'CONTACT' | translate | async }}
+            </a>
+          </li>
+          @for (page of pages(); track page.titleUrl) {
+            @if ((page.titleUrl || '').toLowerCase() !== 'contact') {
+              <li>
+                <a class="footer__link" [routerLink]="['/' + lang + '/eshop/' + page.titleUrl]">
+                  {{ page[lang]?.title || page.titleUrl }}
+                </a>
+              </li>
+            }
+          }
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <div class="footer__legal">
+    <div class="container footer__legal-inner">
+      <span class="footer__copy">© {{ currentYear }}</span>
+      <span class="footer__dot" aria-hidden="true"></span>
+      <span class="footer__credit">{{ 'FOOTER_CREDIT' | translate | async }}</span>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,44 @@
+<nav class="shop-nav-inline" aria-label="Categorías">
+  <ul class="shop-nav-list">
+    @for (item of topNav(); track item.titleUrl) {
+      @if (item.virtualNav === 'home') {
+        <li class="shop-nav-item">
+          <a [routerLink]="['/']" class="shop-nav-link">{{ item.title }}</a>
+        </li>
+      } @else if (item.virtualNav === 'products-all') {
+        <li
+          class="shop-nav-item"
+          [class.shop-nav-item--promo]="item.titleUrl === 'en-promocion'"
+          [class.shop-nav-item--sale]="item.titleUrl === 'ofertas'"
+          [class.shop-nav-item--newin]="item.titleUrl === 'lo-nuevo'"
+          [class.shop-nav-item--moda]="item.titleUrl === 'moda'"
+        >
+          <a
+            [routerLink]="['/', lang(), 'product', 'all']"
+            [queryParams]="item.virtualNavQuery || {}"
+            class="shop-nav-link"
+            >{{ item.title }}</a
+          >
+        </li>
+      } @else if (showMegaFor(item)) {
+        <li class="shop-nav-item shop-nav-item--mega">
+          <span class="shop-nav-link shop-nav-link--trigger" tabindex="0">{{ item.title }}</span>
+          <div class="shop-mega" role="region" [attr.aria-label]="item.title">
+            <div class="shop-mega-inner">
+              <div class="shop-mega-col">
+                @for (sub of childrenFor(item.titleUrl); track sub.titleUrl) {
+                  <a [routerLink]="['/', lang(), 'product', 'category', sub.titleUrl]" class="shop-mega-link">{{ sub.title }}</a>
+                }
+              </div>
+              <a [routerLink]="['/', lang(), 'product', 'category', item.titleUrl]" class="shop-mega-cta">Ver todo en {{ item.title }}</a>
+            </div>
+          </div>
+        </li>
+      } @else {
+        <li class="shop-nav-item">
+          <a [routerLink]="['/', lang(), 'product', 'category', item.titleUrl]" class="shop-nav-link">{{ item.title }}</a>
+        </li>
+      }
+    }
+  </ul>
+</nav>

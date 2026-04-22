@@ -1,0 +1,24 @@
+@if (editorApiKey$ | async; as apiKey) {
+  @if (apiKey) {
+    <editor
+      apiKey="{{ apiKey }}"
+      [ngModel]="description"
+      (ngModelChange)="onEditorChange($event)"
+      [init]="{ plugins: ['image', 'media', 'link', 'code'], height: 420, menubar: false, branding: false }"
+    ></editor>
+  } @else {
+    <mat-form-field class="tiny-editor-fallback" appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ 'PRODUCT_EDIT_DESC_FALLBACK_LABEL' | translate | async }}</mat-label>
+      <textarea
+        matInput
+        rows="14"
+        [ngModel]="description"
+        (ngModelChange)="onEditorChange($event)"
+        [placeholder]="('PRODUCT_EDIT_DESC_FALLBACK_PH' | translate | async) || ''"
+      ></textarea>
+      <mat-hint>{{ 'PRODUCT_EDIT_TINYMCE_FALLBACK' | translate | async }}</mat-hint>
+    </mat-form-field>
+  }
+} @else {
+  <p class="tiny-editor-loading">{{ 'PRODUCT_EDIT_DESC_LOADING' | translate | async }}</p>
+}

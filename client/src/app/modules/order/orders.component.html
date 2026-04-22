@@ -1,0 +1,11 @@
+@if (user()?.roles?.includes('admin')) {
+  <div class="orders-admin-banner">
+    <p>{{ 'ORDERS_ADMIN_BANNER' | translate | async }}</p>
+  </div>
+}
+<app-orders-list
+  [orders]="orders$()"
+  [orderUrl]="'/' + (lang$ | async) + '/orders/'"
+  [allowStatusChange]="!!user()?.roles?.includes('admin')"
+  [currentLang]="(lang$ | async) || 'es'"
+></app-orders-list>

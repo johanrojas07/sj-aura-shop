@@ -1,0 +1,24 @@
+@if (items().length) {
+<section class="recent-strip" aria-labelledby="recent-strip-h">
+  <div class="recent-strip-head">
+    <h2 id="recent-strip-h" class="recent-strip-title">{{ 'RECENTLY_VIEWED' | translate | async }}</h2>
+    @if (last(); as lv) {
+    <a class="recent-strip-last" [routerLink]="productLink(lv)">{{ 'GO_TO_LAST_VIEWED' | translate | async }}</a>
+    }
+  </div>
+  <div class="recent-strip-scroll" role="list">
+    @for (it of items(); track it.titleUrl) {
+    <a class="recent-strip-card" role="listitem" [routerLink]="productLink(it)">
+      @if (it.imageUrl) {
+      <span class="recent-strip-media">
+        <img [src]="it.imageUrl" [alt]="it.title" loading="lazy" />
+      </span>
+      } @else {
+      <span class="recent-strip-media recent-strip-media--empty" aria-hidden="true"></span>
+      }
+      <span class="recent-strip-name">{{ it.title }}</span>
+    </a>
+    }
+  </div>
+</section>
+}

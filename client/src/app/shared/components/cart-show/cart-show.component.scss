@@ -1,0 +1,48 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cart_show {
+  &-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-subtle);
+    background: var(--surface);
+    box-shadow: var(--shadow-xs);
+    cursor: pointer;
+    transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition),
+      background var(--transition);
+
+    &:hover {
+      border-color: var(--accent-gold);
+      background: var(--section-tint);
+      box-shadow: var(--shadow-sm);
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  &-icon {
+    font-size: 22px;
+    color: var(--text-primary);
+  }
+
+  &-quantity {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    min-width: 2.5rem;
+    text-align: center;
+  }
+}

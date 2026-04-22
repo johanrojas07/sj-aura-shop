@@ -1,0 +1,22 @@
+<mat-sidenav-container class="app-shell" hasBackdrop="true">
+  <mat-sidenav
+    position="end"
+    mode="over"
+    class="cart-drawer-sidenav"
+    [opened]="cartDrawer.isOpen()"
+    (openedChange)="cartDrawer.syncOpen($event)"
+    [autoFocus]="false"
+  >
+    <app-cart-drawer />
+  </mat-sidenav>
+  <mat-sidenav-content class="app-sidenav-content">
+    <div class="main-scroll-wrap" id="main-content" (scroll)="onScrolling($event)">
+      <app-header-host />
+      <router-outlet
+        (activate)="onActivate($event)"
+        (deactivate)="onDeactivate($event)">
+      </router-outlet>
+      <app-footer></app-footer>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

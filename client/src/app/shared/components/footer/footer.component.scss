@@ -1,0 +1,195 @@
+:host {
+  display: block;
+  margin-top: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.footer {
+  --footer-fg: rgba(248, 250, 252, 0.92);
+  --footer-fg-muted: rgba(203, 213, 225, 0.82);
+  --footer-fg-soft: rgba(148, 163, 184, 0.75);
+  --footer-accent: rgba(129, 140, 248, 0.95);
+  --footer-accent-soft: rgba(99, 102, 241, 0.35);
+  --footer-line: linear-gradient(90deg, rgba(129, 140, 248, 0.85), rgba(34, 211, 238, 0.55), transparent);
+
+  background: linear-gradient(165deg, rgba(15, 23, 42, 0.98) 0%, rgba(2, 6, 23, 0.99) 48%, rgba(15, 23, 42, 1) 100%);
+  color: var(--footer-fg-muted);
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+  box-shadow:
+    0 -1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 -20px 48px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 2px;
+    background: var(--gradient-brand, var(--footer-line));
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  &__surface {
+    position: relative;
+  }
+
+  .container {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding-left: clamp(16px, 4vw, 24px);
+    padding-right: clamp(16px, 4vw, 24px);
+  }
+
+  &__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: clamp(2rem, 5vw, 3.5rem);
+    align-items: start;
+    padding-top: clamp(2.25rem, 5vw, 3.5rem);
+    padding-bottom: clamp(2rem, 4vw, 2.75rem);
+
+    @media (max-width: 720px) {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+
+  &__brand {
+    padding-right: clamp(0px, 3vw, 1.5rem);
+  }
+
+  &__title {
+    margin: 0 0 0.75rem;
+    font-size: clamp(1.35rem, 2.5vw, 1.625rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    color: var(--footer-fg);
+    text-wrap: balance;
+    width: fit-content;
+    max-width: 100%;
+    padding-bottom: 0.55rem;
+    background: linear-gradient(90deg, rgba(129, 140, 248, 0.85), rgba(34, 211, 238, 0.45)) left bottom /
+      min(11rem, 100%) 2px no-repeat;
+  }
+
+  &__tagline {
+    margin: 0;
+    max-width: 36ch;
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: var(--footer-fg-muted);
+  }
+
+  &__nav {
+    position: relative;
+    padding: 0.5rem 0 0.5rem clamp(1.25rem, 3vw, 1.75rem);
+    border-left: 1px solid rgba(148, 163, 184, 0.18);
+
+    @media (max-width: 720px) {
+      padding-left: 0;
+      padding-top: 1.5rem;
+      border-left: none;
+      border-top: 1px solid rgba(148, 163, 184, 0.14);
+    }
+  }
+
+  &__nav-heading {
+    margin: 0 0 1rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--footer-fg-soft);
+  }
+
+  &__links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  &__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: rgba(226, 232, 240, 0.92);
+    text-decoration: none;
+    border-radius: 6px;
+    margin-left: -0.35rem;
+    padding-left: 0.35rem;
+    padding-right: 0.5rem;
+    transition:
+      color 0.2s ease,
+      background 0.2s ease,
+      transform 0.2s ease;
+
+    &::before {
+      content: '';
+      width: 0;
+      height: 1px;
+      background: var(--footer-accent);
+      transition: width 0.22s ease;
+      flex-shrink: 0;
+    }
+
+    &:hover,
+    &:focus-visible {
+      color: #fff;
+      background: rgba(99, 102, 241, 0.12);
+      outline: none;
+
+      &::before {
+        width: 12px;
+      }
+    }
+  }
+
+  &__legal {
+    background: rgba(2, 6, 23, 0.72);
+    border-top: 1px solid rgba(148, 163, 184, 0.1);
+  }
+
+  &__legal-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem 0.75rem;
+    padding: 1rem clamp(16px, 4vw, 24px);
+    font-size: 0.8125rem;
+    color: var(--footer-fg-soft);
+    letter-spacing: 0.01em;
+  }
+
+  &__copy {
+    color: rgba(148, 163, 184, 0.88);
+  }
+
+  &__dot {
+    display: inline-block;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--footer-accent-soft);
+    box-shadow: 0 0 8px var(--footer-accent-soft);
+    vertical-align: middle;
+  }
+
+  &__credit {
+    color: rgba(186, 198, 214, 0.88);
+  }
+}

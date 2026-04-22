@@ -1,0 +1,68 @@
+<div class="contact">
+  <div class="contact__ambient" aria-hidden="true"></div>
+
+  <div class="container contact__wrap">
+    <header class="contact__intro">
+      <span class="contact__kicker">{{ 'CONTACT_PAGE_KICKER' | translate | async }}</span>
+      <h1 class="contact__title">{{ 'Contact' | translate | async }}</h1>
+      <p class="contact__lead">{{ 'CONTACT_PAGE_LEAD' | translate | async }}</p>
+
+      <ul class="contact__highlights">
+        <li class="contact__hl">
+          <mat-icon class="contact__hl-icon" aria-hidden="true">schedule</mat-icon>
+          <span>{{ 'CONTACT_HL_1' | translate | async }}</span>
+        </li>
+        <li class="contact__hl">
+          <mat-icon class="contact__hl-icon" aria-hidden="true">shield</mat-icon>
+          <span>{{ 'CONTACT_HL_2' | translate | async }}</span>
+        </li>
+      </ul>
+    </header>
+
+    <div class="contact__panel">
+      <form class="contact__form" [formGroup]="contactForm" (ngSubmit)="submit()" novalidate>
+        <mat-form-field class="contact__field" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'CONTACT_FORM_NAME_LABEL' | translate | async }}</mat-label>
+          <input matInput formControlName="name" type="text" name="contactName" autocomplete="name" />
+        </mat-form-field>
+
+        <mat-form-field class="contact__field" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'CONTACT_FORM_EMAIL_LABEL' | translate | async }}</mat-label>
+          <input matInput formControlName="email" type="email" name="email" autocomplete="email" />
+        </mat-form-field>
+
+        <mat-form-field class="contact__field contact__field--message" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'CONTACT_FORM_MESSAGE_LABEL' | translate | async }}</mat-label>
+          <textarea matInput formControlName="notes" name="notes" rows="6"></textarea>
+        </mat-form-field>
+
+        <div class="contact__actions">
+          <button type="submit" class="contact__submit" mat-flat-button color="primary" [disabled]="contactForm.invalid">
+            <mat-icon aria-hidden="true">send</mat-icon>
+            {{ 'SendContact' | translate | async }}
+          </button>
+        </div>
+
+        @if (loading$ | async) {
+          <mat-progress-bar class="contact__progress" mode="indeterminate" />
+        }
+      </form>
+
+      @if (sendRequestSub$ | async) {
+        <div class="contact__feedback" role="status" aria-live="polite">
+          @if (error$()) {
+            <div class="contact__alert contact__alert--error">
+              <mat-icon aria-hidden="true">error_outline</mat-icon>
+              <span>{{ error$() | translate | async }}</span>
+            </div>
+          } @else {
+            <div class="contact__alert contact__alert--success">
+              <mat-icon aria-hidden="true">check_circle</mat-icon>
+              <span>{{ 'CONTACT_SEND_SUCCESS' | translate | async }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

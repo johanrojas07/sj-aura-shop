@@ -1,0 +1,333 @@
+html {
+  font-size: 16px;
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  overflow: hidden;
+  margin: 0;
+  width: 100%;
+  min-height: 100%;
+  height: 100%;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  letter-spacing: 0.01em;
+  background-color: var(--page-bg);
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(248, 223, 229, 0.55) 0%, transparent 52%),
+    radial-gradient(ellipse 90% 50% at 100% 0%, rgba(245, 235, 227, 0.45) 0%, transparent 45%),
+    radial-gradient(ellipse 70% 40% at 0% 100%, rgba(232, 201, 212, 0.2) 0%, transparent 50%),
+    linear-gradient(180deg, var(--page-bg-mid) 0%, var(--page-bg) 38%, var(--page-bg-deep) 100%);
+  background-attachment: fixed;
+}
+
+/* Raíz de Angular: sin altura explícita, % en hijos (sidenav) puede colapsar y dejar la vista en blanco. */
+eshop-mean-app {
+  display: block;
+  height: 100%;
+  min-height: 100%;
+}
+
+h1,
+h2,
+h3,
+.product-title,
+.home-title,
+.products-title,
+.contact-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.main-scroll-wrap {
+  position: absolute;
+  scroll-behavior: smooth;
+  top: calc(var(--nav-stack-height, var(--nav-height)) + var(--site-announcement-height, 0px));
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  z-index: 1;
+
+  &.transparent {
+    top: 0;
+  }
+}
+
+.main {
+  position: relative;
+  flex: 1 0 auto;
+  z-index: 1;
+  background: transparent;
+  min-height: 100%;
+}
+
+.main::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-image: var(--main-background-url);
+  background-repeat: no-repeat;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.08;
+}
+
+.container,
+.container-mid {
+  padding: clamp(16px, 3vw, 32px);
+  position: relative;
+  z-index: 1;
+}
+
+.container-mid {
+  max-width: 1100px;
+  margin: auto;
+}
+
+.sidebar-layout {
+  display: grid;
+  grid-template-areas: 'sidebar main';
+  grid-template-columns: minmax(200px, 240px) 1fr;
+  grid-column-gap: clamp(16px, 3vw, 28px);
+
+  .main-wrap {
+    grid-area: main;
+  }
+
+  .sidebar-wrap {
+    grid-area: sidebar;
+    position: relative;
+  }
+
+  @media screen and (max-width: 600px) {
+    grid-template-areas: 'sidebar' 'main';
+    grid-template-columns: auto;
+  }
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  background-color: transparent;
+  transition: color var(--transition), opacity var(--transition);
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+::selection {
+  background: rgba(184, 160, 120, 0.35);
+  color: var(--text-primary);
+}
+
+.material-icons {
+  font-family: 'Material Symbols Outlined', 'Material Icons', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+  color: inherit;
+}
+
+.material-icons.md-16 {
+  font-size: 16px;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+
+.material-icons.md-18 {
+  font-size: 18px;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+
+.material-icons.md-20 {
+  font-size: 20px;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 22;
+}
+
+.material-icons.md-24 {
+  font-size: 24px;
+}
+
+.material-icons.md-36 {
+  font-size: 36px;
+}
+
+.material-icons.md-48 {
+  font-size: 48px;
+}
+
+.clickable {
+  cursor: pointer !important;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.margin {
+  &-left-small {
+    margin-left: 5px;
+  }
+
+  &-top-basic {
+    margin-top: 1rem;
+  }
+}
+
+/* Botones premium (Material + overrides) */
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary {
+  border-radius: var(--radius-sm) !important;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  padding: 0 1.5rem !important;
+  min-height: 44px;
+  box-shadow: var(--shadow-sm) !important;
+  background-color: var(--text-primary) !important;
+  color: #fff !important;
+  transition: transform var(--transition), box-shadow var(--transition), background-color var(--transition) !important;
+}
+
+.mat-mdc-raised-button.mat-primary:hover,
+.mat-mdc-unelevated-button.mat-primary:hover {
+  box-shadow: var(--shadow-md) !important;
+  transform: translateY(-1px);
+  background-color: #2d2a28 !important;
+}
+
+.mat-mdc-outlined-button,
+.mat-mdc-stroked-button {
+  border-radius: var(--radius-sm) !important;
+  letter-spacing: 0.08em;
+  font-weight: 500 !important;
+  border-color: var(--border-strong) !important;
+  color: var(--text-primary) !important;
+  transition: border-color var(--transition), background-color var(--transition), transform var(--transition) !important;
+}
+
+.mat-mdc-outlined-button:hover,
+.mat-mdc-stroked-button:hover {
+  border-color: var(--text-muted) !important;
+  background-color: var(--surface-muted) !important;
+}
+
+.mdc-card {
+  transition: box-shadow var(--transition-slow);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-xs);
+  background: var(--surface);
+}
+
+.mdc-evolution-chip__action--presentational {
+  cursor: pointer !important;
+}
+
+.mat-mdc-form-field {
+  transition: opacity var(--transition);
+}
+
+mat-icon {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Toasts “add to cart” — boutique, no alerta genérica */
+.mat-mdc-snack-bar-container.eshop-toast {
+  margin-bottom: 24px !important;
+
+  .mdc-snackbar__surface {
+    border-radius: var(--radius-lg) !important;
+    background: linear-gradient(145deg, #fffdfb 0%, #faf0f3 55%, #f5e6ea 100%) !important;
+    border: 1px solid rgba(184, 160, 120, 0.22) !important;
+    box-shadow: 0 10px 36px rgba(42, 36, 38, 0.1), 0 1px 0 rgba(255, 255, 255, 0.8) inset !important;
+    padding: 4px 8px !important;
+  }
+
+  .mat-mdc-snack-bar-label {
+    color: var(--text-primary) !important;
+    font-weight: 500 !important;
+    font-size: 0.9375rem !important;
+    letter-spacing: 0.01em !important;
+  }
+
+  .mat-mdc-snack-bar-actions .mat-mdc-button {
+    --mat-text-button-label-text-color: var(--accent-gold-hover) !important;
+    --mat-text-button-label-text-size: 0.75rem !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    font-weight: 600 !important;
+  }
+}
+
+/* Shell del drawer: altura completa */
+.app-shell.mat-drawer-container,
+.app-shell.mat-sidenav-container {
+  height: 100%;
+  min-height: 100vh;
+}
+
+.app-sidenav-content {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.mat-drawer.cart-drawer-sidenav,
+.mat-sidenav.cart-drawer-sidenav {
+  width: min(420px, 100vw - 12px) !important;
+  max-width: 100%;
+  border: none !important;
+  box-shadow: -12px 0 48px rgba(26, 26, 26, 0.12) !important;
+  background: var(--surface);
+}
+
+/* Scroll bajo el tope: el header sube (sin hueco de anuncio). Ver app.component syncHeaderScrollMode. */
+html.eshop-header-compact {
+  --site-announcement-height: 0px !important;
+}
+
+/* Fuera de la home: sin reserva de altura de la franja de anuncios. */
+html.eshop-route-inner {
+  --site-announcement-height: 0px !important;
+}

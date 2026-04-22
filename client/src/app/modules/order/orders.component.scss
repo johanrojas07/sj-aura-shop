@@ -1,0 +1,21 @@
+:host {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.orders-admin-banner {
+  max-width: 960px;
+  margin: 0 auto 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md, 10px);
+  background: linear-gradient(135deg, rgba(184, 61, 111, 0.1) 0%, rgba(99, 102, 241, 0.08) 100%);
+  border: 1px solid rgba(184, 61, 111, 0.22);
+  color: var(--text-primary, #0f172a);
+  font-size: 0.9rem;
+  line-height: 1.45;
+
+  p {
+    margin: 0;
+  }
+}

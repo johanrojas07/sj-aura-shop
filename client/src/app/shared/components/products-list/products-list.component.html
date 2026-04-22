@@ -1,0 +1,210 @@
+@if (adminMode && layout === 'list') {
+  <table class="admin-catalog-table">
+    <thead>
+      <tr>
+        <th class="admin-catalog-table__th admin-catalog-table__th--thumb" scope="col"></th>
+        <th class="admin-catalog-table__th" scope="col">{{ 'DASH_CATALOG_COL_NAME' | translate | async }}</th>
+        <th class="admin-catalog-table__th admin-catalog-table__th--num" scope="col">{{ 'DASH_CATALOG_COL_STOCK' | translate | async }}</th>
+        <th class="admin-catalog-table__th admin-catalog-table__th--price" scope="col">{{ 'DASH_CATALOG_COL_PRICE' | translate | async }}</th>
+        <th class="admin-catalog-table__th admin-catalog-table__th--actions" scope="col">{{ 'DASH_CATALOG_COL_ACTIONS' | translate | async }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (product of products; track product.titleUrl || product._id || $index) {
+        <tr class="admin-catalog-table__row">
+          <td class="admin-catalog-table__td admin-catalog-table__td--thumb">
+            <a
+              class="admin-catalog-table__thumb-link"
+              [routerLink]="['/' + lang + '/product/' + product?.titleUrl]"
+              (mousemove)="onListCardImageMove(product, $event)"
+              (mouseleave)="onListCardImageLeave(product)"
+            >
+              <img [src]="listCardPreviewUrl(product)" [alt]="" loading="lazy" />
+            </a>
+          </td>
+          <td class="admin-catalog-table__td">
+            <span class="admin-catalog-table__name">{{ product?.title }}</span>
+          </td>
+          <td class="admin-catalog-table__td admin-catalog-table__td--num">
+            <strong>{{ adminStockQty(product) }}</strong>
+          </td>
+          <td class="admin-catalog-table__td admin-catalog-table__td--price">
+            @if (product.onSale && product.regularPrice && product.regularPrice > product.salePrice) {
+              <span class="admin-catalog-table__reg">{{ product.regularPrice | priceFormat }}</span>
+            }
+            <span class="admin-catalog-table__sale">{{ product?.salePrice | priceFormat }}</span>
+          </td>
+          <td class="admin-catalog-table__td admin-catalog-table__td--actions">
+            <button type="button" mat-stroked-button class="admin-catalog-table__btn" (click)="onStockAdjust(product)">
+              {{ 'DASH_CATALOG_STOCK_BTN' | translate | async }}
+            </button>
+            <button type="button" mat-stroked-button class="admin-catalog-table__btn" (click)="onOpenAdminGallery(product)">
+              {{ 'DASH_CATALOG_GALLERY' | translate | async }}
+            </button>
+            @if (showEdit) {
+              <button type="button" mat-flat-button color="primary" class="admin-catalog-table__btn" (click)="onEditProduct(product?.titleUrl)">
+                {{ 'Edit' | translate | async }}
+              </button>
+            }
+            <a mat-stroked-button class="admin-catalog-table__btn" [routerLink]="['/' + lang + '/product/' + product?.titleUrl]">
+              {{ 'DASH_CATALOG_LINK_STORE' | translate | async }}
+            </a>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+} @else {
+  @for (product of products; track product.titleUrl || product._id || $index) {
+    @if (adminMode && layout === 'grid') {
+      <div class="product_card product_card--admin-tight product_card--admin-grid">
+        <div class="product_card-media">
+          <a
+            class="product_card-image"
+            [routerLink]="['/' + lang + '/product/' + product?.titleUrl]"
+            [attr.aria-labelledby]="'pt-' + product?.titleUrl"
+            (mousemove)="onListCardImageMove(product, $event)"
+            (mouseleave)="onListCardImageLeave(product)"
+          >
+            <img class="product_card-image-img" [src]="listCardPreviewUrl(product)" [alt]="product?.title || ''" loading="lazy" />
+          </a>
+          <div class="product_card-media-actions">
+            <button
+              type="button"
+              class="product_card-icon-btn product_card-icon-btn--round"
+              (click)="$event.stopPropagation(); onOpenAdminGallery(product)"
+              [attr.aria-label]="('DASH_CATALOG_GALLERY' | translate | async) || ''"
+            >
+              <i class="material-icons md-18">photo_library</i>
+            </button>
+            <a
+              class="product_card-icon-btn product_card-icon-btn--round"
+              [routerLink]="['/' + lang + '/product/' + product?.titleUrl]"
+              [attr.aria-label]="('DASH_CATALOG_LINK_STORE' | translate | async) || ''"
+            >
+              <i class="material-icons md-18">search</i>
+            </a>
+          </div>
+        </div>
+        <div class="product_card-body product_card-body--admin-grid">
+          <h2 class="product_card-title product_card-title--admin-top" [id]="'pt-' + product?.titleUrl">{{ product?.title }}</h2>
+          <p class="product_card-admin-units">
+            {{ 'DASH_CATALOG_STOCK_LABEL' | translate | async }}: <strong>{{ adminStockQty(product) }}</strong>
+          </p>
+          <div class="product_card-admin-prices">
+            @if (product.onSale && product.regularPrice && product.regularPrice > product.salePrice) {
+              <span class="product_card-reg">{{ product.regularPrice | priceFormat }}</span>
+              <span class="product_card-price-sep" aria-hidden="true">·</span>
+              <span class="product_card-sale product_card-sale--deal">{{ product?.salePrice | priceFormat }}</span>
+            } @else {
+              <span class="product_card-sale product_card-sale--regular">{{ product?.salePrice | priceFormat }}</span>
+            }
+          </div>
+          <div class="product_card-admin-actions">
+            <button type="button" mat-stroked-button class="product_card-admin-actions__btn" (click)="onStockAdjust(product)">
+              {{ 'DASH_CATALOG_STOCK_BTN' | translate | async }}
+            </button>
+            @if (showEdit) {
+              <button type="button" mat-flat-button color="primary" class="product_card-admin-actions__btn" (click)="onEditProduct(product?.titleUrl)">
+                {{ 'Edit' | translate | async }}
+              </button>
+            }
+            <button type="button" mat-stroked-button class="product_card-admin-actions__btn" (click)="onOpenAdminGallery(product)">
+              {{ 'DASH_CATALOG_GALLERY' | translate | async }}
+            </button>
+            <a mat-stroked-button class="product_card-admin-actions__btn" [routerLink]="['/' + lang + '/product/' + product?.titleUrl]">
+              {{ 'DASH_CATALOG_LINK_STORE' | translate | async }}
+            </a>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="product_card">
+        <div class="product_card-media">
+          @if (discountPercent(product); as savePct) {
+            <span class="product_card-save-ribbon" aria-hidden="true">{{ tr('SAVE_PERCENT', { pct: savePct }) }}</span>
+          }
+          <a
+            class="product_card-image"
+            [routerLink]="['/' + lang + '/product/' + product?.titleUrl]"
+            [attr.aria-labelledby]="'pt-' + product?.titleUrl"
+            (mousemove)="onListCardImageMove(product, $event)"
+            (mouseleave)="onListCardImageLeave(product)"
+          >
+            <img class="product_card-image-img" [src]="listCardPreviewUrl(product)" [alt]="product?.title || ''" loading="lazy" />
+          </a>
+          <div class="product_card-media-actions">
+            @if (showEdit) {
+              <button type="button" class="product_card-icon-btn" (click)="onEditProduct(product?.titleUrl)">
+                {{ 'Edit' | translate | async }}
+              </button>
+            }
+            <a
+              class="product_card-icon-btn product_card-icon-btn--round"
+              [routerLink]="['/' + lang + '/product/' + product?.titleUrl]"
+              [attr.aria-label]="('Detail' | translate | async) || 'Ver producto'"
+            >
+              <i class="material-icons md-18">search</i>
+            </a>
+          </div>
+        </div>
+
+        <div class="product_card-body">
+          <div class="product_card-meta">
+            <div class="product_card-prices">
+              @if (product.onSale && product.regularPrice && product.regularPrice > product.salePrice) {
+                <div class="product_card-price-band product_card-price-band--sale">
+                  <span class="product_card-reg">{{ product.regularPrice | priceFormat }}</span>
+                  <span class="product_card-price-sep" aria-hidden="true">·</span>
+                  <span class="product_card-sale product_card-sale--deal">{{ product?.salePrice | priceFormat }}</span>
+                </div>
+              } @else {
+                <div class="product_card-price-band product_card-price-band--single">
+                  <span class="product_card-sale product_card-sale--regular">{{ product?.salePrice | priceFormat }}</span>
+                </div>
+              }
+            </div>
+            <p class="product_card-stock">{{ product?.stock | translate | async }}</p>
+          </div>
+
+          @if (productColors(product).length > 0) {
+            <div
+              class="product_card-colors"
+              tabindex="0"
+              role="group"
+              [attr.aria-label]="colorAriaLabel(product)"
+            >
+              <p class="product_card-colors-line" aria-hidden="true">{{ availableInColorsLine(product) }}</p>
+              <div class="product_card-color-dots" aria-hidden="true">
+                @for (c of productColors(product); track c.label + (c.hex || '')) {
+                  <span class="product_card-color-dot" [style.background]="dotColor(c)"></span>
+                }
+              </div>
+            </div>
+          }
+
+          <h2 class="product_card-title" [id]="'pt-' + product?.titleUrl">{{ product?.title }}</h2>
+
+          <div class="product_card-footer">
+            @if (cartIds?.[product._id]) {
+              <div class="product_card-inbag" role="status">
+                <span class="product_card-inbag-dot" aria-hidden="true"></span>
+                <span class="product_card-inbag-text">{{ ('ALREADY_IN_CART' | translate | async) || 'En tu bolsa' }}</span>
+                @if (cartIds[product._id] > 1) {
+                  <span class="product_card-inbag-qty">×{{ cartIds[product._id] }}</span>
+                }
+              </div>
+              <button type="button" mat-stroked-button class="product_card-add product_card-add--ghost" (click)="onAddProduct(product?._id)">
+                {{ ('ADD_ANOTHER' | translate | async) || 'Añadir otro' }}
+              </button>
+            } @else {
+              <button type="button" mat-flat-button class="product_card-add" (click)="onAddProduct(product?._id)">
+                {{ ('ADD_TO_CART' | translate | async) || 'Agregar al carrito' }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  }
+}

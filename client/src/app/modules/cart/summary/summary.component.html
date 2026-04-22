@@ -1,0 +1,17 @@
+<div class="main order-summary-page">
+  <div class="container order-summary-page__container">
+    <button type="button" mat-stroked-button class="order-summary-page__back" (click)="goBack()">
+      <mat-icon aria-hidden="true">arrow_back</mat-icon>
+      {{ 'Back' | translate | async }}
+    </button>
+
+    <div class="order-summary-page__hero">
+      <div class="order-summary-page__hero-icon-wrap" aria-hidden="true">
+        <mat-icon class="order-summary-page__hero-icon">mark_chat_read</mat-icon>
+      </div>
+      <p class="order-summary-page__lead">{{ 'CART_ORDER_SENT_WHATSAPP' | translate | async }}</p>
+    </div>
+
+    <app-order-info [order]="order$()" [lang]="(lang$ | async) || 'es'"></app-order-info>
+  </div>
+</div>

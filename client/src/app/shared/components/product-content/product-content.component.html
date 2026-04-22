@@ -1,0 +1,104 @@
+<article
+  class="product-content"
+  [class.product-content--editorial]="layout() === 'editorial'"
+  [class.product-content--compact]="layout() === 'compact'"
+>
+  <figure
+    class="product-media"
+    [class.product-media--with-thumbs]="layout() === 'editorial' && galleryUrls.length > 1 && !fullGalleryStack()"
+    [class.product-media--with-gallery-stack]="layout() === 'editorial' && fullGalleryStack() && galleryUrls.length > 1"
+  >
+    @if (layout() === 'editorial') {
+    <div class="product-media-main">
+      <img [src]="activeGalleryUrl" [alt]="product?.title || ''" loading="lazy" />
+    </div>
+    @if (galleryUrls.length > 1 && !fullGalleryStack()) {
+    <div class="product-thumbs" role="list">
+      @for (url of galleryUrls; track $index; let i = $index) {
+      <button
+        type="button"
+        class="product-thumb"
+        [class.product-thumb--active]="i === selectedGalleryIndex"
+        (click)="selectGallery(i)"
+        [attr.aria-current]="i === selectedGalleryIndex ? 'true' : null"
+        [attr.aria-label]="'Vista ' + (i + 1)"
+      >
+        <img [src]="url" alt="" loading="lazy" />
+      </button>
+      }
+    </div>
+    }
+    @if (fullGalleryStack() && galleryUrls.length > 1) {
+    <div class="product-gallery-stack" role="list">
+      @for (url of galleryUrls; track $index; let i = $index) {
+      <button
+        type="button"
+        class="product-gallery-stack-item"
+        [class.product-gallery-stack-item--active]="i === selectedGalleryIndex"
+        (click)="selectGallery(i)"
+        [attr.aria-current]="i === selectedGalleryIndex ? 'true' : null"
+        [attr.aria-label]="'Vista ' + (i + 1)"
+      >
+        <img [src]="url" alt="" loading="lazy" />
+      </button>
+      }
+    </div>
+    }
+    } @else {
+    <img [src]="product?.mainImage?.url" [alt]="product?.title || ''" loading="lazy" />
+    }
+  </figure>
+
+  <div class="product-detail">
+    <h1 class="product-title">{{ product?.title }}</h1>
+
+    <div class="product-meta-row product-meta-row--top">
+      <span class="product-stock">{{ product?.stock | translate | async }}</span>
+      <div class="product-price-block">
+        @if (product.onSale && product.regularPrice) {
+        <span class="product-price-before">{{ product.regularPrice | priceFormat }}</span>
+        }
+        <span class="product-price-current" [class.product-price-current--deal]="product.onSale">{{ product?.salePrice | priceFormat }}</span>
+      </div>
+    </div>
+
+    <p class="product-description">{{ product?.description }}</p>
+
+    @if (lang && product) {
+    <div class="product-actions">
+      @if (cartIds?.[product._id]) {
+      <div class="product-inbag" role="status">
+        <span class="product-inbag-dot" aria-hidden="true"></span>
+        <span class="product-inbag-label">{{ ('ALREADY_IN_CART' | translate | async) || 'En tu bolsa' }}</span>
+        @if (cartIds[product._id] > 1) {
+        <span class="product-inbag-qty">×{{ cartIds[product._id] }}</span>
+        }
+      </div>
+      <button type="button" mat-stroked-button class="product-add-cta product-add-cta--ghost" (click)="onAddProduct(product._id)">
+        {{ ('ADD_ANOTHER' | translate | async) || 'Añadir otro' }}
+      </button>
+      } @else {
+      <button type="button" mat-flat-button class="product-add-cta" (click)="onAddProduct(product._id)">
+        {{ ('ADD_TO_CART' | translate | async) || 'Agregar al carrito' }}
+      </button>
+      }
+    </div>
+    }
+
+    @if (product.tags?.length) {
+    <mat-chip-listbox aria-label="Category selection" class="product-tags">
+      @for (tag of product.tags; track tag) {
+      <mat-chip-option class="product-chip" [routerLink]="['/' + lang + '/product/category/' + tag]">
+        {{ categoriesToShow()[tag] || tag }}
+      </mat-chip-option>
+      }
+    </mat-chip-listbox>
+    }
+
+    @if (withLink) {
+    <a class="product-more" [routerLink]="['/' + lang + '/product/' + product.titleUrl]">
+      {{ 'More' | translate | async }}
+    </a>
+    }
+  </div>
+</article>

@@ -1,0 +1,185 @@
+@if (!sendRequest) {
+<div class="theme-page">
+  <header class="theme-page__head">
+    <h1 class="theme-page__title">{{ 'THEME_EDIT_TITLE' | translate | async }}</h1>
+    <p class="theme-page__lead">{{ 'THEME_EDIT_LEAD' | translate | async }}</p>
+  </header>
+
+  <mat-card class="theme-card" appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>{{ 'THEME_EDIT_PICK_TITLE' | translate | async }}</mat-card-title>
+      <mat-card-subtitle>{{ 'THEME_EDIT_PICK_HINT' | translate | async }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content class="theme-card__content theme-pick">
+      <mat-form-field class="theme-pick__field" appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ 'THEME_EDIT_NEW_SLUG' | translate | async }}</mat-label>
+        <input matInput [(ngModel)]="newTheme" [ngModelOptions]="{ standalone: true }" [placeholder]="('THEME_EDIT_NEW_PH' | translate | async) || ''" />
+      </mat-form-field>
+      <button type="button" mat-flat-button color="primary" class="theme-pick__create" (click)="addTheme()">
+        {{ 'THEME_EDIT_CREATE' | translate | async }}
+      </button>
+      <mat-form-field class="theme-pick__field theme-pick__field--wide" appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ 'From_existing_themes' | translate | async }}</mat-label>
+        <mat-select [(ngModel)]="chosenTheme" [ngModelOptions]="{ standalone: true }" (ngModelChange)="choseTheme()">
+          @for (option of themes$ | async; track option.titleUrl) {
+            <mat-option [value]="option.titleUrl">{{ option.titleUrl }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </mat-card-content>
+  </mat-card>
+
+  @if (themesEditForm.get('titleUrl')?.value) {
+  <form class="theme-form" [formGroup]="themesEditForm">
+    <mat-card class="theme-card" appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>{{ themesEditForm.get('titleUrl')?.value }}</mat-card-title>
+        <mat-card-subtitle>{{ 'THEME_EDIT_EDITING' | translate | async }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="theme-card__content">
+        <h3 class="theme-section__label">{{ 'THEME_EDIT_SECTION_COLORS' | translate | async }}</h3>
+        <div class="theme-color-grid">
+          <div class="theme-color-cell">
+            <span
+              class="theme-swatch"
+              [style.background]="themesEditForm.get('primaryColor')?.value"
+              aria-hidden="true"
+            ></span>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>{{ 'THEME_EDIT_PRIMARY' | translate | async }}</mat-label>
+              <input matInput type="color" formControlName="primaryColor" />
+            </mat-form-field>
+          </div>
+          <div class="theme-color-cell">
+            <span
+              class="theme-swatch"
+              [style.background]="themesEditForm.get('secondaryColor')?.value"
+              aria-hidden="true"
+            ></span>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>{{ 'THEME_EDIT_SECONDARY' | translate | async }}</mat-label>
+              <input matInput type="color" formControlName="secondaryColor" />
+            </mat-form-field>
+          </div>
+          <div class="theme-color-cell">
+            <span
+              class="theme-swatch"
+              [style.background]="themesEditForm.get('backgroundColor')?.value"
+              aria-hidden="true"
+            ></span>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>{{ 'THEME_EDIT_BACKGROUND' | translate | async }}</mat-label>
+              <input matInput type="color" formControlName="backgroundColor" />
+            </mat-form-field>
+          </div>
+        </div>
+
+        <h3 class="theme-section__label">{{ 'THEME_EDIT_SECTION_SURFACE' | translate | async }}</h3>
+        <mat-form-field class="theme-field-full" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'THEME_EDIT_MAIN_BG' | translate | async }}</mat-label>
+          <input matInput formControlName="mainBackground" [placeholder]="('THEME_EDIT_URL_PH' | translate | async) || ''" />
+          <mat-hint>{{ 'THEME_EDIT_MAIN_BG_HINT' | translate | async }}</mat-hint>
+        </mat-form-field>
+
+        <h3 class="theme-section__label">{{ 'THEME_EDIT_SECTION_MEDIA' | translate | async }}</h3>
+        <mat-form-field class="theme-field-full" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'THEME_EDIT_LOGO' | translate | async }}</mat-label>
+          <input matInput formControlName="logo" [placeholder]="('THEME_EDIT_URL_PH' | translate | async) || ''" />
+        </mat-form-field>
+        <div class="theme-media-block">
+          <p class="theme-preview-caption">{{ 'THEME_EDIT_PREVIEW_LOGO' | translate | async }}</p>
+          <div class="theme-preview-frame">
+            @if (imagePreviewSrc('logo'); as logoSrc) {
+              <img class="theme-preview-img theme-preview-img--logo" [src]="logoSrc" alt="" />
+            } @else {
+              <div class="theme-preview-placeholder">{{ 'THEME_EDIT_NO_PREVIEW' | translate | async }}</div>
+            }
+          </div>
+        </div>
+        <div class="theme-upload">
+          <button type="button" mat-stroked-button color="primary" (click)="logoFileInput.click()">
+            {{ 'THEME_EDIT_UPLOAD_LOGO' | translate | async }}
+          </button>
+          <input #logoFileInput type="file" accept="image/*" hidden (change)="onThemeImageUpload('logo', $event)" />
+        </div>
+
+        <mat-form-field class="theme-field-full" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'THEME_EDIT_BANNER' | translate | async }}</mat-label>
+          <input matInput formControlName="promoSlideBackground" [placeholder]="('THEME_EDIT_URL_PH' | translate | async) || ''" />
+        </mat-form-field>
+        <div class="theme-media-block">
+          <p class="theme-preview-caption">{{ 'THEME_EDIT_PREVIEW_BANNER' | translate | async }}</p>
+          <div class="theme-preview-frame theme-preview-frame--wide">
+            @if (imagePreviewSrc('promoSlideBackground'); as bannerSrc) {
+              <img class="theme-preview-img theme-preview-img--banner" [src]="bannerSrc" alt="" />
+            } @else {
+              <div class="theme-preview-placeholder">{{ 'THEME_EDIT_NO_PREVIEW' | translate | async }}</div>
+            }
+          </div>
+        </div>
+        <div class="theme-upload">
+          <button type="button" mat-stroked-button color="primary" (click)="promoFileInput.click()">
+            {{ 'THEME_EDIT_UPLOAD_BANNER' | translate | async }}
+          </button>
+          <input #promoFileInput type="file" accept="image/*" hidden (change)="onThemeImageUpload('promoSlideBackground', $event)" />
+        </div>
+        <p class="theme-hint">{{ 'THEME_EDIT_MEDIA_HINT' | translate | async }}</p>
+
+        <mat-form-field class="theme-field-full" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'THEME_EDIT_VIDEO' | translate | async }}</mat-label>
+          <input matInput formControlName="promoSlideVideo" />
+        </mat-form-field>
+        <mat-form-field class="theme-field-half" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'THEME_EDIT_BANNER_POS' | translate | async }}</mat-label>
+          <mat-select formControlName="promoSlideBackgroundPosition">
+            <mat-option value="center">{{ 'THEME_EDIT_POS_CENTER' | translate | async }}</mat-option>
+            <mat-option value="top">{{ 'THEME_EDIT_POS_TOP' | translate | async }}</mat-option>
+            <mat-option value="bottom">{{ 'THEME_EDIT_POS_BOTTOM' | translate | async }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <h3 class="theme-section__label">{{ 'THEME_EDIT_SECTION_PROMO' | translate | async }}</h3>
+        <div class="theme-two-col">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ 'Show_shipping_promo' | translate | async }}</mat-label>
+            <mat-select formControlName="freeShippingPromo">
+              <mat-option value="none">{{ 'Hide' | translate | async }}</mat-option>
+              <mat-option value="block">{{ 'Show' | translate | async }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ 'Show_promo' | translate | async }}</mat-label>
+            <mat-select formControlName="promo">
+              <mat-option value="none">{{ 'Hide' | translate | async }}</mat-option>
+              <mat-option value="block">{{ 'Show' | translate | async }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <h3 class="theme-section__label">{{ 'THEME_EDIT_SECTION_STATUS' | translate | async }}</h3>
+        <mat-radio-group class="theme-active" aria-label="Active" formControlName="active">
+          <mat-radio-button [value]="true">{{ 'Active' | translate | async }}</mat-radio-button>
+          <mat-radio-button [value]="false">{{ 'Inactive' | translate | async }}</mat-radio-button>
+        </mat-radio-group>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="theme-actions">
+      <button type="button" mat-flat-button color="primary" [disabled]="themesEditForm.invalid" (click)="saveTheme()">
+        {{ 'Save' | translate | async }}
+      </button>
+      <button type="button" mat-stroked-button color="warn" [disabled]="themesEditForm.invalid" (click)="removeTheme()">
+        {{ 'Remove' | translate | async }}
+      </button>
+    </div>
+  </form>
+  }
+</div>
+} @if (sendRequest) {
+<div class="theme-after-send">
+  <span>{{ 'Request_sended' | translate | async }}</span>
+  <button type="button" mat-flat-button color="primary" (click)="sendRequest = !sendRequest">
+    {{ 'Again' | translate | async }}
+  </button>
+</div>
+}

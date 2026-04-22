@@ -1,0 +1,134 @@
+@if (!order) {
+<mat-progress-bar class="order-receipt__loading" mode="indeterminate" />
+} @if (order) {
+<article class="order-receipt">
+  <header class="order-receipt__header">
+    <div class="order-receipt__id-block">
+      <span class="order-receipt__id-label">{{ 'ORDER_RECEIPT_NUMBER' | translate | async }}</span>
+      <span class="order-receipt__id">{{ order.orderId }}</span>
+    </div>
+    <div
+      class="order-receipt__status-pill"
+      [class.order-receipt__status-pill--new]="order.status === 'NEW'"
+      [class.order-receipt__status-pill--paid]="order.status === 'PAID'"
+    >
+      @if (order.status === 'NEW') {
+      <span>{{ 'ORDER_STATUS_NEW' | translate | async }}</span>
+      } @else if (order.status === 'PAID') {
+      <span>{{ 'ORDER_STATUS_PAID' | translate | async }}</span>
+      } @else {
+      <span>{{ order.status }}</span>
+      }
+    </div>
+  </header>
+
+  <section class="order-receipt__panel" aria-labelledby="order-summary-heading">
+    <h3 id="order-summary-heading" class="order-receipt__panel-title">
+      <mat-icon class="order-receipt__title-icon" aria-hidden="true">receipt_long</mat-icon>
+      {{ 'ORDER_RECEIPT_SUMMARY' | translate | async }}
+    </h3>
+    <dl class="order-receipt__dl">
+      <div class="order-receipt__dl-row">
+        <dt>{{ 'Amount' | translate | async }}</dt>
+        <dd>{{ order.amount | priceFormat }} {{ order.currency }}</dd>
+      </div>
+      <div class="order-receipt__dl-row">
+        <dt>{{ 'Customer' | translate | async }}</dt>
+        <dd>{{ order.customerEmail }}</dd>
+      </div>
+      @if (order.customerPhone) {
+      <div class="order-receipt__dl-row">
+        <dt>{{ 'CART_PHONE_LABEL' | translate | async }}</dt>
+        <dd class="order-receipt__dl-row--mono">{{ order.customerPhone }}</dd>
+      </div>
+      }
+      <div class="order-receipt__dl-row">
+        <dt>{{ 'Created' | translate | async }}</dt>
+        <dd>{{ order.dateAdded | date: 'mediumDate' }}</dd>
+      </div>
+      <div class="order-receipt__dl-row">
+        <dt>{{ 'ORDER_PAYMENT_STATUS_LABEL' | translate | async }}</dt>
+        <dd>
+          @if (order.outcome?.seller_message === 'PAYMENT_ON_DELIVERY') {
+          <span class="order-receipt__pill order-receipt__pill--pending">{{ 'ORDER_OUTCOME_PAYMENT_ON_DELIVERY' | translate | async }}</span>
+          } @else if (order.outcome?.seller_message === 'WITH_PAYMENT') {
+          <span class="order-receipt__pill order-receipt__pill--ok">{{ 'ORDER_OUTCOME_WITH_PAYMENT' | translate | async }}</span>
+          } @else {
+          <span>{{ order.outcome?.seller_message }}</span>
+          }
+        </dd>
+      </div>
+      <div class="order-receipt__dl-row order-receipt__dl-row--highlight">
+        <dt>{{ 'Total_price' | translate | async }}</dt>
+        <dd>{{ order.cart?.totalPrice | priceFormat }} {{ order.currency }}</dd>
+      </div>
+      <div class="order-receipt__dl-row">
+        <dt>{{ 'Total_quantity' | translate | async }}</dt>
+        <dd>{{ order.cart?.totalQty }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  @if (order.addresses[0]; as address) {
+  <section class="order-receipt__panel" aria-labelledby="order-ship-heading">
+    <h3 id="order-ship-heading" class="order-receipt__panel-title">
+      <mat-icon class="order-receipt__title-icon" aria-hidden="true">local_shipping</mat-icon>
+      {{ 'ORDER_RECEIPT_SHIPPING' | translate | async }}
+    </h3>
+    <dl class="order-receipt__dl order-receipt__dl--compact">
+      @if (address.name) {
+      <div class="order-receipt__dl-row">
+        <dt>{{ 'Name' | translate | async }}</dt>
+        <dd>{{ address.name }}</dd>
+      </div>
+      }
+      <div class="order-receipt__dl-row">
+        <dt>{{ 'Address' | translate | async }}</dt>
+        <dd>{{ address.line1 }}</dd>
+      </div>
+      <div class="order-receipt__dl-row">
+        <dt>{{ 'City' | translate | async }}</dt>
+        <dd>{{ address.city }}</dd>
+      </div>
+      <div class="order-receipt__dl-row">
+        <dt>{{ 'Country' | translate | async }}</dt>
+        <dd>{{ address.country }}</dd>
+      </div>
+      @if (address.zip) {
+      <div class="order-receipt__dl-row">
+        <dt>{{ 'Zip' | translate | async }}</dt>
+        <dd>{{ address.zip }}</dd>
+      </div>
+      }
+    </dl>
+  </section>
+  }
+
+  <section class="order-receipt__panel order-receipt__panel--lines" aria-labelledby="order-lines-heading">
+    <h3 id="order-lines-heading" class="order-receipt__panel-title">
+      <mat-icon class="order-receipt__title-icon" aria-hidden="true">shopping_bag</mat-icon>
+      {{ 'ORDER_RECEIPT_ITEMS' | translate | async }}
+    </h3>
+    <ul class="order-receipt__lines">
+      @for (cartItem of order.cart?.items; track cartItem.item?._id ?? cartItem.item?.titleUrl ?? $index) {
+      <li class="order-receipt__line">
+        <a class="order-receipt__line-media" [routerLink]="['/' + (lang || 'es') + '/product/' + cartItem?.item?.titleUrl]">
+          <img [src]="cartItem?.item?.mainImage?.url" [alt]="cartItem?.item?.title || ''" width="72" height="90" loading="lazy" />
+        </a>
+        <div class="order-receipt__line-body">
+          <a class="order-receipt__line-title" [routerLink]="['/' + (lang || 'es') + '/product/' + cartItem?.item?.titleUrl]">{{
+            cartItem?.item?.title
+          }}</a>
+          <span class="order-receipt__line-qty">{{ cartItem.qty }} × {{ cartItem.price | priceFormat }}</span>
+        </div>
+        <div class="order-receipt__line-total">{{ cartItem.price * cartItem.qty | priceFormat }}</div>
+      </li>
+      }
+    </ul>
+  </section>
+
+  @if (order?.description) {
+  <p class="order-receipt__note">{{ 'Description' | translate | async }}: {{ order.description }}</p>
+  }
+</article>
+}

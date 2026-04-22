@@ -1,0 +1,24 @@
+:host {
+  display: block;
+
+  .container-mid {
+    background: var(--surface);
+    position: relative;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-sm);
+    margin: clamp(12px, 3vw, 24px) auto;
+    max-width: 720px;
+  }
+
+  .page {
+    margin: clamp(1rem, 3vw, 1.75rem);
+
+    h1 {
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin-top: 0;
+    }
+  }
+}

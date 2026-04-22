@@ -1,0 +1,69 @@
+<div class="dash-shell">
+  <aside class="dash-shell__aside" aria-label="Administración">
+    <div class="dash-shell__brand">
+      <div class="dash-shell__brand-mark" aria-hidden="true">SJ</div>
+      <div class="dash-shell__brand-text">
+        <span class="dash-shell__brand-title">AURA</span>
+        <span class="dash-shell__brand-sub">Admin</span>
+      </div>
+    </div>
+
+    <nav class="dash-nav">
+      @if (lang$ | async; as lang) {
+        <div class="dash-nav__group">
+          <span class="dash-nav__group-label">{{ 'DASH_NAV_GROUP_MAIN' | translate | async }}</span>
+          <a
+            class="dash-nav__link"
+            routerLink="./"
+            routerLinkActive="dash-nav__link--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            <mat-icon>dashboard</mat-icon>
+            <span>{{ 'DASH_NAV_OVERVIEW' | translate | async }}</span>
+          </a>
+          <a class="dash-nav__link" [routerLink]="['/', lang, 'dashboard', 'catalog']" routerLinkActive="dash-nav__link--active">
+            <mat-icon>inventory_2</mat-icon>
+            <span>{{ 'DASH_NAV_CATALOG' | translate | async }}</span>
+          </a>
+          <a class="dash-nav__link" [routerLink]="['/', lang, 'dashboard', 'orders']" routerLinkActive="dash-nav__link--active">
+            <mat-icon>receipt_long</mat-icon>
+            <span>{{ 'DASH_NAV_ORDERS' | translate | async }}</span>
+          </a>
+          <a class="dash-nav__link" [routerLink]="['/', lang, 'dashboard', 'product-add']" routerLinkActive="dash-nav__link--active">
+            <mat-icon>add_box</mat-icon>
+            <span>{{ 'DASH_NAV_PRODUCT_ADD' | translate | async }}</span>
+          </a>
+        </div>
+
+        <div class="dash-nav__group">
+          <span class="dash-nav__group-label">{{ 'DASH_NAV_GROUP_CONTENT' | translate | async }}</span>
+          <a class="dash-nav__link" [routerLink]="['/', lang, 'dashboard', 'categories']" routerLinkActive="dash-nav__link--active">
+            <mat-icon>category</mat-icon>
+            <span>{{ 'DASH_NAV_CATEGORIES' | translate | async }}</span>
+          </a>
+          <a class="dash-nav__link" [routerLink]="['/', lang, 'dashboard', 'translations']" routerLinkActive="dash-nav__link--active">
+            <mat-icon>translate</mat-icon>
+            <span>{{ 'DASH_NAV_TRANSLATIONS' | translate | async }}</span>
+          </a>
+          <a class="dash-nav__link" [routerLink]="['/', lang, 'dashboard', 'theme']" routerLinkActive="dash-nav__link--active">
+            <mat-icon>palette</mat-icon>
+            <span>{{ 'DASH_NAV_THEME' | translate | async }}</span>
+          </a>
+        </div>
+
+      }
+    </nav>
+  </aside>
+
+  <main class="dash-shell__main">
+    @if (lang$ | async; as langMain) {
+      <div class="dash-shell__topbar">
+        <a class="dash-shell__store" [routerLink]="['/', langMain, 'product', 'all']">
+          <mat-icon>storefront</mat-icon>
+          <span>{{ 'DASH_NAV_STORE' | translate | async }}</span>
+        </a>
+      </div>
+      <router-outlet></router-outlet>
+    }
+  </main>
+</div>

@@ -1,0 +1,241 @@
+:host {
+  display: block;
+  max-width: 52rem;
+}
+
+.theme-page__head {
+  margin-bottom: 1.5rem;
+}
+
+.theme-page__title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.25rem, 2.2vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #18181b;
+}
+
+.theme-page__lead {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: #71717a;
+  max-width: 36rem;
+}
+
+.theme-card {
+  margin-bottom: 1rem;
+  border-radius: 0.65rem !important;
+  border-color: #e4e4e7 !important;
+}
+
+.theme-card__content {
+  padding-top: 0.25rem !important;
+}
+
+::ng-deep .theme-card .mat-mdc-card-header {
+  padding-bottom: 0.25rem;
+}
+
+::ng-deep .theme-card .mat-mdc-card-title {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: #18181b !important;
+}
+
+::ng-deep .theme-card .mat-mdc-card-subtitle {
+  font-size: 0.8125rem !important;
+  color: #a1a1aa !important;
+  margin-top: 0.2rem !important;
+}
+
+.theme-pick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.75rem 1rem;
+}
+
+.theme-pick__field {
+  flex: 1 1 12rem;
+  min-width: 0;
+
+  &--wide {
+    flex: 1 1 100%;
+  }
+}
+
+.theme-pick__create {
+  margin-top: 0.125rem;
+  align-self: flex-start;
+  border-radius: 0.5rem !important;
+}
+
+.theme-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.theme-section__label {
+  margin: 1.25rem 0 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #a1a1aa;
+
+  &:first-of-type {
+    margin-top: 0;
+  }
+}
+
+.theme-color-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+
+  @media (min-width: 560px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.theme-color-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.theme-swatch {
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e4e4e7;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.theme-field-full {
+  width: 100%;
+}
+
+.theme-field-half {
+  width: 100%;
+  max-width: 20rem;
+}
+
+.theme-upload {
+  margin: -0.25rem 0 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.theme-hint {
+  margin: 0 0 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: #71717a;
+}
+
+.theme-media-block {
+  margin: 0.35rem 0 0.5rem;
+}
+
+.theme-preview-caption {
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #a1a1aa;
+}
+
+.theme-preview-frame {
+  border: 1px dashed #d4d4d8;
+  border-radius: 0.5rem;
+  background: #fafafa;
+  min-height: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  &--wide {
+    min-height: 7rem;
+  }
+}
+
+.theme-preview-img {
+  max-width: 100%;
+  object-fit: contain;
+
+  &--logo {
+    max-height: 4.5rem;
+    padding: 0.5rem;
+  }
+
+  &--banner {
+    width: 100%;
+    max-height: 10rem;
+    object-fit: cover;
+  }
+}
+
+.theme-preview-placeholder {
+  padding: 1rem 1.25rem;
+  font-size: 0.8125rem;
+  color: #a1a1aa;
+  text-align: center;
+}
+
+.theme-two-col {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+
+  @media (min-width: 520px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.theme-active {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+}
+
+.theme-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.25rem 0 1.5rem;
+}
+
+.theme-actions .mat-mdc-unelevated-button,
+.theme-actions .mat-mdc-outlined-button {
+  border-radius: 0.5rem !important;
+  min-width: 7.5rem;
+}
+
+.theme-after-send {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 0;
+}
+
+::ng-deep .theme-page .mat-mdc-form-field.mat-form-field-appearance-outline {
+  .mat-mdc-text-field-wrapper {
+    background: #fafafa;
+  }
+
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: #e4e4e7;
+  }
+}
+
+::ng-deep .theme-page .mat-mdc-radio-button ~ .mat-mdc-radio-button {
+  margin-left: 0;
+}

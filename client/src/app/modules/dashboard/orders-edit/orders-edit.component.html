@@ -1,0 +1,13 @@
+@if (orders$()?.length) {
+  <app-orders-list
+    [orders]="orders$()"
+    [orderUrl]="'/' + (lang$ | async) + '/dashboard/orders/'"
+    [allowStatusChange]="true"
+    [currentLang]="(lang$ | async) || 'es'"
+  >
+  </app-orders-list>
+} @else {
+  <div class="orders-edit-empty">
+    <p>{{ 'DASH_ORDERS_EMPTY' | translate | async }}</p>
+  </div>
+}

@@ -1,0 +1,115 @@
+<div class="account-page">
+  <div class="account-page__ambient" aria-hidden="true"></div>
+
+  <div class="container account-page__wrap">
+    <header class="account-page__intro">
+      <span class="account-page__kicker">{{ 'PROFILE_PAGE_KICKER' | translate | async }}</span>
+      <h1 class="account-page__title">{{ 'PROFILE_PAGE_TITLE' | translate | async }}</h1>
+      <p class="account-page__lead">{{ 'PROFILE_PAGE_LEAD' | translate | async }}</p>
+    </header>
+
+    <div class="account-page__panels">
+      @if (user(); as u) {
+        <section class="account-card" aria-labelledby="account-summary-title">
+          <h2 id="account-summary-title" class="account-card__title">
+            <mat-icon aria-hidden="true">badge</mat-icon>
+            {{ 'PROFILE_SUMMARY_TITLE' | translate | async }}
+          </h2>
+          <dl class="account-dl">
+            <div class="account-dl__row">
+              <dt>{{ 'PROFILE_EMAIL' | translate | async }}</dt>
+              <dd>{{ u.email }}</dd>
+            </div>
+            <div class="account-dl__row">
+              <dt>{{ 'PROFILE_USER_ID' | translate | async }}</dt>
+              <dd class="account-dl__mono">{{ u.id }}</dd>
+            </div>
+            <div class="account-dl__row">
+              <dt>{{ 'PROFILE_LOYALTY' | translate | async }}</dt>
+              <dd>
+                <span class="account-loyalty">{{ u.loyaltyPoints ?? 0 }}</span>
+                {{ 'LOYALTY_NAV_POINTS' | translate | async }}
+              </dd>
+            </div>
+            <div class="account-dl__row account-dl__row--stack">
+              <dt>{{ 'PROFILE_ROLES' | translate | async }}</dt>
+              <dd>
+                @if (u.roles?.length) {
+                  <ul class="account-roles">
+                    @for (role of u.roles; track role) {
+                      <li class="account-chip">
+                        @if (role === 'admin') {
+                          {{ 'PROFILE_ROLE_ADMIN' | translate | async }}
+                        } @else {
+                          {{ role }}
+                        }
+                      </li>
+                    }
+                  </ul>
+                } @else {
+                  <span class="account-muted">{{ 'PROFILE_ROLE_SHOPPER' | translate | async }}</span>
+                }
+              </dd>
+            </div>
+          </dl>
+
+          <nav class="account-links" [attr.aria-label]="('PROFILE_QUICK_NAV' | translate | async) || ''">
+            @if (lang$ | async; as lang) {
+              <a
+                mat-stroked-button
+                color="primary"
+                [routerLink]="u.roles?.includes('admin') ? ['/', lang, 'dashboard', 'orders'] : ['/', lang, 'orders']"
+              >
+                <mat-icon>assignment</mat-icon>
+                {{ 'Orders' | translate | async }}
+              </a>
+              <a mat-stroked-button [routerLink]="['/', lang, 'product', 'all']">
+                <mat-icon>storefront</mat-icon>
+                {{ 'PROFILE_LINK_CATALOG' | translate | async }}
+              </a>
+              @if (u.roles?.includes('admin')) {
+                <a mat-stroked-button [routerLink]="['/', lang, 'dashboard']">
+                  <mat-icon>dashboard</mat-icon>
+                  {{ 'Dashboard' | translate | async }}
+                </a>
+              }
+            }
+          </nav>
+
+          <div class="account-session">
+            <button mat-stroked-button color="warn" type="button" class="account-session__btn" (click)="signOut()">
+              <mat-icon aria-hidden="true">logout</mat-icon>
+              {{ 'PROFILE_SIGN_OUT' | translate | async }}
+            </button>
+            <p class="account-session__hint">{{ 'PROFILE_SIGN_OUT_HINT' | translate | async }}</p>
+          </div>
+        </section>
+
+        <section class="account-card" aria-labelledby="account-edit-title">
+          <h2 id="account-edit-title" class="account-card__title">
+            <mat-icon aria-hidden="true">edit</mat-icon>
+            {{ 'PROFILE_EDIT_TITLE' | translate | async }}
+          </h2>
+          <form class="account-form" [formGroup]="profileForm" (ngSubmit)="saveName()" novalidate>
+            <mat-form-field class="account-form__field" appearance="outline" subscriptSizing="dynamic">
+              <mat-label>{{ 'AUTH_FIELD_NAME' | translate | async }}</mat-label>
+              <input matInput type="text" formControlName="name" name="displayName" autocomplete="name" />
+              @if (profileForm.get('name')?.hasError('maxlength')) {
+                <mat-error>{{ 'AUTH_NAME_TOO_LONG' | translate | async }}</mat-error>
+              }
+            </mat-form-field>
+            <div class="account-form__actions">
+              <button mat-flat-button color="primary" type="submit" [disabled]="saving()">
+                @if (saving()) {
+                  <mat-spinner diameter="20" />
+                } @else {
+                  {{ 'PROFILE_SAVE' | translate | async }}
+                }
+              </button>
+            </div>
+          </form>
+        </section>
+      }
+    </div>
+  </div>
+</div>

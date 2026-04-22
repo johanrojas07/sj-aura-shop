@@ -1,0 +1,13 @@
+{
+  "hosting": {
+    "site": "ecommerce-afcfb-db103",
+    "public": "dist/eshop/browser",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "eshop": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "client",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": "dist/eshop",
+            "index": "client/src/index.html",
+            "browser": "client/src/main.ts",
+            "polyfills": [],
+            "tsConfig": "client/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "client/src/assets",
+                "output": "assets"
+              },
+              {
+                "glob": "favicon.ico",
+                "input": "client/src",
+                "output": "."
+              },
+              {
+                "glob": "manifest.webmanifest",
+                "input": "client/src",
+                "output": "."
+              }
+            ],
+            "styles": [
+              "client/src/assets/fonts/material-icons/material-icons.css",
+              "client/src/styles/index.scss"
+            ],
+            "externalDependencies": [
+              "@nestjs/microservices",
+              "@nestjs/microservices/microservices-module",
+              "@nestjs/websockets",
+              "@nestjs/websockets/socket-module",
+              "cache-manager",
+              "whatwg-url"
+            ],
+            "scripts": [],
+            "server": "client/src/main.server.ts",
+            "prerender": false,
+            "ssr": {
+              "entry": "server-ssr.ts"
+            }
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "38kb",
+                  "maximumError": "45kb"
+                }
+              ],
+              "outputHashing": "all",
+              "fileReplacements": [
+                {
+                  "replace": "client/src/environments/environment.ts",
+                  "with": "client/src/environments/environment.prod.ts"
+                }
+              ]
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "port": 3000
+          },
+          "configurations": {
+            "production": {
+              "buildTarget": "eshop:build:production"
+            },
+            "development": {
+              "buildTarget": "eshop:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular/build:extract-i18n",
+          "options": {
+            "buildTarget": "eshop:build"
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "client/**/*.ts",
+              "client/**/*.html"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "schematicCollections": [
+      "@angular-eslint/schematics"
+    ]
+  }
+}

@@ -1,0 +1,224 @@
+:host {
+  display: block;
+}
+
+.account-page {
+  position: relative;
+  padding: clamp(1.5rem, 5vw, 3rem) 0 clamp(2rem, 5vw, 3.5rem);
+  overflow: hidden;
+
+  &__ambient {
+    position: absolute;
+    inset: -35% -15% auto;
+    height: 65%;
+    max-height: 480px;
+    background:
+      radial-gradient(ellipse 75% 55% at 15% 10%, rgba(129, 140, 248, 0.14), transparent 55%),
+      radial-gradient(ellipse 65% 45% at 90% 5%, rgba(34, 211, 238, 0.09), transparent 48%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding-left: clamp(16px, 4vw, 24px);
+    padding-right: clamp(16px, 4vw, 24px);
+  }
+
+  &__wrap {
+    position: relative;
+    z-index: 1;
+  }
+
+  &__intro {
+    margin-bottom: clamp(1.25rem, 3vw, 2rem);
+  }
+
+  &__kicker {
+    display: inline-block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(99, 102, 241, 0.95);
+    margin-bottom: 0.5rem;
+  }
+
+  &__title {
+    margin: 0 0 0.65rem;
+    font-size: clamp(1.5rem, 3vw, 1.95rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--text-primary, #0f172a);
+  }
+
+  &__lead {
+    margin: 0;
+    max-width: 52ch;
+    font-size: 0.98rem;
+    line-height: 1.55;
+    color: var(--text-secondary, #475569);
+  }
+
+  &__panels {
+    display: grid;
+    gap: clamp(1rem, 2.5vw, 1.5rem);
+    grid-template-columns: 1fr;
+
+    @media (min-width: 840px) {
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+  }
+}
+
+.account-card {
+  border-radius: var(--radius-xl, 20px);
+  padding: clamp(1.1rem, 2.5vw, 1.5rem);
+  background: var(--surface, #fff);
+  border: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 18px 40px rgba(15, 23, 42, 0.06);
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0 0 1rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary, #0f172a);
+
+    mat-icon {
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+      color: rgba(99, 102, 241, 0.9);
+    }
+  }
+}
+
+.account-dl {
+  margin: 0;
+
+  &__row {
+    display: grid;
+    grid-template-columns: minmax(0, 38%) 1fr;
+    gap: 0.35rem 1rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+
+    &--stack {
+      grid-template-columns: 1fr;
+    }
+
+    dt {
+      margin: 0;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-secondary, #64748b);
+    }
+
+    dd {
+      margin: 0;
+      font-size: 0.95rem;
+      color: var(--text-primary, #0f172a);
+      word-break: break-word;
+    }
+  }
+
+  &__mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.82rem;
+  }
+}
+
+.account-loyalty {
+  font-weight: 800;
+  color: rgba(184, 61, 111, 0.95);
+}
+
+.account-muted {
+  color: var(--text-secondary, #64748b);
+  font-size: 0.92rem;
+}
+
+.account-roles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.account-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  background: rgba(99, 102, 241, 0.1);
+  color: rgba(67, 56, 202, 0.95);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.account-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.15rem;
+
+  a mat-icon {
+    margin-right: 0.35rem;
+    vertical-align: middle;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.account-session {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
+}
+
+.account-session__btn {
+  border-radius: 12px !important;
+}
+
+.account-session__btn mat-icon {
+  margin-right: 0.35rem;
+  vertical-align: middle;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.account-session__hint {
+  margin: 0.65rem 0 0;
+  max-width: 42ch;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-secondary, #64748b);
+}
+
+.account-form {
+  &__field {
+    width: 100%;
+  }
+
+  &__actions {
+    margin-top: 0.5rem;
+  }
+
+  button[type='submit'] {
+    min-width: 140px;
+  }
+}

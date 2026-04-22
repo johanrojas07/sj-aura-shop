@@ -1,0 +1,67 @@
+<div class="auth-page">
+  <div class="auth-page__ambient" aria-hidden="true"></div>
+
+  <div class="container auth-page__wrap">
+    <header class="auth-page__intro">
+      <span class="auth-page__kicker">{{ 'AUTH_PAGE_KICKER' | translate | async }}</span>
+      <h1 class="auth-page__title">{{ 'SignIn' | translate | async }}</h1>
+      <p class="auth-page__lead">{{ 'AUTH_SIGNIN_LEAD' | translate | async }}</p>
+    </header>
+
+    <div class="auth-page__panel">
+      @if (authError(); as errKey) {
+        <div class="auth-page__alert auth-page__alert--error" role="alert">
+          <span>{{ errKey | translate | async }}</span>
+          <button type="button" class="auth-page__alert-dismiss" (click)="dismissError()">
+            {{ 'AUTH_DISMISS_ERROR' | translate | async }}
+          </button>
+        </div>
+      }
+
+      <form class="auth-page__form" [formGroup]="signInForm" (ngSubmit)="submit()" novalidate>
+        <mat-form-field class="auth-page__field" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'AUTH_FIELD_EMAIL' | translate | async }}</mat-label>
+          <input matInput type="email" formControlName="email" name="email" autocomplete="email" />
+          @if (signInForm.get('email')?.invalid && signInForm.get('email')?.touched) {
+            <mat-error>{{ 'AUTH_ERR_INVALID_EMAIL' | translate | async }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field class="auth-page__field" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'AUTH_FIELD_PASSWORD' | translate | async }}</mat-label>
+          <input matInput type="password" formControlName="password" name="password" autocomplete="current-password" />
+          <mat-hint>{{ 'AUTH_FIELD_PASSWORD_HINT' | translate | async }}</mat-hint>
+          @if (signInForm.get('password')?.hasError('required') && signInForm.get('password')?.touched) {
+            <mat-error>{{ 'AUTH_PASSWORD_REQUIRED' | translate | async }}</mat-error>
+          }
+          @if (signInForm.get('password')?.hasError('minlength') && signInForm.get('password')?.touched) {
+            <mat-error>{{ 'AUTH_ERR_WEAK_PASSWORD' | translate | async }}</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="auth-page__actions">
+          <button
+            type="submit"
+            class="auth-page__submit"
+            mat-flat-button
+            color="primary"
+            [disabled]="signInForm.invalid || (loading$ | async)"
+          >
+            @if (loading$ | async) {
+              <mat-spinner diameter="20" />
+              <span>{{ 'AUTH_LOADING' | translate | async }}</span>
+            } @else {
+              {{ 'AUTH_SUBMIT_SIGNIN' | translate | async }}
+            }
+          </button>
+        </div>
+      </form>
+
+      <p class="auth-page__switch">
+        <a class="auth-page__switch-link" [routerLink]="['/' + (lang$ | async) + '/authorize/signup']">
+          {{ 'AUTH_GO_SIGNUP' | translate | async }}
+        </a>
+      </p>
+    </div>
+  </div>
+</div>

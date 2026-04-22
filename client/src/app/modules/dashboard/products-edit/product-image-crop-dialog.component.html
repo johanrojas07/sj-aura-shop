@@ -1,0 +1,45 @@
+<h2 mat-dialog-title>
+  <mat-icon class="dialog-title-icon" aria-hidden="true">photo_size_select_large</mat-icon>
+  {{ 'PRODUCT_IMG_CROP_TITLE' | translate | async }}
+</h2>
+
+<mat-dialog-content class="img-crop-dlg__body">
+  <p class="img-crop-dlg__intro">{{ 'PRODUCT_IMG_CROP_INTRO' | translate | async }}</p>
+  <p class="img-crop-dlg__name">{{ file.name }}</p>
+  <div class="img-crop-dlg__frame">
+    <canvas #previewCanvas class="img-crop-dlg__canvas" width="280" height="374"></canvas>
+  </div>
+  <div class="img-crop-dlg__zoom">
+    <mat-icon aria-hidden="true">zoom_in</mat-icon>
+    <mat-slider
+      class="img-crop-dlg__slider"
+      [min]="minZoom"
+      [max]="maxZoom"
+      [step]="step"
+    >
+      <input matSliderThumb [(ngModel)]="zoom" (ngModelChange)="onZoomChange()" />
+    </mat-slider>
+  </div>
+  <p class="img-crop-dlg__hint">{{ 'PRODUCT_IMG_CROP_ZOOM_HINT' | translate | async }}</p>
+</mat-dialog-content>
+
+<mat-dialog-actions class="img-crop-dlg__actions" align="end">
+  <button mat-stroked-button type="button" (click)="cancel()">{{ 'PRODUCT_IMG_CROP_CANCEL' | translate | async }}</button>
+  <button mat-stroked-button type="button" (click)="useOriginal()">
+    {{ 'PRODUCT_IMG_CROP_USE_ORIGINAL' | translate | async }}
+  </button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    [disabled]="busy"
+    (click)="applyCropped()"
+  >
+    @if (busy) {
+      <mat-spinner diameter="20" />
+    } @else {
+      <mat-icon>check</mat-icon>
+    }
+    {{ 'PRODUCT_IMG_CROP_APPLY' | translate | async }}
+  </button>
+</mat-dialog-actions>

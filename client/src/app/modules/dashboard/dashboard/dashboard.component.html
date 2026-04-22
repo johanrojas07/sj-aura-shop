@@ -1,0 +1,134 @@
+<div class="dash-home">
+  <header class="dash-home__hero">
+    <h1 class="dash-home__title">{{ 'DASH_HOME_TITLE' | translate | async }}</h1>
+    <p class="dash-home__lead">{{ 'DASH_HOME_LEAD' | translate | async }}</p>
+  </header>
+
+  @if (stats(); as s) {
+    <section class="dash-overview" aria-labelledby="dash-overview-title">
+      <h2 id="dash-overview-title" class="dash-overview__title">{{ 'DASH_STATS_TITLE' | translate | async }}</h2>
+      <p class="dash-overview__subtitle">{{ 'DASH_STATS_SUBTITLE' | translate | async }}</p>
+
+      <div class="dash-stat-grid">
+        <mat-card class="dash-stat-card" appearance="outlined">
+          <mat-card-content>
+            <div class="dash-stat-card__icon" aria-hidden="true"><mat-icon>inventory_2</mat-icon></div>
+            <div class="dash-stat-card__value">{{ s.productCount }}</div>
+            <div class="dash-stat-card__label">{{ 'DASH_STATS_PRODUCTS' | translate | async }}</div>
+            <div class="dash-stat-card__hint">{{ s.visibleProductCount }} {{ 'DASH_STATS_VISIBLE' | translate | async }}</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="dash-stat-card" appearance="outlined">
+          <mat-card-content>
+            <div class="dash-stat-card__icon" aria-hidden="true"><mat-icon>category</mat-icon></div>
+            <div class="dash-stat-card__value">{{ s.categoryCount }}</div>
+            <div class="dash-stat-card__label">{{ 'DASH_STATS_CATEGORIES' | translate | async }}</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="dash-stat-card" appearance="outlined">
+          <mat-card-content>
+            <div class="dash-stat-card__icon" aria-hidden="true"><mat-icon>warehouse</mat-icon></div>
+            <div class="dash-stat-card__value">{{ s.totalStockUnits }}</div>
+            <div class="dash-stat-card__label">{{ 'DASH_STATS_STOCK_UNITS' | translate | async }}</div>
+            @if (s.lowStockCount > 0) {
+              <div class="dash-stat-card__warn">{{ 'DASH_STATS_LOW_STOCK' | translate | async }}: {{ s.lowStockCount }}</div>
+            }
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="dash-stat-card" appearance="outlined">
+          <mat-card-content>
+            <div class="dash-stat-card__icon" aria-hidden="true"><mat-icon>receipt_long</mat-icon></div>
+            @if (!s.ordersFetched) {
+              <mat-spinner diameter="28" class="dash-stat-card__spinner" />
+            } @else {
+              <div class="dash-stat-card__value">{{ s.orderCount }}</div>
+              <div class="dash-stat-card__label">{{ 'DASH_STATS_ORDERS' | translate | async }}</div>
+              <div class="dash-stat-card__hint">{{ 'DASH_STATS_REVENUE_COMPLETED' | translate | async }}: {{ s.revenueCompleted | priceFormat }}</div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="dash-analytics-strip">
+        <div class="dash-analytics-strip__icon" aria-hidden="true">
+          <mat-icon>insights</mat-icon>
+        </div>
+        <div class="dash-analytics-strip__copy">
+          <span class="dash-analytics-strip__title">{{ 'DASH_STATS_TRAFFIC_TITLE' | translate | async }}</span>
+          <p class="dash-analytics-strip__body">{{ 'DASH_STATS_TRAFFIC_BODY' | translate | async }}</p>
+        </div>
+        <a
+          class="dash-analytics-strip__cta"
+          href="https://analytics.google.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {{ 'DASH_STATS_TRAFFIC_LINK' | translate | async }}
+          <mat-icon>open_in_new</mat-icon>
+        </a>
+      </div>
+    </section>
+  }
+
+  @if (lang$ | async; as lang) {
+    <h2 class="dash-home__nav-title">{{ 'DASH_HOME_NAV_TITLE' | translate | async }}</h2>
+    <div class="dash-home__grid" role="navigation" aria-label="Admin shortcuts">
+      <a class="dash-tile" [routerLink]="['/', lang, 'dashboard', 'catalog']">
+        <span class="dash-tile__icon" aria-hidden="true"><mat-icon>inventory_2</mat-icon></span>
+        <span class="dash-tile__body">
+          <span class="dash-tile__title">{{ 'DASH_NAV_CATALOG' | translate | async }}</span>
+          <span class="dash-tile__desc">{{ 'DASH_HOME_CARD_CATALOG' | translate | async }}</span>
+        </span>
+        <mat-icon class="dash-tile__chevron" aria-hidden="true">chevron_right</mat-icon>
+      </a>
+
+      <a class="dash-tile" [routerLink]="['/', lang, 'dashboard', 'orders']">
+        <span class="dash-tile__icon" aria-hidden="true"><mat-icon>receipt_long</mat-icon></span>
+        <span class="dash-tile__body">
+          <span class="dash-tile__title">{{ 'DASH_NAV_ORDERS' | translate | async }}</span>
+          <span class="dash-tile__desc">{{ 'DASH_HOME_CARD_ORDERS' | translate | async }}</span>
+        </span>
+        <mat-icon class="dash-tile__chevron" aria-hidden="true">chevron_right</mat-icon>
+      </a>
+
+      <a class="dash-tile" [routerLink]="['/', lang, 'dashboard', 'product-add']">
+        <span class="dash-tile__icon" aria-hidden="true"><mat-icon>add_box</mat-icon></span>
+        <span class="dash-tile__body">
+          <span class="dash-tile__title">{{ 'DASH_NAV_PRODUCT_ADD' | translate | async }}</span>
+          <span class="dash-tile__desc">{{ 'DASH_HOME_CARD_ADD' | translate | async }}</span>
+        </span>
+        <mat-icon class="dash-tile__chevron" aria-hidden="true">chevron_right</mat-icon>
+      </a>
+
+      <a class="dash-tile" [routerLink]="['/', lang, 'dashboard', 'categories']">
+        <span class="dash-tile__icon" aria-hidden="true"><mat-icon>category</mat-icon></span>
+        <span class="dash-tile__body">
+          <span class="dash-tile__title">{{ 'DASH_NAV_CATEGORIES' | translate | async }}</span>
+          <span class="dash-tile__desc">{{ 'DASH_HOME_CARD_CATEGORIES' | translate | async }}</span>
+        </span>
+        <mat-icon class="dash-tile__chevron" aria-hidden="true">chevron_right</mat-icon>
+      </a>
+
+      <a class="dash-tile" [routerLink]="['/', lang, 'dashboard', 'translations']">
+        <span class="dash-tile__icon" aria-hidden="true"><mat-icon>translate</mat-icon></span>
+        <span class="dash-tile__body">
+          <span class="dash-tile__title">{{ 'DASH_NAV_TRANSLATIONS' | translate | async }}</span>
+          <span class="dash-tile__desc">{{ 'DASH_HOME_CARD_TRANSLATIONS' | translate | async }}</span>
+        </span>
+        <mat-icon class="dash-tile__chevron" aria-hidden="true">chevron_right</mat-icon>
+      </a>
+
+      <a class="dash-tile" [routerLink]="['/', lang, 'dashboard', 'theme']">
+        <span class="dash-tile__icon" aria-hidden="true"><mat-icon>palette</mat-icon></span>
+        <span class="dash-tile__body">
+          <span class="dash-tile__title">{{ 'DASH_NAV_THEME' | translate | async }}</span>
+          <span class="dash-tile__desc">{{ 'DASH_HOME_CARD_THEME' | translate | async }}</span>
+        </span>
+        <mat-icon class="dash-tile__chevron" aria-hidden="true">chevron_right</mat-icon>
+      </a>
+    </div>
+  }
+</div>

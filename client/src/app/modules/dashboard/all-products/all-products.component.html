@@ -1,0 +1,88 @@
+@if (productsList().length) {
+  <div class="catalog-sort-bar">
+    <mat-form-field class="catalog-sort-bar__field" appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ 'DASH_CATALOG_SORT_LABEL' | translate | async }}</mat-label>
+      <mat-select [(ngModel)]="catalogSort" name="catalogSort">
+        <mat-option value="name-asc">{{ 'DASH_CATALOG_SORT_NAME_ASC' | translate | async }}</mat-option>
+        <mat-option value="name-desc">{{ 'DASH_CATALOG_SORT_NAME_DESC' | translate | async }}</mat-option>
+        <mat-option value="stock-asc">{{ 'DASH_CATALOG_SORT_STOCK_ASC' | translate | async }}</mat-option>
+        <mat-option value="stock-desc">{{ 'DASH_CATALOG_SORT_STOCK_DESC' | translate | async }}</mat-option>
+        <mat-option value="price-asc">{{ 'DASH_CATALOG_SORT_PRICE_ASC' | translate | async }}</mat-option>
+        <mat-option value="price-desc">{{ 'DASH_CATALOG_SORT_PRICE_DESC' | translate | async }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div class="catalog-toolbar catalog-toolbar--top">
+    <mat-form-field class="catalog-toolbar__search" appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ 'DASH_CATALOG_SEARCH_LABEL' | translate | async }}</mat-label>
+      <input matInput [(ngModel)]="catalogSearch" name="catalogSearch" [placeholder]="('DASH_CATALOG_SEARCH_PLH' | translate | async) || ''" />
+      @if (catalogSearch) {
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="catalogSearch = ''"
+          [attr.aria-label]="('DASH_CATALOG_SEARCH_CLEAR' | translate | async) || ''"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </mat-form-field>
+    @if (!embeddedMode && categorySelectOptions().length) {
+      <mat-form-field class="catalog-toolbar__category" appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ 'DASH_CATALOG_CATEGORY_LABEL' | translate | async }}</mat-label>
+        <mat-select [(ngModel)]="catalogCategory" name="catalogCategory">
+          <mat-option value="">{{ 'DASH_CATALOG_CATEGORY_ALL' | translate | async }}</mat-option>
+          @for (c of categorySelectOptions(); track c.titleUrl) {
+            <mat-option [value]="c.titleUrl">{{ c.title }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+    <button mat-stroked-button color="primary" type="button" class="catalog-toolbar__new" (click)="goToNewProduct()">
+      <mat-icon>add</mat-icon>
+      {{ 'DASH_CATALOG_NEW_PRODUCT' | translate | async }}
+    </button>
+    <div class="catalog-toolbar__spacer" aria-hidden="true"></div>
+    <button class="catalog-toolbar__refresh" (click)="refresh()" mat-flat-button color="primary" type="button">
+      {{ 'Refresh' | translate | async }}
+    </button>
+    <mat-button-toggle-group
+      class="catalog-toolbar__views"
+      [value]="viewMode"
+      (change)="onCatalogViewChange($event)"
+      appearance="standard"
+      [attr.aria-label]="('DASH_CATALOG_VIEW_LABEL' | translate | async) || ''"
+    >
+      <mat-button-toggle [value]="'list'" [matTooltip]="'DASH_CATALOG_VIEW_LIST' | translate | async" matTooltipPosition="below">
+        <mat-icon>view_list</mat-icon>
+      </mat-button-toggle>
+      <mat-button-toggle [value]="'grid'" [matTooltip]="'DASH_CATALOG_VIEW_GRID' | translate | async" matTooltipPosition="below">
+        <mat-icon>grid_view</mat-icon>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+  @if (visibleProducts().length) {
+    <app-products-list
+      [products]="visibleProducts()"
+      [lang]="langVal()"
+      [showEdit]="true"
+      [adminMode]="true"
+      [layout]="viewMode"
+      [currency]="currencyVal()"
+      (editProduct)="onEdit($event)"
+      (stockAdjust)="openStockDialog($event)"
+    >
+    </app-products-list>
+  } @else {
+    <p class="all-products-no-match">{{ 'DASH_CATALOG_NO_MATCH' | translate | async }}</p>
+  }
+} @else {
+  <div class="catalog-toolbar catalog-toolbar--empty">
+    <button mat-stroked-button color="primary" type="button" class="catalog-toolbar__new" (click)="goToNewProduct()">
+      <mat-icon>add</mat-icon>
+      {{ 'DASH_CATALOG_NEW_PRODUCT' | translate | async }}
+    </button>
+  </div>
+  <p class="all-products-empty">{{ 'DASH_CATALOG_EMPTY' | translate | async }}</p>
+}
