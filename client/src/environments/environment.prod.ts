@@ -1,12 +1,16 @@
 import { firebaseWebConfig } from './firebase-web.config';
 
-const apiPublic = 'https://sj-aura-api-three.vercel.app';
+/**
+ * API en Render (Web Service). Tras el deploy, la URL en Render (p. ej. `https://sj-aura-api.onrender.com`) debe
+ * coincidir. Si en Render usas otro *service name*, cambia esta constante.
+ * CORS: en el panel de Render, variable `ORIGIN` = `siteUrl` (Firebase) + `.web.app` / `firebaseapp.com` si aplica.
+ */
+const apiPublic = 'https://sj-aura-api.onrender.com';
 
 export const environment = {
   production: true,
   /**
-   * API Nest (Vercel), sin barra final. CORS: en Vercel define ORIGIN = URL de esta app en Firebase
-   * (misma que `siteUrl` + custom domain si aplica), separado por comas.
+   * API Nest (Render o similar), sin barra final. En Render, `ORIGIN` con la URL pública de esta tienda.
    */
   apiUrl: apiPublic,
   /** Para SSR, mismas peticiones al API. */

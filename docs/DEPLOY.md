@@ -37,19 +37,26 @@ Notas: las funciones usan límite de memoria y tiempo; `vercel.json` ajusta `max
 
 **504 / `FUNCTION_INVOCATION_TIMEOUT` (Vercel):** el *cold start* de Nest en serverless a menudo **supera el tope** que impone el plan. En **Hobby** el *timeout* de función ronda **10 s**; `maxDuration: 60` en `vercel.json` **sólo tiene efecto con plan Pro** (y, en el panel, *Settings → Functions →* **Function Max Duration** debe coincidir). CORS en el navegador con 504 es el típico error secundario (el *gateway* no añade CORS a la respuesta de timeout). El front ya encadena *config* y *traducciones* en el arranque. **Rutas sin quedarse en 504:** (A) [Vercel Pro](https://vercel.com/docs/plans) + 60 s + opc. *min instances* 1, o (B) API en **Render** (abajo).
 
-## 2b. API (Nest) en [Render](https://render.com) (alternativa sin límite 10s)
+## 2b. API (Nest) en [Render](https://render.com) (recomendado: sin tope 10s de Vercel Hobby)
 
-En la raíz del repo: `render.yaml`. Evita el modelo serverless estricto: el proceso hace `node server/dist/main.js` y atiende hasta el **sleep** del plan *free*.
+En la raíz del repo está `render.yaml` (Build: `npm install && npm run build:server` · Start: `node server/dist/main.js`).
 
-1. Crea cuenta en [Render](https://render.com) → **New** → *Blueprint* (importa el `render.yaml`) o *Web Service* (conecta el repo `sj-aura-shop`, misma *build* / *start* que en el yaml).
-2. Añade las **mismas** variables de entorno que en Vercel: `ORIGIN` (tus `https://…web.app`), `FIREBASE_SERVICE_ACCOUNT` (JSON), `COOKIE_KEY`, `FIREBASE_PROJECT_ID`, etc. Añade **`CROSS_SITE_COOKIES=1`** (el front y el API en dominios distintos: cookies; ya está de ejemplo en `render.yaml`).
-3. Tras el deploy, copia la URL pública (`https://sj-aura-api.onrender.com` o similar) y pégala en `client/src/environments/environment.prod.ts` como `apiUrl` (y en `prerenderUrl` si aplica). Vuelve a `npm run deploy:hosting`.
-4. *Free* puede poner el servicio en *sleep* tras inactividad: la **primera** visita tarda mientras el dyno se despierta (puede ser 30 s–1 min); luego responde normal. Plan de pago desactiva el *sleep*.
+1. Cuenta en [render.com](https://render.com) (GitHub).
+2. **New** → **Blueprint** → conecta el repo `johanrojas07/sj-aura-shop` (o *Web Service* y los mismos comandos que en el yaml). Deja el **nombre** del servicio si quieres `sj-aura-api` (la URL será `https://sj-aura-api.onrender.com`; si el nombre ya existe, elige otro y luego ajusta `apiUrl` en el front).
+3. En el servicio → **Environment** → añade (mismas claves que en Vercel):
+   - **`ORIGIN`** — `https://ecommerce-afcfb-db103.web.app,https://ecommerce-afcfb-db103.firebaseapp.com` (o solo la `.web.app` si basta; sin barra final).
+   - **`FIREBASE_SERVICE_ACCOUNT`** — el JSON de la cuenta de servicio, **en una sola línea** (minificado).
+   - **`COOKIE_KEY`** — la misma cadena larga que en Vercel.
+   - Opcional: `FIREBASE_PROJECT_ID`, `FIRESTORE_DATABASE_ID`, Stripe, SendGrid, etc., si las usas.
+   - **`CROSS_SITE_COOKIES=1`** — ya suele fijar el blueprint; el API no está en `vercel.app` pero el front y el back siguen en dominios distintos, así que las cookies de sesión y `SameSite` son correctas (ver `setAppDB.ts`).
+4. **Deploy** y espera a que pase *build* (varios minutos el primero). Prueba en el navegador: `https://<tu-servicio>.onrender.com/api/eshop/config` (o `GET /api/health/firebase` para comprobar Firestore). Tras el arranque debería responder 200, no 504.
+5. **Front:** en `client/src/environments/environment.prod.ts` ya se usa por defecto `https://sj-aura-api.onrender.com`; cámbialo si tu URL de Render es otra. Luego: `npm run deploy:hosting`.
+6. **Plan free:** el servicio puede **dormir** sin tráfico; el **primer** acceso tarda 30s–1 min. Plan de pago o “always on” la evita.
 
 ## 3. Front (Angular) en Firebase Hosting
 
 1. En `client/src/environments/environment.prod.ts`, rellena:
-   - `apiUrl` — URL pública de la API en Vercel (sin `/` al final), p. ej. `https://<proyecto>.vercel.app`
+   - `apiUrl` y `prerenderUrl` — URL pública de la **API** (p. ej. `https://sj-aura-api.onrender.com` en Render; sin barra al final)
    - `siteUrl` — URL pública del sitio (Firebase: `https://<id>.web.app` o custom domain)
 2. Construcción y despliegue (el script de tu `package.json` apunta a un *site* concreto):
 
@@ -59,11 +66,11 @@ En la raíz del repo: `render.yaml`. Evita el modelo serverless estricto: el pro
 
    Comprueba en `firebase.json` el *site* de hosting; si hace falta, alinea con tu proyecto en la consola Firebase o usa `firebase target:apply hosting <alias> <site>`.
 
-3. CORS: en el panel de Vercel → *Environment Variables* del proyecto `sj-aura-api-three`, añade **`ORIGIN`** con al menos: `https://ecommerce-afcfb-db103.web.app` (y el dominio custom si lo conectas), separado por comas. Sin eso, el front en Firebase no podrá llamar al API por CORS.
+3. CORS: el valor de **`ORIGIN`** en el back (Vercel o **Render**) debe listar el dominio de esta tienda en Firebase (`https://…web.app` y, si aplica, `…firebaseapp.com` o custom). Sin eso, el navegador bloquea las peticiones al API.
 
 ## 4. Sesión (cookies) entre Front y API en dominios distintos
 
-Front en Firebase y API en Vercel = **cross-site**: en el servidor, con `VERCEL=1` las cookies de sesión usan `SameSite=none` y `Secure` (ver `setAppDB.ts`). Todo debe ser **HTTPS** en producción. Si en desarrollo hace falta otro criterio, documenta o usa `CROSS_SITE_COOKIES` según el código.
+Front (Firebase) y API en otro dominio (Vercel o **Render**): **cross-site**. En el servidor, `VERCEL=1` o **`CROSS_SITE_COOKIES=1`** hace que la cookie de sesión use `SameSite=none` y `Secure` (ver `setAppDB.ts`). Todo en **HTTPS** en producción.
 
 ## 5. Referencias
 
