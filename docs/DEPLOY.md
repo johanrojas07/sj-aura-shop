@@ -24,7 +24,8 @@ Si el remoto ya existe, usa: `git remote set-url origin https://github.com/johan
    - **Output Directory:** `public` (carpeta mínima con `index.html` para que Vercel acepte el despliegue; el tráfico sigue yendo a la API con las reglas de `vercel.json`).
 3. Añade **variables de entorno** (Production y Preview según toque), al menos:
    - `ORIGIN` — orígenes del front, separados por comas, por ejemplo: `https://TU-PROYECTO.web.app,https://tudominio.com`
-   - Mismas claves que en local: `COOKIE_KEY`, credenciales Firebase Admin (las que ya uses en el servidor: JSON o variables), Stripe, `NODE_ENV=production` si aplica, etc.
+   - **`FIREBASE_SERVICE_ACCOUNT`** (obligatoria en Vercel) — el JSON de la cuenta de servicio, en **una sola línea** (o minificado). En entornos sin clave, el Admin SDK puede colgar o dar 504 en el primer acceso a Firestore.
+   - Mismas claves que en local: `COOKIE_KEY`, `FIREBASE_PROJECT_ID` si hace falta, Stripe, `NODE_ENV=production` si aplica, etc. (O `GOOGLE_APPLICATION_CREDENTIALS` apuntando a un archivo empaquetado en el despliegue, en vez del JSON en env.)
 4. Tras el despligue, anota la URL: `https://<proyecto>.vercel.app`.
 
 Notas: las funciones usan límite de memoria y tiempo; `vercel.json` ajusta `maxDuration` y `includeFiles` del build `server/dist/`. En local, `node server/dist/main` sigue sirviendo para probar el API clásico.

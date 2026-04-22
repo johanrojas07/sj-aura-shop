@@ -12,6 +12,23 @@ export class FirebaseService implements OnModuleInit {
   private initOk = false;
 
   onModuleInit(): void {
+    const isVercel = process.env.VERCEL === '1' || Boolean(process.env.VERCEL);
+    const hasGacFile = Boolean(
+      (process.env.GOOGLE_APPLICATION_CREDENTIALS || '').trim(),
+    );
+    const hasServiceAccountJson = Boolean(
+      (process.env.FIREBASE_SERVICE_ACCOUNT || '').trim(),
+    );
+    const hasExplicitCredential = hasServiceAccountJson || hasGacFile;
+    /* En Vercel, applicationDefault() sin clave termina con ADC que no aplica: la 1.ª operación
+     * a Firestore puede colgar o tardar > timeout del serverless (504) y CORS falsa. */
+    if (isVercel && !hasExplicitCredential) {
+      this.initOk = false;
+      this.logger.error(
+        '[Firebase] Vercel: define FIREBASE_SERVICE_ACCOUNT (JSON de la cuenta de servicio) o GOOGLE_APPLICATION_CREDENTIALS. Sin eso, no se usa el SDK.',
+      );
+      return;
+    }
     try {
       if (admin.apps.length === 0) {
         const keyPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
