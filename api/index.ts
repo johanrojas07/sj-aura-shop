@@ -114,6 +114,34 @@ function setCorsHeaders(
   }
 }
 
+function pathFromRequest(req: import('http').IncomingMessage): string {
+  const u = req.url || '/';
+  return (u.split('?')[0] || '/').split('#')[0] || '/';
+}
+
+function isFaviconGet(req: import('http').IncomingMessage): boolean {
+  if (req.method !== 'GET') {
+    return false;
+  }
+  const p = pathFromRequest(req);
+  return p === '/favicon.ico' || p === '/favicon.png' || p.endsWith('/favicon.ico');
+}
+
+/** Responde sin levantar Nest: útil para comprobar en Vercel que el *runtime* y `api/index` viven. */
+function isLivenessGet(req: import('http').IncomingMessage): boolean {
+  if (req.method !== 'GET') {
+    return false;
+  }
+  const p = pathFromRequest(req);
+  if (p === '/api/health' || p === '/health' || p.endsWith('/api/health')) {
+    return true;
+  }
+  if (p === '/api/ping' || p.endsWith('/api/ping')) {
+    return true;
+  }
+  return false;
+}
+
 function getHandler(): Promise<H> {
   if (!handlerPromise) {
     handlerPromise = (async () => {
@@ -153,6 +181,36 @@ export default async (req: import('http').IncomingMessage, res: import('http').S
         corsOriginOk: ro ? Boolean(reflectedOrigin(ro)) : null,
       }),
     );
+  }
+  if (isFaviconGet(req)) {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+  if (isLivenessGet(req)) {
+    if (process.env.VERCEL || process.env.VERCEL === '1') {
+      // eslint-disable-next-line no-console
+      console.log('[sj-aura:api] liveness 200 (sin Nest) url=' + (req.url || ''));
+    }
+    setCorsHeaders(req, res);
+    if (!res.getHeader('Access-Control-Allow-Origin')) {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+    }
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-store');
+    res.writeHead(200);
+    res.end(
+      JSON.stringify({
+        ok: true,
+        name: 'sj-aura-api',
+        nest: 'not-loaded',
+        where: 'api/index (bypass Nest; solo comprueba Vercel + CORS básico)',
+        time: new Date().toISOString(),
+        vercelRegion: process.env.VERCEL_REGION || null,
+        node: process.version,
+      }),
+    );
+    return;
   }
   /* Preflight sin levantar Nest: evita timeout en 1.ª carga mientras congela el cold start. */
   if (req.method === 'OPTIONS') {
