@@ -3,6 +3,7 @@ import { provideServerRendering, withRoutes, RenderMode } from '@angular/ssr';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { appConfig } from './app.config';
+import { environment } from '../environments/environment';
 
 /**
  * Todas las URLs en SSR (sin SSG en build). Evita que el extractor de rutas
@@ -11,6 +12,10 @@ import { appConfig } from './app.config';
  */
 const serverConfig: ApplicationConfig = {
   providers: [
+    {
+      provide: 'serverUrl',
+      useValue: (environment.apiUrl && String(environment.apiUrl).trim()) || environment.prerenderUrl || '',
+    },
     provideServerRendering(
       withRoutes([{ path: '**', renderMode: RenderMode.Server }]),
     ),

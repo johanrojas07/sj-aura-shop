@@ -4,9 +4,12 @@
  */
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 const serverless = require('serverless-http') as (app: import('express').Application) => import('http').RequestListener;
+// Sin tipos de @nestjs/core aquí: el compilador de Vercel a veces no resuelve INestApplication.
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 const { createNestServer } = require('../server/dist/bootstrap.js') as {
-  createNestServer: () => Promise<import('@nestjs/core').INestApplication>;
+  createNestServer: () => Promise<{
+    getHttpAdapter: () => { getInstance: () => import('express').Application };
+  }>;
 };
 
 type H = (req: import('http').IncomingMessage, res: import('http').ServerResponse) => void;

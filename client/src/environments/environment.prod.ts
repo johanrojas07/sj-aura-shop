@@ -1,16 +1,18 @@
 import { firebaseWebConfig } from './firebase-web.config';
 
+const apiPublic = 'https://sj-aura-api-three.vercel.app';
+
 export const environment = {
   production: true,
   /**
-   * URL pública del API (Nest en Vercel), sin barra final. Ej.: https://sj-aura-api.vercel.app
-   * Debe coincidir con CORS (ORIGIN en Vercel = tu dominio de Firebase + custom).
-   * Vacío = mismo origen que el front (solo si el API se sirve junto al front con proxy).
+   * API Nest (Vercel), sin barra final. CORS: en Vercel define ORIGIN = URL de esta app en Firebase
+   * (misma que `siteUrl` + custom domain si aplica), separado por comas.
    */
-  apiUrl: '',
-  prerenderUrl: '',
-  /** Sustituir por el dominio de Firebase Hosting (https://…web.app) para JSON-LD y og. */
-  siteUrl: '',
+  apiUrl: apiPublic,
+  /** Para SSR, mismas peticiones al API. */
+  prerenderUrl: apiPublic,
+  /** URL pública de esta tienda (Firebase Hosting `firebase.json` → site ecommerce-afcfb-db103). */
+  siteUrl: 'https://ecommerce-afcfb-db103.web.app',
   /** Misma app web que en dev (Angular reemplaza este archivo en `ng build --configuration=production`). */
   firebase: firebaseWebConfig,
 };

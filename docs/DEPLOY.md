@@ -42,7 +42,7 @@ Notas: las funciones usan límite de memoria y tiempo; `vercel.json` ajusta `max
 
    Comprueba en `firebase.json` el *site* de hosting; si hace falta, alinea con tu proyecto en la consola Firebase o usa `firebase target:apply hosting <alias> <site>`.
 
-3. CORS: la API debe aceptar el `ORIGIN` exacto del front (puntos `www` y sin `www` distintos).
+3. CORS: en el panel de Vercel → *Environment Variables* del proyecto `sj-aura-api-three`, añade **`ORIGIN`** con al menos: `https://ecommerce-afcfb-db103.web.app` (y el dominio custom si lo conectas), separado por comas. Sin eso, el front en Firebase no podrá llamar al API por CORS.
 
 ## 4. Sesión (cookies) entre Front y API en dominios distintos
 

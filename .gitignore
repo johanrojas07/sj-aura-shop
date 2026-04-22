@@ -84,6 +84,9 @@ server/dist
 # Vercel
 .vercel
 
+# Firebase CLI caché local
+.firebase/
+
 # TernJS port file
 .tern-port
 

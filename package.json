@@ -33,7 +33,7 @@
     "build:ssr": "cross-env NODE_ENV=production ng build --configuration production",
     "build:ssr:clean": "ng cache clean && cross-env NODE_ENV=production ng build --configuration production",
     "prepare:firebase-hosting": "node scripts/prepare-firebase-hosting.cjs",
-    "deploy:hosting": "npm run build:ssr && npm run prepare:firebase-hosting && firebase deploy --only hosting:ecommerce-afcfb-db103",
+    "deploy:hosting": "npm run build:ssr && npm run prepare:firebase-hosting && npx firebase deploy --only hosting:ecommerce-afcfb-db103",
     "serve:client:prod": "ng serve --configuration production",
     "lint:client": "ng lint",
     "lint:scss": "stylelint **/**.scss --formatter verbose",
