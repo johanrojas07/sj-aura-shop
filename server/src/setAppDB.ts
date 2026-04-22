@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
@@ -59,5 +60,12 @@ export const setAppDB = (app: NestExpressApplication): void => {
       /** true: la cookie de sesión se guarda desde la primera petición (p. ej. GET /api/cart), evitando carrito “nuevo” en cada visita. */
       saveUninitialized: true,
     }),
+  );
+
+  new Logger('SJ AURA').log(
+    `CORS: orígenes en lista (${allowOrigins.length}): ${allowOrigins.join(', ')}. Sesión cross-site: ${
+      isCrossSite ? 'Sí (SameSite=none + Secure si aplica)' : 'No (modo Lax/localhost).'
+    } COOKIE_KEY: ${(process.env.COOKIE_KEY || '').trim() ? 'definida' : 'falta (revisar en producción).'
+    }`,
   );
 };

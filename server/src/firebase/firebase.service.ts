@@ -25,7 +25,7 @@ export class FirebaseService implements OnModuleInit {
     if (isVercel && !hasExplicitCredential) {
       this.initOk = false;
       this.logger.error(
-        '[Firebase] Vercel: define FIREBASE_SERVICE_ACCOUNT (JSON de la cuenta de servicio) o GOOGLE_APPLICATION_CREDENTIALS. Sin eso, no se usa el SDK.',
+        '[SJ AURA] Firebase: NO conectado — en Vercel faltan FIREBASE_SERVICE_ACCOUNT o GOOGLE_APPLICATION_CREDENTIALS. Sin eso el SDK no arranca.',
       );
       return;
     }
@@ -65,7 +65,7 @@ export class FirebaseService implements OnModuleInit {
           ...(storageBucket && { storageBucket }),
         });
         this.logger.log(
-          `[Firebase] Inicializado (credenciales: ${credentialSource}, projectId: ${projectId ?? 'del JSON'})`,
+          `[SJ AURA] Firebase Admin: SDK inicializado (credenciales: ${credentialSource}, projectId: ${projectId ?? 'del JSON'})`,
         );
       }
       const databaseId = process.env.FIRESTORE_DATABASE_ID || '(default)';
@@ -75,7 +75,7 @@ export class FirebaseService implements OnModuleInit {
     } catch (err: unknown) {
       this.initOk = false;
       const message = err instanceof Error ? err.message : String(err);
-      this.logger.error(`[Firebase] Error al inicializar: ${message}`);
+      this.logger.error(`[SJ AURA] Firebase: error al inicializar el SDK — ${message}`);
     }
   }
 
