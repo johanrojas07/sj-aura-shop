@@ -4,6 +4,28 @@ import * as admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
 import * as path from 'path';
 
+/**
+ * Puede haber varias bases en un mismo proyecto. La por defecto se llama `(default)`.
+ * Si al crear la base elegiste un nombre (p. ej. `ecommerce`), la consola muestra
+ * `.../firestore/databases/ecommerce/...` — entonces hace falta `FIRESTORE_DATABASE_ID=ecommerce`.
+ * `default` sin paréntesis se mapea a `(default)`; no confundir con nombres propios de base.
+ */
+function resolveFirestoreDatabaseId(
+  envValue: string | undefined,
+  log?: (msg: string) => void,
+): string {
+  const t = (envValue ?? '').trim();
+  if (!t || t === 'default' || t === '(default)') {
+    if (t === 'default') {
+      log?.(
+        'FIRESTORE_DATABASE_ID=default mapeado a (default) — en Firestore el id de la base por defecto es el literal "(default)".',
+      );
+    }
+    return '(default)';
+  }
+  return t;
+}
+
 @Injectable()
 export class FirebaseService implements OnModuleInit {
   private readonly logger = new Logger(FirebaseService.name);
@@ -68,10 +90,14 @@ export class FirebaseService implements OnModuleInit {
           `[SJ AURA] Firebase Admin: SDK inicializado (credenciales: ${credentialSource}, projectId: ${projectId ?? 'del JSON'})`,
         );
       }
-      const databaseId = process.env.FIRESTORE_DATABASE_ID || '(default)';
+      const databaseId = resolveFirestoreDatabaseId(
+        process.env.FIRESTORE_DATABASE_ID,
+        (m) => this.logger.warn(m),
+      );
       this._firestore = getFirestore(admin.app(), databaseId);
       this._auth = admin.auth();
       this.initOk = true;
+      this.logger.log(`[SJ AURA] Firestore: conectando a databaseId=${databaseId}`);
     } catch (err: unknown) {
       this.initOk = false;
       const message = err instanceof Error ? err.message : String(err);
@@ -181,10 +207,12 @@ export class FirebaseService implements OnModuleInit {
           process.env.FIREBASE_PROJECT_ID ||
           process.env.GCLOUD_PROJECT ||
           'tu-proyecto';
-        const dbId = process.env.FIRESTORE_DATABASE_ID || '(default)';
+        const dbId = resolveFirestoreDatabaseId(
+          process.env.FIRESTORE_DATABASE_ID,
+        );
         return {
           ok: false,
-          message: `Firestore no encontrado (databaseId=${dbId}). Crea la base en la consola: https://console.firebase.google.com/project/${projectId}/firestore`,
+          message: `Firestore no encontrado (databaseId=${dbId}, NOT_FOUND). Si en la consola el path es .../databases/ecommerce/... o similar, fija en el servidor FIRESTORE_DATABASE_ID con ese nombre (p. ej. ecommerce). O crea o elige la base: https://console.firebase.google.com/project/${projectId}/firestore`,
         };
       }
       if (message.includes('PERMISSION_DENIED') || message.includes('403')) {
