@@ -16,21 +16,32 @@ type H = (req: import('http').IncomingMessage, res: import('http').ServerRespons
 
 let handlerPromise: Promise<H> | null = null;
 
-/** CORS: coincide con orígenes en `ORIGIN` (Vercel). */
-function reflectedOrigin(
-  requestOrigin: string | undefined,
-): string | null {
+function normalizePublicOrigin(s: string): string {
+  return s.trim().replace(/\/$/, '').toLowerCase();
+}
+
+const localOriginRe = /^https?:\/\/(localhost|127\.0.0\.1)(:\d+)?$/i;
+
+/**
+ * CORS: coincide con `ORIGIN` en Vercel (misma lógica que en `setAppDB`).
+ * Puedes añadir .web.app y .firebaseapp.com separados por comas.
+ */
+function reflectedOrigin(requestOrigin: string | undefined): string | null {
   if (!requestOrigin) {
     return null;
   }
-  const allowed = (process.env.ORIGIN || '')
-    .split(',')
-    .map((o) => o.trim())
-    .filter(Boolean);
-  if (allowed.includes(requestOrigin)) {
+  const nReq = normalizePublicOrigin(requestOrigin);
+  if (localOriginRe.test(nReq)) {
     return requestOrigin;
   }
-  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(requestOrigin)) {
+  const allowed = (process.env.ORIGIN || '')
+    .split(',')
+    .map((o) => normalizePublicOrigin(o))
+    .filter(Boolean);
+  if (allowed.length === 0) {
+    return null;
+  }
+  if (allowed.includes(nReq)) {
     return requestOrigin;
   }
   return null;
@@ -40,18 +51,26 @@ function setCorsHeaders(
   req: import('http').IncomingMessage,
   res: import('http').ServerResponse,
 ): void {
-  const o = reflectedOrigin(
-    Array.isArray(req.headers.origin) ? req.headers.origin[0] : req.headers.origin,
-  );
+  const rawOrigin = (
+    Array.isArray(req.headers.origin) ? req.headers.origin[0] : req.headers.origin
+  ) as string | undefined;
+  const o = reflectedOrigin(rawOrigin);
   if (o) {
     res.setHeader('Access-Control-Allow-Origin', o);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
   }
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Authorization,Content-Type,lang,Accept,Accept-Language',
-  );
+  const reqHead = req.headers['access-control-request-headers'];
+  const rch = typeof reqHead === 'string' ? reqHead : Array.isArray(reqHead) ? reqHead[0] : '';
+  if (rch) {
+    res.setHeader('Access-Control-Allow-Headers', rch);
+  } else {
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      'Authorization,Content-Type,lang,Accept,Accept-Language,X-Requested-With',
+    );
+  }
 }
 
 function getHandler(): Promise<H> {

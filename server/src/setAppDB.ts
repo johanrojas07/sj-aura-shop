@@ -25,10 +25,22 @@ export const setAppDB = (app: NestExpressApplication): void => {
       '[CORS] ORIGIN no está definido. Las peticiones desde el front (p. ej. Firebase) se bloquean en el navegador. En Vercel, define ORIGIN con la URL de tu app (p. ej. https://ecommerce-….web.app).',
     );
   }
+  const normalizePublicOrigin = (s: string) => s.trim().replace(/\/$/, '').toLowerCase();
+  const allowNorm = allowOrigins.map((o) => normalizePublicOrigin(o));
+  const localHostRe = /^https?:\/\/(localhost|127\.0.0\.1)(:\d+)?$/i;
   app.use(
     cors({
       credentials: true,
-      origin: allowOrigins,
+      origin: (requestOrigin, callback) => {
+        if (!requestOrigin) {
+          return callback(null, true);
+        }
+        const n = normalizePublicOrigin(requestOrigin);
+        if (localHostRe.test(n) || allowNorm.includes(n)) {
+          return callback(null, true);
+        }
+        return callback(null, false);
+      },
     }),
   );
 
