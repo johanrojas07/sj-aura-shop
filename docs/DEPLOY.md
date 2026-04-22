@@ -27,6 +27,7 @@ Si el remoto ya existe, usa: `git remote set-url origin https://github.com/johan
    - **`FIREBASE_SERVICE_ACCOUNT`** (obligatoria en Vercel) — el JSON de la cuenta de servicio, en **una sola línea** (o minificado). En entornos sin clave, el Admin SDK puede colgar o dar 504 en el primer acceso a Firestore.
    - Mismas claves que en local: `COOKIE_KEY`, `FIREBASE_PROJECT_ID` si hace falta, Stripe, `NODE_ENV=production` si aplica, etc. (O `GOOGLE_APPLICATION_CREDENTIALS` apuntando a un archivo empaquetado en el despliegue, en vez del JSON en env.)
 4. Tras el despligue, anota la URL: `https://<proyecto>.vercel.app`.
+5. **Límites en `vercel.json` (Hobby):** memoria y duración de función no pueden ser las de Pro (p. ej. 3008 MB o 60 s) o el *deploy* falla. En el repo van **1024 MB** y **10 s**; con **Vercel Pro** puedes subir en *Project → Settings → Functions* `Max Duration` (hasta 60+ s) y memoria, o ajusta `vercel.json` a esos valores solo si el plan lo permite.
 
 Notas: las funciones usan límite de memoria y tiempo; `vercel.json` ajusta `maxDuration` y `includeFiles` del build `server/dist/`. En local, `node server/dist/main` sigue sirviendo para probar el API clásico.
 
