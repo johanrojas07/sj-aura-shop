@@ -5,23 +5,31 @@ import { getFirestore } from 'firebase-admin/firestore';
 import * as path from 'path';
 
 /**
- * Puede haber varias bases en un mismo proyecto. La por defecto se llama `(default)`.
- * Si al crear la base elegiste un nombre (p. ej. `ecommerce`), la consola muestra
- * `.../firestore/databases/ecommerce/...` — entonces hace falta `FIRESTORE_DATABASE_ID=ecommerce`.
- * `default` sin paréntesis se mapea a `(default)`; no confundir con nombres propios de base.
+ * Varias bases por proyecto. Sin `FIRESTORE_DATABASE_ID` este repo asume `ecommerce`
+ * (mismo criterio que `server/.env.example`). En servicios viejos de Render, `render.yaml` no
+ * aplica: sin eso, antes se caía a `(default)` y NOT_FOUND. Para la base nativa: defínela explícitamente
+ * `FIRESTORE_DATABASE_ID=(default)`.
+ * `FIRESTORE_DATABASE_ID=default` (sin paréntesis) se mapea a `(default)`.
  */
 function resolveFirestoreDatabaseId(
   envValue: string | undefined,
   log?: (msg: string) => void,
 ): string {
   const t = (envValue ?? '').trim();
-  if (!t || t === 'default' || t === '(default)') {
-    if (t === 'default') {
-      log?.(
-        'FIRESTORE_DATABASE_ID=default mapeado a (default) — en Firestore el id de la base por defecto es el literal "(default)".',
-      );
-    }
+  if (t === 'default') {
+    log?.(
+      'FIRESTORE_DATABASE_ID=default mapeado a (default) — el id de la base nativa es el literal "(default)".',
+    );
     return '(default)';
+  }
+  if (t === '(default)') {
+    return '(default)';
+  }
+  if (!t) {
+    log?.(
+      'FIRESTORE_DATABASE_ID vacío: usando "ecommerce". Para solo la base (default) define FIRESTORE_DATABASE_ID=(default).',
+    );
+    return 'ecommerce';
   }
   return t;
 }

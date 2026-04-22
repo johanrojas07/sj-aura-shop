@@ -1009,7 +1009,8 @@ async function uploadProductImagesOnly() {
     });
   }
 
-  const dbId = process.env.FIRESTORE_DATABASE_ID || '(default)';
+  const dbId =
+    (process.env.FIRESTORE_DATABASE_ID || '').trim() || 'ecommerce';
   const db = getFirestore(admin.app(), dbId);
 
   const storageBucket = await resolveStorageBucketNameOrNull();
@@ -1089,7 +1090,8 @@ async function main() {
     });
   }
 
-  const dbId = process.env.FIRESTORE_DATABASE_ID || '(default)';
+  const dbId =
+    (process.env.FIRESTORE_DATABASE_ID || '').trim() || 'ecommerce';
   const db = getFirestore(admin.app(), dbId);
 
   const skipStorageUpload = process.argv.includes('--no-storage-upload');
