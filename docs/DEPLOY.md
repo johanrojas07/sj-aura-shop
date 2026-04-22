@@ -32,7 +32,16 @@ Notas: las funciones usan límite de memoria y tiempo; `vercel.json` ajusta `max
 
 **Logs de diagnóstico (Vercel → Runtime / Functions):** en cada *cold start* el handler imprime `[sj-aura:api] boot env` (orígenes permitidos, si hay JSON de Firebase sin el contenido, `COOKIE_KEY` solo “set: true/false”, región) y, tras levantar Nest, `[sj-aura:api] createNestServer ok, ms` con el tiempo de arranque. Opcional: en variables de entorno añade `SJ_AURA_LOG_REQUESTS=1` (Production) para un log por petición con `method`, `url`, `origin` y si CORS hace match.
 
-**504 en `GET` pero `OPTIONS` 204:** el preflight (CORS) responde sin levantar Nest; el `GET` sí arranca Nest + Firestore. Cuando Vercel devuelve 504, el *gateway* a menudo no incluye CORS, y el navegador muestra “CORS” aunque el fallo de fondo sea el *timeout*. En el plan **Hobby** el tiempo máximo de *serverless* suele estar **capped a ~10 s**; el `maxDuration: 60` de `vercel.json` aplica con **Pro** o superior. Un *cold start* de Nest a menudo pasa 10 s; además, muchas peticiones al API en **paralelo** multiplican instancias frías. El front ahora carga *config* y luego *traducciones* en **serie** en el arranque. Opciones: subir a **Pro** (límite 60 s, opción mín. 1 instancia), o desplegar el API en un servicio *always-on* (p. ej. Render/Railway).
+**504 / `FUNCTION_INVOCATION_TIMEOUT` (Vercel):** el *cold start* de Nest en serverless a menudo **supera el tope** que impone el plan. En **Hobby** el *timeout* de función ronda **10 s**; `maxDuration: 60` en `vercel.json` **sólo tiene efecto con plan Pro** (y, en el panel, *Settings → Functions →* **Function Max Duration** debe coincidir). CORS en el navegador con 504 es el típico error secundario (el *gateway* no añade CORS a la respuesta de timeout). El front ya encadena *config* y *traducciones* en el arranque. **Rutas sin quedarse en 504:** (A) [Vercel Pro](https://vercel.com/docs/plans) + 60 s + opc. *min instances* 1, o (B) API en **Render** (abajo).
+
+## 2b. API (Nest) en [Render](https://render.com) (alternativa sin límite 10s)
+
+En la raíz del repo: `render.yaml`. Evita el modelo serverless estricto: el proceso hace `node server/dist/main.js` y atiende hasta el **sleep** del plan *free*.
+
+1. Crea cuenta en [Render](https://render.com) → **New** → *Blueprint* (importa el `render.yaml`) o *Web Service* (conecta el repo `sj-aura-shop`, misma *build* / *start* que en el yaml).
+2. Añade las **mismas** variables de entorno que en Vercel: `ORIGIN` (tus `https://…web.app`), `FIREBASE_SERVICE_ACCOUNT` (JSON), `COOKIE_KEY`, `FIREBASE_PROJECT_ID`, etc. Añade **`CROSS_SITE_COOKIES=1`** (el front y el API en dominios distintos: cookies; ya está de ejemplo en `render.yaml`).
+3. Tras el deploy, copia la URL pública (`https://sj-aura-api.onrender.com` o similar) y pégala en `client/src/environments/environment.prod.ts` como `apiUrl` (y en `prerenderUrl` si aplica). Vuelve a `npm run deploy:hosting`.
+4. *Free* puede poner el servicio en *sleep* tras inactividad: la **primera** visita tarda mientras el dyno se despierta (puede ser 30 s–1 min); luego responde normal. Plan de pago desactiva el *sleep*.
 
 ## 3. Front (Angular) en Firebase Hosting
 

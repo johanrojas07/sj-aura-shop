@@ -1,0 +1,19 @@
+# API Nest como Web Service (proceso Node, sin límite de 10s de serverless en Hobby).
+# En Render: New + Blueprint → conecta el repo, o Web Service con este root.
+# Tras el deploy, copia la URL pública (https://…onrender.com) a client/.../environment.prod.ts → apiUrl.
+# Variables de entorno: las mismas que en Vercel (ORIGIN, FIREBASE_SERVICE_ACCOUNT, COOKIE_KEY, …)
+# y CROSS_SITE_COOKIES=1 (cookies con el front en otro dominio; ver setAppDB.ts).
+
+services:
+  - type: web
+    name: sj-aura-api
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build:server
+    startCommand: node server/dist/main.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CROSS_SITE_COOKIES
+        value: "1"
