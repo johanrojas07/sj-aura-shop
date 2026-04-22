@@ -42,21 +42,22 @@ Notas: las funciones usan límite de memoria y tiempo; `vercel.json` ajusta `max
 En la raíz del repo está `render.yaml` (Build: `npm install && npm run build:server` · Start: `node server/dist/main.js`).
 
 1. Cuenta en [render.com](https://render.com) (GitHub).
-2. **New** → **Blueprint** → conecta el repo `johanrojas07/sj-aura-shop` (o *Web Service* y los mismos comandos que en el yaml). Deja el **nombre** del servicio si quieres `sj-aura-api` (la URL será `https://sj-aura-api.onrender.com`; si el nombre ya existe, elige otro y luego ajusta `apiUrl` en el front).
-3. En el servicio → **Environment** → añade (mismas claves que en Vercel):
+2. **No uses Docker** para este API si el panel te ofrece *Language: Docker* con el repo tal cual: el `Dockerfile` de la raíz compila el **SSR** de Angular, no el Nest. Elige **Node** o, mejor, **New → Blueprint** e importa el `render.yaml` (build `npm install && npm run build:server`, start `node server/dist/main.js`).
+3. Nombre del servicio (p. ej. `sj-aura-shop`): la URL pública será `https://<nombre>.onrender.com` — debe coincidir con `apiUrl` en `client/.../environment.prod.ts`.
+4. En el servicio → **Environment** → añade (mismas claves que en Vercel):
    - **`ORIGIN`** — `https://ecommerce-afcfb-db103.web.app,https://ecommerce-afcfb-db103.firebaseapp.com` (o solo la `.web.app` si basta; sin barra final).
    - **`FIREBASE_SERVICE_ACCOUNT`** — el JSON de la cuenta de servicio, **en una sola línea** (minificado).
    - **`COOKIE_KEY`** — la misma cadena larga que en Vercel.
    - Opcional: `FIREBASE_PROJECT_ID`, `FIRESTORE_DATABASE_ID`, Stripe, SendGrid, etc., si las usas.
    - **`CROSS_SITE_COOKIES=1`** — ya suele fijar el blueprint; el API no está en `vercel.app` pero el front y el back siguen en dominios distintos, así que las cookies de sesión y `SameSite` son correctas (ver `setAppDB.ts`).
-4. **Deploy** y espera a que pase *build* (varios minutos el primero). Prueba en el navegador: `https://<tu-servicio>.onrender.com/api/eshop/config` (o `GET /api/health/firebase` para comprobar Firestore). Tras el arranque debería responder 200, no 504.
-5. **Front:** en `client/src/environments/environment.prod.ts` ya se usa por defecto `https://sj-aura-api.onrender.com`; cámbialo si tu URL de Render es otra. Luego: `npm run deploy:hosting`.
-6. **Plan free:** el servicio puede **dormir** sin tráfico; el **primer** acceso tarda 30s–1 min. Plan de pago o “always on” la evita.
+5. **Deploy** y espera a que pase *build* (varios minutos el primero). Prueba: `https://<tu-servicio>.onrender.com/api/eshop/config` o `GET /api/health/firebase` (Firebase). Tras el arranque debería ser 200, no 504.
+6. **Front:** en `environment.prod.ts` usa la misma URL `https://<tu-servicio>.onrender.com` en `apiUrl` y `prerenderUrl`; luego `npm run deploy:hosting`.
+7. **Plan free:** el servicio puede **dormir**; el primer acceso puede tardar. Plan de pago evita el *sleep*.
 
 ## 3. Front (Angular) en Firebase Hosting
 
 1. En `client/src/environments/environment.prod.ts`, rellena:
-   - `apiUrl` y `prerenderUrl` — URL pública de la **API** (p. ej. `https://sj-aura-api.onrender.com` en Render; sin barra al final)
+   - `apiUrl` y `prerenderUrl` — URL pública de la **API** en Render, p. ej. `https://sj-aura-shop.onrender.com` (sin barra al final; debe ser el *service name* de Render)
    - `siteUrl` — URL pública del sitio (Firebase: `https://<id>.web.app` o custom domain)
 2. Construcción y despliegue (el script de tu `package.json` apunta a un *site* concreto):
 

@@ -1,11 +1,10 @@
 import { firebaseWebConfig } from './firebase-web.config';
 
 /**
- * API en Render (Web Service). Tras el deploy, la URL en Render (p. ej. `https://sj-aura-api.onrender.com`) debe
- * coincidir. Si en Render usas otro *service name*, cambia esta constante.
- * CORS: en el panel de Render, variable `ORIGIN` = `siteUrl` (Firebase) + `.web.app` / `firebaseapp.com` si aplica.
+ * API en Render. La URL es `https://<nombre-del-servicio>.onrender.com` (p. ej. `sj-aura-shop` en el panel).
+ * CORS: en Render, variable `ORIGIN` = URL de la tienda en Firebase (y dominio custom si aplica).
  */
-const apiPublic = 'https://sj-aura-api.onrender.com';
+const apiPublic = 'https://sj-aura-shop.onrender.com';
 
 export const environment = {
   production: true,
