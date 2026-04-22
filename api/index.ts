@@ -16,6 +16,47 @@ type H = (req: import('http').IncomingMessage, res: import('http').ServerRespons
 
 let handlerPromise: Promise<H> | null = null;
 
+/**
+ * Log seguro: no vuelques secretos (FIREBASE_SERVICE_ACCOUNT, COOKIE_KEY, claves). Los orígenes son URL públicas.
+ */
+function logVercelBootState(): void {
+  const originRaw = (process.env.ORIGIN || '').trim();
+  const origins = originRaw
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+  const fsa = process.env.FIREBASE_SERVICE_ACCOUNT || '';
+  // eslint-disable-next-line no-console
+  console.log(
+    '[sj-aura:api] boot env',
+    JSON.stringify({
+      vercel: process.env.VERCEL,
+      vercelEnv: process.env.VERCEL_ENV,
+      vercelRegion: process.env.VERCEL_REGION,
+      node: process.version,
+      origin: {
+        set: origins.length > 0,
+        count: origins.length,
+        list: origins,
+      },
+      firebase: {
+        FIREBASE_SERVICE_ACCOUNT: {
+          set: fsa.trim().length > 0,
+          length: fsa.length,
+          /** comprueba que parece JSON, sin mostrarlo */
+          looksJson: fsa.trim().startsWith('{') && fsa.trim().endsWith('}'),
+        },
+        GOOGLE_APPLICATION_CREDENTIALS: {
+          set: Boolean((process.env.GOOGLE_APPLICATION_CREDENTIALS || '').trim()),
+        },
+        FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || null,
+        FIRESTORE_DATABASE_ID: process.env.FIRESTORE_DATABASE_ID || null,
+      },
+      COOKIE_KEY: { set: Boolean((process.env.COOKIE_KEY || '').trim()) },
+    }),
+  );
+}
+
 function normalizePublicOrigin(s: string): string {
   return s.trim().replace(/\/$/, '').toLowerCase();
 }
@@ -76,7 +117,12 @@ function setCorsHeaders(
 function getHandler(): Promise<H> {
   if (!handlerPromise) {
     handlerPromise = (async () => {
+      const t0 = Date.now();
       const nest = await createNestServer();
+      if (process.env.VERCEL === '1' || process.env.VERCEL) {
+        // eslint-disable-next-line no-console
+        console.log('[sj-aura:api] createNestServer ok, ms', Date.now() - t0);
+      }
       const ex = nest.getHttpAdapter().getInstance();
       return serverless(ex);
     })();
@@ -85,13 +131,29 @@ function getHandler(): Promise<H> {
 }
 
 if (process.env.VERCEL === '1' || process.env.VERCEL) {
+  logVercelBootState();
   getHandler().catch((err) => {
     // eslint-disable-next-line no-console
-    console.error('[vercel] createNestServer / serverless init:', err);
+    console.error('[sj-aura:api] createNestServer / serverless init failed:', err);
   });
 }
 
 export default async (req: import('http').IncomingMessage, res: import('http').ServerResponse) => {
+  if (process.env.SJ_AURA_LOG_REQUESTS === '1' && (process.env.VERCEL || process.env.VERCEL === '1')) {
+    const ro = (Array.isArray(req.headers.origin) ? req.headers.origin[0] : req.headers.origin) as
+      | string
+      | undefined;
+    // eslint-disable-next-line no-console
+    console.log(
+      '[sj-aura:api] request',
+      JSON.stringify({
+        method: req.method,
+        url: req.url,
+        origin: ro ?? null,
+        corsOriginOk: ro ? Boolean(reflectedOrigin(ro)) : null,
+      }),
+    );
+  }
   /* Preflight sin levantar Nest: evita timeout en 1.ª carga mientras congela el cold start. */
   if (req.method === 'OPTIONS') {
     setCorsHeaders(req, res);
