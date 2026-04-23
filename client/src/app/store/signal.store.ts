@@ -20,8 +20,9 @@ export class SignalStore {
   private cartRestoreFromBackupInFlight = false;
 
   /**
-   * Solo la última petición getCart aplica su respuesta. Evita que una respuesta vacía
-   * obsoleta (carrera entre HTTP) dispare otra `restoreCartFromBackup` tras ya haber restaurado.
+   * Generación de lecturas de carrito: getCart hace ++ y guarda su seq; cualquier add/remove/qty
+   * vuelve a ++ para **invalidar** getCart en vuelo. Si no, una respuesta GET vacía/lenta
+   * llega después del add y dejaba solo 1 producto o carrito vacío.
    */
   private getCartResponseSeq = 0;
 
@@ -36,6 +37,11 @@ export class SignalStore {
   private applyCartResponse(cart: Cart | null): void {
     this.selectors.productState.update((state) => ({ ...state, cart }));
     this.syncLocalCartMirror(cart);
+  }
+
+  /** Invalida respuestas pendientes de getCart (evita carrera con add/remove). */
+  private bumpCartReadGeneration(): void {
+    this.getCartResponseSeq++;
   }
 
   private syncLocalCartMirror(cart: Cart | null): void {
@@ -121,6 +127,7 @@ export class SignalStore {
       this.applyCartResponse({ items: [], totalQty: 0, totalPrice: 0 });
       return;
     }
+    this.bumpCartReadGeneration();
     let lastOk: Cart | null = null;
     from(normalized)
       .pipe(
@@ -478,18 +485,21 @@ getCart = (payload) => {
 };
 
 addToCart = (payload) => {
+  this.bumpCartReadGeneration();
   this.apiService.addToCart(payload).subscribe((response: any) => {
     this.applyCartResponse(response);
   });
 };
 
 removeFromCart = (payload) => {
+  this.bumpCartReadGeneration();
   this.apiService.removeFromCart(payload).subscribe((response: any) => {
     this.applyCartResponse(response);
   });
 };
 
 setCartLineQty = (id: string, lang: string, qty: number) => {
+  this.bumpCartReadGeneration();
   const q = Math.max(0, Math.min(999, Math.floor(qty)));
   const params = `?id=${encodeURIComponent(id)}&lang=${encodeURIComponent(lang)}&qty=${q}`;
   this.apiService.setCartLineQty(params).subscribe((response: any) => {
@@ -499,6 +509,7 @@ setCartLineQty = (id: string, lang: string, qty: number) => {
 
 /** Quita una línea completa del carrito (varias llamadas remove, -1 unidad c/u). */
 removeCartLineCompletely = (id: string, lang: string, qty: number) => {
+  this.bumpCartReadGeneration();
   const step = (remaining: number) => {
     if (remaining <= 0 || !id) {
       return;

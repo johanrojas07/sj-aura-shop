@@ -9,6 +9,8 @@ import { createClient } from 'redis';
 import RedisStore from 'connect-redis';
 
 export async function setAppDB(app: NestExpressApplication): Promise<void> {
+  /** Tras el balanceador (Render, etc.): `req.secure` y cookies `Secure` coherentes. */
+  app.set('trust proxy', 1);
   app.use(compression());
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ limit: '10mb' }));
