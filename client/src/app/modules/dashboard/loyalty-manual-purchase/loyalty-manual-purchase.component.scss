@@ -1,0 +1,565 @@
+:host {
+  display: block;
+  padding: 1rem 1.25rem 2.75rem;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.dash-loyalty-manual__back {
+  margin-bottom: 0.75rem;
+  border-radius: var(--admin-radius-sm, 8px);
+  color: var(--admin-text-muted, #64748b);
+  font-weight: 600;
+
+  mat-icon {
+    margin-right: 0.25rem;
+    vertical-align: middle;
+  }
+}
+
+.dash-loyalty-manual__hero.dash-admin-page-header {
+  margin-bottom: 1.15rem;
+}
+
+.dash-loyalty-manual__rule-pill {
+  display: inline-flex;
+  align-items: center;
+  margin: 0.65rem 0 0;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #4338ca;
+  background: var(--admin-accent-soft, rgba(79, 70, 229, 0.12));
+  border: 1px solid rgba(79, 70, 229, 0.22);
+}
+
+.dash-loyalty-manual__step-track {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  margin-bottom: 1.25rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--admin-radius-md, 12px);
+  border: 1px solid var(--admin-border, #e2e8f0);
+  background: #f8fafc;
+}
+
+.dash-loyalty-manual__step-node {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--admin-text-muted, #64748b);
+  padding: 0.2rem 0.35rem;
+  border-radius: 8px;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+
+  &--current {
+    color: var(--admin-accent, #4f46e5);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: var(--admin-shadow-sm, 0 1px 2px rgba(15, 23, 42, 0.06));
+  }
+
+  &--done {
+    color: var(--admin-success, #059669);
+  }
+}
+
+.dash-loyalty-manual__step-num {
+  display: inline-grid;
+  place-items: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: rgba(15, 23, 42, 0.08);
+  color: var(--admin-text, #0f172a);
+}
+
+.dash-loyalty-manual__step-node--current .dash-loyalty-manual__step-num {
+  background: var(--admin-accent, #4f46e5);
+  color: #fff;
+}
+
+.dash-loyalty-manual__step-node--done .dash-loyalty-manual__step-num {
+  background: rgba(5, 150, 105, 0.18);
+  color: var(--admin-success, #059669);
+}
+
+.dash-loyalty-manual__step-sep {
+  width: 1.25rem;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--admin-border, #e2e8f0);
+}
+
+.dash-loyalty-manual__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 1rem 1.25rem;
+  align-items: start;
+
+  @media (max-width: 880px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dash-loyalty-manual__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dash-loyalty-manual__panel {
+  margin: 0;
+}
+
+.dash-loyalty-manual__card-head {
+  padding-bottom: 0.15rem !important;
+}
+
+.dash-loyalty-manual__avatar {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  background: var(--admin-accent-soft, rgba(79, 70, 229, 0.14)) !important;
+  color: var(--admin-accent, #4f46e5) !important;
+
+  mat-icon {
+    font-size: 1.35rem;
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+
+  &--purchase {
+    background: rgba(5, 150, 105, 0.12) !important;
+    color: var(--admin-success, #059669) !important;
+  }
+}
+
+.dash-loyalty-manual__hint {
+  margin: 0 0 0.65rem;
+  color: var(--admin-text-muted, #64748b);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.dash-loyalty-manual__search-field {
+  width: 100%;
+  margin: 0;
+}
+
+.dash-loyalty-manual__search-progress {
+  margin-top: 0.35rem;
+  border-radius: 4px;
+}
+
+.dash-loyalty-manual__hits {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 15rem;
+  overflow: auto;
+}
+
+.dash-loyalty-manual__hit-btn {
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+  height: auto;
+  min-height: 2.75rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: var(--admin-radius-md, 12px);
+  border-color: var(--admin-border, #e2e8f0) !important;
+  background: #fff;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    border-color: rgba(79, 70, 229, 0.38) !important;
+    box-shadow: var(--admin-shadow-sm, 0 1px 2px rgba(15, 23, 42, 0.06));
+  }
+}
+
+.dash-loyalty-manual__hit-name {
+  display: block;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--admin-text, #0f172a);
+}
+
+.dash-loyalty-manual__hit-meta {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--admin-text-muted, #64748b);
+  margin-top: 0.15rem;
+}
+
+.dash-loyalty-manual__selected {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin-top: 0.85rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--admin-radius-md, 12px);
+  background: rgba(5, 150, 105, 0.08);
+  border: 1px solid rgba(5, 150, 105, 0.22);
+
+  > mat-icon {
+    color: var(--admin-success, #059669);
+    font-size: 1.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+}
+
+.dash-loyalty-manual__selected-text {
+  flex: 1 1 12rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.84rem;
+  color: var(--admin-text, #0f172a);
+
+  strong {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--admin-success, #059669);
+  }
+}
+
+.dash-loyalty-manual__selected-hint {
+  font-size: 0.78rem;
+  color: var(--admin-text-muted, #64748b);
+  line-height: 1.4;
+}
+
+.dash-loyalty-manual__form {
+  margin: 0;
+}
+
+.dash-loyalty-manual__phone-field {
+  width: 100%;
+  margin-bottom: 0.35rem;
+}
+
+.dash-loyalty-manual__phone-status {
+  margin: 0.5rem 0 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--admin-radius-md, 12px);
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--admin-text, #0f172a);
+
+  &--loading {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    background: #f8fafc;
+    border: 1px solid var(--admin-border, #e2e8f0);
+    color: var(--admin-text-muted, #64748b);
+  }
+
+  &--warn {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    background: rgba(254, 252, 232, 0.95);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    color: #92400e;
+  }
+
+  &--found {
+    background: linear-gradient(135deg, rgba(5, 150, 105, 0.09) 0%, rgba(240, 253, 244, 0.5) 100%);
+    border: 1px solid rgba(5, 150, 105, 0.28);
+  }
+
+  &--new {
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.08) 0%, rgba(238, 242, 255, 0.6) 100%);
+    border: 1px solid rgba(79, 70, 229, 0.25);
+  }
+}
+
+.dash-loyalty-manual__status-ico {
+  flex-shrink: 0;
+  font-size: 1.35rem;
+  width: 1.35rem;
+  height: 1.35rem;
+  color: var(--admin-accent, #4f46e5);
+}
+
+.dash-loyalty-manual__phone-status--found .dash-loyalty-manual__status-ico {
+  color: var(--admin-success, #059669);
+}
+
+.dash-loyalty-manual__phone-status--new .dash-loyalty-manual__status-ico {
+  color: var(--admin-accent, #4f46e5);
+}
+
+.dash-loyalty-manual__status-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.dash-loyalty-manual__status-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.dash-loyalty-manual__status-kicker {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--admin-text-muted, #64748b);
+  margin-bottom: 0.2rem;
+}
+
+.dash-loyalty-manual__status-lead {
+  margin: 0 0 0.4rem;
+  font-weight: 600;
+  color: var(--admin-text, #0f172a);
+  line-height: 1.4;
+}
+
+.dash-loyalty-manual__status-meta {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: #334155;
+
+  li {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.4rem;
+  }
+}
+
+.dash-loyalty-manual__inline-ico {
+  font-size: 1rem !important;
+  width: 1rem !important;
+  height: 1rem !important;
+  color: #94a3b8;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.dash-loyalty-manual__meta-k {
+  font-weight: 600;
+  color: #64748b;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dash-loyalty-manual__meta-dim {
+  color: #64748b;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.dash-loyalty-manual__status-meta-line {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.dash-loyalty-manual__chip-kind {
+  margin-left: 0.2rem;
+  display: inline-flex;
+  padding: 0.08rem 0.35rem;
+  border-radius: 6px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(79, 70, 229, 0.12);
+  color: #4338ca;
+  border: 1px solid rgba(79, 70, 229, 0.2);
+}
+
+.dash-loyalty-manual__chip-kind--g {
+  background: rgba(5, 150, 105, 0.12);
+  color: #047857;
+  border-color: rgba(5, 150, 105, 0.22);
+}
+
+.dash-loyalty-manual__phone-progress {
+  height: 3px;
+  border-radius: 2px;
+  margin: 0.1rem 0 0;
+}
+
+.dash-loyalty-manual__phone-status--warn .dash-loyalty-manual__status-ico {
+  color: #d97706;
+}
+
+.dash-loyalty-manual__points-hint-legend {
+  margin: 0.25rem 0 0;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.dash-loyalty-manual__points-total-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  margin: 0.5rem 0 0;
+  padding: 0.45rem 0.55rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #0f766e;
+  background: rgba(5, 150, 105, 0.08);
+  border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+.dash-loyalty-manual__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem 0.85rem;
+  align-items: start;
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-loyalty-manual__field--wide {
+    grid-column: 1 / -1;
+  }
+}
+
+.dash-loyalty-manual__name-hint {
+  line-height: 1.4;
+  font-size: 0.78rem;
+  color: var(--admin-text-muted, #64748b);
+  margin-top: 0.1rem;
+}
+
+.dash-loyalty-manual__points-strip {
+  margin: 1rem 0 0.85rem;
+  padding: 1rem 1.1rem;
+  border-radius: var(--admin-radius-md, 12px);
+  border: 1px dashed var(--admin-border, #e2e8f0);
+  background: linear-gradient(145deg, #fafafa 0%, #f8fafc 100%);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &--active {
+    border-style: solid;
+    border-color: rgba(79, 70, 229, 0.35);
+    background: linear-gradient(145deg, rgba(79, 70, 229, 0.06) 0%, rgba(255, 255, 255, 0.95) 100%);
+    box-shadow: var(--admin-shadow-sm, 0 1px 2px rgba(15, 23, 42, 0.05));
+  }
+}
+
+.dash-loyalty-manual__points-strip-head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--admin-text-muted, #64748b);
+  margin-bottom: 0.35rem;
+
+  mat-icon {
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--admin-accent, #4f46e5);
+  }
+}
+
+.dash-loyalty-manual__points-big {
+  font-size: clamp(2rem, 4vw, 2.35rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--admin-accent, #4f46e5);
+  line-height: 1.1;
+}
+
+.dash-loyalty-manual__points-caption {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--admin-text-muted, #64748b);
+  line-height: 1.45;
+}
+
+.dash-loyalty-manual__confirm-row {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.dash-loyalty-manual__inline-err {
+  font-size: 0.8rem;
+  color: var(--admin-danger, #dc2626);
+}
+
+.dash-loyalty-manual__actions {
+  margin-top: 1.15rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.dash-loyalty-manual__btn-secondary {
+  border-radius: var(--admin-radius-sm, 8px);
+  font-weight: 600;
+}
+
+.dash-loyalty-manual__submit {
+  border-radius: var(--admin-radius-sm, 8px) !important;
+  font-weight: 700 !important;
+  padding: 0 1.35rem !important;
+  min-height: 44px !important;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+
+  mat-icon {
+    margin-right: 0.4rem;
+    font-size: 1.15rem;
+    width: 1.15rem;
+    height: 1.15rem;
+    vertical-align: middle;
+  }
+}
+
+.dash-loyalty-manual__banner {
+  margin-top: 1rem;
+}

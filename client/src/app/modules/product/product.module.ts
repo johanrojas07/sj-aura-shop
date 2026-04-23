@@ -9,7 +9,6 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { ProductComponent } from './product/product.component';
 import { ProductsComponent } from './products/products.component';
@@ -42,7 +41,6 @@ const PRODUCT_ROUTES: Routes = [
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatSidenavModule,
-    MatSnackBarModule,
 
     TranslatePipe,
     PriceFormatPipe,

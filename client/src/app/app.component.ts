@@ -27,10 +27,11 @@ import { HeaderHostComponent } from './layout/header-host.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { CartDrawerComponent } from './shared/components/cart-drawer/cart-drawer.component';
 import { CartDrawerService } from './services/cart-drawer.service';
+import { ProductQuickViewComponent } from './shared/components/product-quick-view/product-quick-view.component';
 
 @Component({
     selector: 'eshop-mean-app',
-    imports: [CommonModule, RouterOutlet, FooterComponent, HeaderHostComponent, MatSidenavModule, CartDrawerComponent],
+    imports: [CommonModule, RouterOutlet, FooterComponent, HeaderHostComponent, MatSidenavModule, CartDrawerComponent, ProductQuickViewComponent],
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss']
 })

@@ -1,0 +1,547 @@
+<div class="dash-loyalty-detail dash-admin-form-page">
+  @if (lang$ | async; as lang) {
+    <button mat-button type="button" class="dash-loyalty-detail__back dash-admin-btn-ghost" (click)="back(lang)">
+      <mat-icon>arrow_back</mat-icon>
+      {{ 'DASH_LOYALTY_BACK' | translate | async }}
+    </button>
+  }
+
+  @if (loading) {
+    <div class="dash-loyalty-detail__load-wrap" aria-live="polite" aria-busy="true">
+      <mat-progress-bar class="dash-loyalty-detail__load-bar" mode="indeterminate"></mat-progress-bar>
+    </div>
+  } @else if (error) {
+    <div class="dash-admin-alert dash-admin-alert--error dash-loyalty-detail__err-banner" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error | translate | async }}</span>
+    </div>
+  } @else if (detail) {
+    <header class="dash-loyalty-detail__hero">
+      <div class="dash-loyalty-detail__hero-main">
+        <p class="dash-admin-page-kicker">{{ 'DASH_LOYALTY_DETAIL_KICKER' | translate | async }}</p>
+        <h1 class="dash-admin-page-title">{{ 'DASH_LOYALTY_DETAIL_TITLE' | translate | async }}</h1>
+        <p class="dash-loyalty-detail__identity-row">
+          <span class="dash-loyalty-detail__identity">
+            {{ detail.name || detail.email || detail.phoneMasked || '—' }}
+          </span>
+          <span
+            class="dash-loyalty-detail__points-pill"
+            [class.dash-loyalty-detail__points-pill--zero]="(detail.points ?? 0) === 0"
+          >
+            <span class="dash-loyalty-detail__points-pill__num">{{ detail.points }}</span>
+            <span class="dash-loyalty-detail__points-pill__suf">
+              {{ 'DASH_LOYALTY_PTS_ABBR' | translate | async }}
+            </span>
+          </span>
+        </p>
+      </div>
+      <div class="dash-loyalty-detail__badges">
+        @if (detail.kind === 'registered') {
+          <span class="dash-loyalty-detail__badge dash-loyalty-detail__badge--reg">
+            {{ 'DASH_LOYALTY_BADGE_REGISTERED' | translate | async }}
+          </span>
+        } @else {
+          <span class="dash-loyalty-detail__badge dash-loyalty-detail__badge--guest">
+            {{ 'DASH_LOYALTY_BADGE_GUEST' | translate | async }}
+          </span>
+        }
+        @if (detail.mergedIntoUserId) {
+          <span class="dash-loyalty-detail__badge dash-loyalty-detail__badge--merged">
+            {{ 'DASH_LOYALTY_BADGE_MERGED' | translate | async }}
+          </span>
+        }
+      </div>
+    </header>
+
+    <mat-card class="dash-loyalty-detail__card dash-admin-card" appearance="outlined">
+      <mat-card-header class="dash-loyalty-detail__card-h">
+        <div mat-card-avatar class="dash-loyalty-detail__ico-wrap">
+          <mat-icon aria-hidden="true">person</mat-icon>
+        </div>
+        <mat-card-title class="dash-loyalty-detail__sec-title">
+          {{ 'DASH_LOYALTY_CARD_SUMMARY' | translate | async }}
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="dash-loyalty-detail__grid">
+          <div class="dash-loyalty-detail__field">
+            <span class="dash-loyalty-detail__label">{{ 'DASH_LOYALTY_COL_NAME' | translate | async }}</span>
+            <p class="dash-loyalty-detail__value">{{ detail.name || '—' }}</p>
+          </div>
+          <div class="dash-loyalty-detail__field">
+            <span class="dash-loyalty-detail__label">{{ 'DASH_LOYALTY_COL_EMAIL' | translate | async }}</span>
+            <p class="dash-loyalty-detail__value">{{ detail.email || '—' }}</p>
+          </div>
+          <div class="dash-loyalty-detail__field">
+            <span class="dash-loyalty-detail__label">{{ 'DASH_LOYALTY_COL_PHONE' | translate | async }}</span>
+            <p class="dash-loyalty-detail__value dash-loyalty-detail__mono">{{ detail.phoneMasked }}</p>
+          </div>
+          <div class="dash-loyalty-detail__field dash-loyalty-detail__field--points">
+            <span class="dash-loyalty-detail__label">{{ 'DASH_LOYALTY_COL_POINTS' | translate | async }}</span>
+            <p class="dash-loyalty-detail__value dash-loyalty-detail__points-hero">
+              {{ detail.points }}
+            </p>
+          </div>
+          <div class="dash-loyalty-detail__field">
+            <span class="dash-loyalty-detail__label">{{ 'DASH_LOYALTY_COL_ACTIVITY' | translate | async }}</span>
+            <p
+              class="dash-loyalty-detail__value"
+              [title]="detail.lastActivityAt ? (detail.lastActivityAt | date: 'medium') : ''"
+            >
+              {{ detail.lastActivityAt | relativeTime: (lang$ | async) }}
+            </p>
+          </div>
+          @if (detail.walletHash) {
+            <div class="dash-loyalty-detail__field dash-loyalty-detail__field--span">
+              <span class="dash-loyalty-detail__label">{{ 'DASH_LOYALTY_WALLET_HASH' | translate | async }}</span>
+              <code class="dash-loyalty-detail__hashcode">{{ detail.walletHash }}</code>
+            </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="dash-loyalty-detail__split">
+      <mat-card class="dash-loyalty-detail__card dash-admin-card" appearance="outlined">
+        <mat-card-header class="dash-loyalty-detail__card-h">
+          <div mat-card-avatar class="dash-loyalty-detail__ico-wrap">
+            <mat-icon aria-hidden="true">receipt_long</mat-icon>
+          </div>
+          <mat-card-title class="dash-loyalty-detail__sec-title">
+            {{ 'DASH_LOYALTY_SECTION_MOV' | translate | async }}
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          @if (!detail.audits?.length) {
+            <p class="dash-loyalty-detail__empty">{{ 'DASH_LOYALTY_NO_MOV' | translate | async }}</p>
+          } @else {
+            <div class="dash-loyalty-detail__mov-table-wrap dash-admin-data-table-wrap">
+              <table class="dash-loyalty-detail__mov-table dash-admin-data-table">
+                <thead>
+                  <tr>
+                    <th scope="col">{{ 'DASH_LOYALTY_COL_TYPE' | translate | async }}</th>
+                    <th class="dash-loyalty-detail__th-num" scope="col">
+                      {{ 'DASH_LOYALTY_COL_POINTS' | translate | async }}
+                    </th>
+                    <th scope="col">{{ 'DASH_LOYALTY_MOV_TH_DESC' | translate | async }}</th>
+                    <th class="dash-loyalty-detail__th-order" scope="col">
+                      {{ 'DASH_LOYALTY_MOV_TH_ORDER' | translate | async }}
+                    </th>
+                    <th class="dash-loyalty-detail__th-when" scope="col">
+                      {{ 'DASH_LOYALTY_MOV_TH_WHEN' | translate | async }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (a of detail.audits; track $index) {
+                    <tr [ngClass]="auditRowClass(a)">
+                      <td>{{ auditLabelKey(a.type) | translate | async }}</td>
+                      <td class="dash-loyalty-detail__td-num">
+                        <span
+                          class="dash-loyalty-detail__td-pill"
+                          [class.dash-loyalty-detail__td-pill--neg]="auditDisplayDelta(a) < 0"
+                          [class.dash-loyalty-detail__td-pill--pos]="auditDisplayDelta(a) > 0"
+                          [class.dash-loyalty-detail__td-pill--zero]="auditDisplayDelta(a) === 0"
+                        >
+                          {{ auditDisplayDelta(a) > 0 ? '+' : '' }}{{ auditDisplayDelta(a) }}
+                        </span>
+                      </td>
+                      <td class="dash-loyalty-detail__td-desc">{{ a.reason }}</td>
+                      <td class="dash-loyalty-detail__td-mono">@if (a.orderId) { #{{ a.orderId }} } @else { — }</td>
+                      <td
+                        class="dash-loyalty-detail__td-when"
+                        [title]="a.createdAt ? (a.createdAt | date: 'full') : ''"
+                      >
+                        {{ a.createdAt | relativeTime: (lang$ | async) }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="dash-loyalty-detail__card dash-admin-card" appearance="outlined">
+        <mat-card-header class="dash-loyalty-detail__card-h">
+          <div mat-card-avatar class="dash-loyalty-detail__ico-wrap">
+            <mat-icon aria-hidden="true">local_mall</mat-icon>
+          </div>
+          <mat-card-title class="dash-loyalty-detail__sec-title">
+            {{ 'DASH_LOYALTY_SECTION_ORDERS' | translate | async }}
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          @if (!detail.orders?.length) {
+            <p class="dash-loyalty-detail__empty">{{ 'DASH_LOYALTY_NO_ORDERS' | translate | async }}</p>
+          } @else {
+            <ul class="dash-loyalty-detail__orders">
+              @for (o of detail.orders; track o.orderId) {
+                <li>
+                  @if (lang$ | async; as lang2) {
+                    <a class="dash-loyalty-detail__order-id" [routerLink]="orderDashUrl(lang2, o.orderId)">#{{ o.orderId }}</a>
+                  }
+                  <span class="dash-loyalty-detail__order-meta"
+                    >{{ o.status }} · {{ o.amount }} {{ o.currency }}</span
+                  >
+                  @if (o.loyaltyPointsGrantedAmount) {
+                    <span class="dash-loyalty-detail__pts">+{{ o.loyaltyPointsGrantedAmount }} pts</span>
+                  }
+                </li>
+              }
+            </ul>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <mat-card class="dash-loyalty-detail__card dash-loyalty-detail__card--ledger dash-admin-card" appearance="outlined">
+      <mat-card-header class="dash-loyalty-detail__card-h">
+        <div mat-card-avatar class="dash-loyalty-detail__ico-wrap">
+          <mat-icon aria-hidden="true">account_balance</mat-icon>
+        </div>
+        <mat-card-title class="dash-loyalty-detail__sec-title">
+          {{ 'DASH_LOYALTY_SECTION_LEDGER' | translate | async }}
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @if (!(detail.transactions?.length)) {
+          <p class="dash-loyalty-detail__empty">{{ 'DASH_LOYALTY_LEDGER_EMPTY' | translate | async }}</p>
+        } @else {
+          <div class="dash-loyalty-detail__mov-table-wrap dash-admin-data-table-wrap dash-loyalty-detail__ledger-table-wrap">
+            <table class="dash-loyalty-detail__mov-table dash-admin-data-table">
+              <thead>
+                <tr>
+                  <th scope="col">{{ 'DASH_LOYALTY_COL_TYPE' | translate | async }}</th>
+                  <th class="dash-loyalty-detail__th-num" scope="col">
+                    {{ 'DASH_LOYALTY_COL_POINTS' | translate | async }}
+                  </th>
+                  <th scope="col">{{ 'DASH_LOYALTY_MOV_TH_DESC' | translate | async }}</th>
+                  <th class="dash-loyalty-detail__th-cop" scope="col">
+                    {{ 'DASH_LOYALTY_MOV_TH_COP' | translate | async }}
+                  </th>
+                  <th class="dash-loyalty-detail__th-when" scope="col">
+                    {{ 'DASH_LOYALTY_MOV_TH_WHEN' | translate | async }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (tx of detail.transactions; track tx._id) {
+                  <tr [ngClass]="txClass(tx.type, tx.points)">
+                    <td>{{ txLabelKey(tx.type) | translate | async }}</td>
+                    <td class="dash-loyalty-detail__td-num">
+                      <span
+                        class="dash-loyalty-detail__td-pill"
+                        [class.dash-loyalty-detail__td-pill--neg]="(tx.points ?? 0) < 0"
+                        [class.dash-loyalty-detail__td-pill--pos]="(tx.points ?? 0) > 0"
+                        [class.dash-loyalty-detail__td-pill--zero]="(tx.points ?? 0) === 0"
+                      >
+                        {{ (tx.points ?? 0) > 0 ? '+' : '' }}{{ tx.points }}
+                      </span>
+                    </td>
+                    <td class="dash-loyalty-detail__td-desc">{{ tx.description }}</td>
+                    <td class="dash-loyalty-detail__td-cop">@if (tx.amountCOP) {
+                      <span class="dash-loyalty-detail__td-cop-v">{{ tx.amountCOP | number: '1.0-0' }} {{ tx.currency }}</span>
+                    } @else {
+                      <span class="dash-loyalty-detail__td-em">—</span>
+                    }</td>
+                    <td
+                      class="dash-loyalty-detail__td-when"
+                      [title]="tx.createdAt ? (tx.createdAt | date: 'full') : ''"
+                    >
+                      {{ tx.createdAt | relativeTime: (lang$ | async) }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <div class="dash-loyalty-detail__split">
+      <mat-card class="dash-loyalty-detail__card dash-loyalty-detail__card--action dash-admin-card" appearance="outlined">
+        <mat-card-header class="dash-loyalty-detail__card-h">
+          <div mat-card-avatar class="dash-loyalty-detail__ico-wrap">
+            <mat-icon aria-hidden="true">tune</mat-icon>
+          </div>
+          <mat-card-title class="dash-loyalty-detail__sec-title">
+            {{ 'DASH_LOYALTY_ADJUST_TITLE' | translate | async }}
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="dash-loyalty-detail__balance-hint" aria-live="polite">
+            <mat-icon class="dash-loyalty-detail__bal-ico" aria-hidden="true">savings</mat-icon>
+            <span>{{ 'DASH_LOYALTY_ADJUST_CURRENT' | translate | async }} <strong>{{ availablePoints }}</strong> {{ 'DASH_LOYALTY_PTS_ABBR' | translate | async }}</span>
+          </p>
+          <mat-button-toggle-group
+            class="dash-loyalty-detail__adjust-mode"
+            name="adjustMode"
+            [hideSingleSelectionIndicator]="true"
+            [(ngModel)]="adjustMode"
+          >
+            <mat-button-toggle class="dash-loyalty-detail__toggle--add" value="add">
+              <mat-icon>add</mat-icon>
+              {{ 'DASH_LOYALTY_ADJUST_MODE_ADD' | translate | async }}
+            </mat-button-toggle>
+            <mat-button-toggle class="dash-loyalty-detail__toggle--sub" value="subtract">
+              <mat-icon>remove</mat-icon>
+              {{ 'DASH_LOYALTY_ADJUST_MODE_SUB' | translate | async }}
+            </mat-button-toggle>
+          </mat-button-toggle-group>
+          <div class="dash-loyalty-detail__form">
+            <mat-form-field
+              class="dash-admin-field dash-admin-field--compact"
+              subscriptSizing="dynamic"
+              appearance="outline"
+            >
+              <mat-icon matPrefix class="dash-loyalty-detail__field-ico" aria-hidden="true">numbers</mat-icon>
+              <mat-label>{{ 'DASH_LOYALTY_ADJUST_AMOUNT' | translate | async }}</mat-label>
+              <input
+                matInput
+                type="number"
+                min="1"
+                [max]="9999999"
+                name="adjustAmount"
+                [(ngModel)]="adjustAmount"
+              />
+            </mat-form-field>
+            <mat-form-field
+              class="dash-loyalty-detail__grow dash-admin-field dash-admin-field--compact"
+              subscriptSizing="dynamic"
+              appearance="outline"
+            >
+              <mat-icon matPrefix class="dash-loyalty-detail__field-ico" aria-hidden="true">label</mat-icon>
+              <mat-label>{{ 'DASH_LOYALTY_REASON' | translate | async }}</mat-label>
+              <input matInput name="adjustReason" [(ngModel)]="adjustReason" />
+            </mat-form-field>
+            <button
+              class="dash-loyalty-detail__btn dash-admin-btn-primary"
+              [class.dash-loyalty-detail__btn--add]="adjustMode === 'add'"
+              [class.dash-loyalty-detail__btn--sub]="adjustMode === 'subtract'"
+              mat-flat-button
+              [color]="adjustMode === 'add' ? 'primary' : 'warn'"
+              type="button"
+              (click)="submitAdjust()"
+              [disabled]="adjustBusy || adjustWouldGoNegative"
+            >
+              <mat-icon>{{ adjustMode === 'add' ? 'add_circle' : 'remove_circle' }}</mat-icon>
+              {{ 'DASH_LOYALTY_ADJUST_BTN' | translate | async }}
+            </button>
+          </div>
+          @if (adjustAmountInt > 0 && !adjustWouldGoNegative) {
+            <p
+              class="dash-loyalty-detail__preview"
+              [class.dash-loyalty-detail__preview--add]="adjustMode === 'add'"
+              [class.dash-loyalty-detail__preview--sub]="adjustMode === 'subtract'"
+            >
+              <mat-icon>functions</mat-icon>
+              <span
+                >{{ 'DASH_LOYALTY_ADJUST_PREVIEW' | translate | async }}&nbsp;<strong
+                  >{{ adjustPreviewNewTotal }} {{ 'DASH_LOYALTY_PTS_ABBR' | translate | async }}</strong
+                ></span
+              >
+            </p>
+          }
+          @if (adjustWouldGoNegative) {
+            <p class="dash-loyalty-detail__hint" role="alert">
+              {{ 'DASH_LOYALTY_ADJUST_ERR_NEGATIVE' | translate | async }}
+            </p>
+          }
+          @if (adjustMsg) {
+            <p class="dash-loyalty-detail__hint" [class.dash-loyalty-detail__hint--ok]="!adjustMsg.includes('ERR')">
+              {{ adjustMsg | translate | async }}
+              @if (adjustErrorDetail) {
+                <br /><span class="dash-loyalty-detail__hint-sub">{{ adjustErrorDetail }}</span>
+              }
+            </p>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="dash-loyalty-detail__card dash-loyalty-detail__card--action dash-admin-card" appearance="outlined">
+        <mat-card-header class="dash-loyalty-detail__card-h">
+          <div mat-card-avatar class="dash-loyalty-detail__ico-wrap">
+            <mat-icon aria-hidden="true">swap_horiz</mat-icon>
+          </div>
+          <mat-card-title class="dash-loyalty-detail__sec-title">
+            {{ 'DASH_LOYALTY_XFER_TITLE' | translate | async }}
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="dash-loyalty-detail__balance-hint dash-loyalty-detail__balance-hint--xfer" aria-live="polite">
+            <mat-icon class="dash-loyalty-detail__bal-ico" aria-hidden="true">account_balance_wallet</mat-icon>
+            <span
+              >{{ 'DASH_LOYALTY_XFER_AVAILABLE' | translate | async }}&nbsp;<strong
+                [class.dash-loyalty-detail__bal-warn]="xferExceedsBalance"
+                >{{ availablePoints }} {{ 'DASH_LOYALTY_PTS_ABBR' | translate | async }}</strong
+              ></span
+            >
+          </p>
+          <p class="dash-loyalty-detail__xfer-hint">{{ 'DASH_LOYALTY_XFER_HINT' | translate | async }}</p>
+
+          <p class="dash-loyalty-detail__xfer-label">{{ 'DASH_LOYALTY_XFER_SEARCH' | translate | async }}</p>
+          <p class="dash-loyalty-detail__xfer-sublabel">{{ 'DASH_LOYALTY_XFER_SEARCH_HINT' | translate | async }}</p>
+          <mat-form-field
+            class="dash-loyalty-detail__xfer-search-field dash-admin-field dash-admin-field--compact"
+            subscriptSizing="dynamic"
+            appearance="outline"
+            hideRequiredMarker
+          >
+            <mat-icon matPrefix class="dash-loyalty-detail__field-ico" aria-hidden="true">search</mat-icon>
+            <mat-label>{{ 'DASH_LOYALTY_FILTER_SEARCH' | translate | async }}</mat-label>
+            <input
+              matInput
+              name="xferSearch"
+              autocomplete="off"
+              [ngModel]="xferSearchQuery"
+              (ngModelChange)="onXferSearchInput($event)"
+            />
+          </mat-form-field>
+          @if (xferSearchLoading) {
+            <mat-progress-bar mode="indeterminate" class="dash-loyalty-detail__xfer-progress"></mat-progress-bar>
+          }
+          @if (xferSearchItems.length) {
+            <ul class="dash-loyalty-detail__xfer-hits" role="listbox">
+              @for (row of xferSearchItems; track row.ref) {
+                <li>
+                  <button
+                    type="button"
+                    mat-stroked-button
+                    class="dash-loyalty-detail__xfer-hit"
+                    (click)="pickXferDest(row)"
+                  >
+                    <span class="dash-loyalty-detail__xfer-hit-name">{{ row.name || row.email || '—' }}</span>
+                    <span class="dash-loyalty-detail__xfer-hit-meta"
+                      >{{ row.kind }} · {{ row.phoneMasked }} · {{ row.points }} pts</span
+                    >
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+          @if (xferDestPicked) {
+            <div class="dash-loyalty-detail__xfer-picked" role="status">
+              <mat-icon aria-hidden="true">check_circle</mat-icon>
+              <div class="dash-loyalty-detail__xfer-picked-text">
+                <span class="dash-loyalty-detail__xfer-picked-k">{{ 'DASH_LOYALTY_XFER_DEST_PICKED' | translate | async }}</span>
+                <span>
+                  {{ xferDestPicked.name || xferDestPicked.email || xferDestPicked.phoneMasked }} ·
+                  {{ xferDestPicked.points }} {{ 'DASH_LOYALTY_PTS_ABBR' | translate | async }}
+                </span>
+              </div>
+              <button mat-stroked-button type="button" (click)="clearXferDest()">
+                {{ 'DASH_LOYALTY_XFER_CLEAR_DEST' | translate | async }}
+              </button>
+            </div>
+          }
+
+          <p class="dash-loyalty-detail__xfer-label dash-loyalty-detail__xfer-label--manual">
+            {{ 'DASH_LOYALTY_XFER_OR_MANUAL' | translate | async }}
+          </p>
+          <div class="dash-loyalty-detail__form">
+            <mat-form-field
+              class="dash-admin-field dash-admin-field--compact"
+              subscriptSizing="dynamic"
+              appearance="outline"
+            >
+              <mat-icon matPrefix class="dash-loyalty-detail__field-ico" aria-hidden="true">savings</mat-icon>
+              <mat-label>{{ 'DASH_LOYALTY_XFER_AMOUNT' | translate | async }}</mat-label>
+              <input
+                matInput
+                type="number"
+                min="1"
+                [attr.max]="availablePoints > 0 ? availablePoints : undefined"
+                [(ngModel)]="xferAmount"
+                name="xferAmount"
+                (ngModelChange)="onXferAmountChange()"
+              />
+            </mat-form-field>
+            <mat-form-field
+              class="dash-loyalty-detail__grow dash-admin-field dash-admin-field--compact"
+              subscriptSizing="dynamic"
+              appearance="outline"
+            >
+              <mat-icon matPrefix class="dash-loyalty-detail__field-ico" aria-hidden="true">call_split</mat-icon>
+              <mat-label>{{ 'DASH_LOYALTY_XFER_TO_TYPE' | translate | async }}</mat-label>
+              <mat-select
+                [(ngModel)]="xferToType"
+                name="xferToType"
+                (ngModelChange)="onXferToTypeChange()"
+                panelClass="dash-loyalty-detail__select-p"
+              >
+                <mat-option value="user">{{ 'DASH_LOYALTY_TYPE_REGISTERED' | translate | async }}</mat-option>
+                <mat-option value="phone_wallet">{{ 'DASH_LOYALTY_TYPE_GUEST' | translate | async }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            @if (xferToType === 'user') {
+              <mat-form-field
+                class="dash-loyalty-detail__grow dash-admin-field dash-admin-field--compact"
+                subscriptSizing="dynamic"
+                appearance="outline"
+              >
+                <mat-icon matPrefix class="dash-loyalty-detail__field-ico" aria-hidden="true">account_circle</mat-icon>
+                <mat-label>{{ 'DASH_LOYALTY_XFER_TO_UID' | translate | async }}</mat-label>
+                <input matInput [(ngModel)]="xferToUserId" name="xferToUserId" (ngModelChange)="onXferDestManualInput()" />
+              </mat-form-field>
+            } @else {
+              <mat-form-field
+                class="dash-loyalty-detail__grow dash-admin-field dash-admin-field--compact"
+                subscriptSizing="dynamic"
+                appearance="outline"
+              >
+                <mat-icon matPrefix class="dash-loyalty-detail__field-ico" aria-hidden="true">phone_iphone</mat-icon>
+                <mat-label>{{ 'DASH_LOYALTY_XFER_TO_PHONE' | translate | async }}</mat-label>
+                <input matInput [(ngModel)]="xferToPhone" name="xferToPhone" (ngModelChange)="onXferDestManualInput()" />
+              </mat-form-field>
+              <mat-form-field
+                class="dash-loyalty-detail__grow dash-admin-field dash-admin-field--compact"
+                subscriptSizing="dynamic"
+                appearance="outline"
+              >
+                <mat-icon matPrefix class="dash-loyalty-detail__field-ico" aria-hidden="true">tag</mat-icon>
+                <mat-label>{{ 'DASH_LOYALTY_XFER_TO_HASH' | translate | async }}</mat-label>
+                <input matInput [(ngModel)]="xferToPhoneHash" name="xferToPhoneHash" (ngModelChange)="onXferDestManualInput()" />
+              </mat-form-field>
+            }
+            <mat-form-field
+              class="dash-loyalty-detail__full dash-admin-field dash-admin-field--compact"
+              subscriptSizing="dynamic"
+              appearance="outline"
+            >
+              <mat-icon matPrefix class="dash-loyalty-detail__field-ico" aria-hidden="true">message</mat-icon>
+              <mat-label>{{ 'DASH_LOYALTY_REASON' | translate | async }}</mat-label>
+              <input matInput [(ngModel)]="xferReason" name="xferReason" />
+            </mat-form-field>
+            <button
+              class="dash-loyalty-detail__btn dash-loyalty-detail__btn--stroke dash-loyalty-detail__btn--xfer"
+              mat-stroked-button
+              color="primary"
+              type="button"
+              (click)="submitTransfer()"
+              [disabled]="xferBusy || xferExceedsBalance"
+            >
+              <mat-icon>swap_horiz</mat-icon>
+              {{ 'DASH_LOYALTY_XFER_BTN' | translate | async }}
+            </button>
+          </div>
+          @if (xferExceedsBalance) {
+            <p class="dash-loyalty-detail__hint" role="alert">
+              {{ 'DASH_LOYALTY_XFER_ERR_INSUFFICIENT' | translate | async }}
+            </p>
+          }
+          @if (xferMsg) {
+            <p class="dash-loyalty-detail__hint" [class.dash-loyalty-detail__hint--ok]="!xferMsg.includes('ERR')">
+              {{ xferMsg | translate | async }}
+              @if (xferErrorDetail) {
+                <br /><span class="dash-loyalty-detail__hint-sub">{{ xferErrorDetail }}</span>
+              }
+            </p>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+</div>

@@ -14,12 +14,10 @@ import {
   type CatalogStockAdjustResult,
 } from './catalog-stock-adjust-dialog.component';
 
-type CatalogSortKey = 'name-asc' | 'name-desc' | 'stock-asc' | 'stock-desc' | 'price-asc' | 'price-desc';
-
 @Component({
   selector: 'app-all-products',
   templateUrl: './all-products.component.html',
-  styleUrls: ['./all-products.component.scss'],
+  styleUrls: ['./all-products.component.scss', '../_dash-admin-forms.shared.scss'],
   standalone: false,
 })
 export class AllProductsComponent implements OnInit {
@@ -41,9 +39,6 @@ export class AllProductsComponent implements OnInit {
 
   /** Filtro por categoría (slug `titleUrl`); vacío = todas. */
   catalogCategory = '';
-
-  /** Orden: nombre, unidades o precio (venta), A→Z / Z→A o ascendente/descendente. */
-  catalogSort: CatalogSortKey = 'name-asc';
 
   private readonly store = inject(SignalStore);
   private readonly selectors = inject(SignalStoreSelectors);
@@ -165,8 +160,11 @@ export class AllProductsComponent implements OnInit {
     });
   }
 
-  /** Productos filtrados por categoría, búsqueda (nombre / slug / categoría) y ordenados. */
-  visibleProducts(): Product[] {
+  /**
+   * Sin ordenar. La vista lista ordena con `MatSort` en `app-products-list`.
+   * La rejilla se ordena por nombre ascendente.
+   */
+  catalogFilteredOnly(): Product[] {
     let out = [...this.productsList()];
     const catSlug = (this.catalogCategory || '').trim();
 
@@ -185,36 +183,17 @@ export class AllProductsComponent implements OnInit {
       out = out.filter((p) => this.productMatchesQuery(p, q, categoryMatchSlugs));
     }
 
-    const [by, dir] = this.catalogSort.split('-') as ['name' | 'stock' | 'price', 'asc' | 'desc'];
-    const mul = dir === 'asc' ? 1 : -1;
-    const locale = this.langVal() || 'es';
-
-    if (by === 'stock') {
-      out.sort((a, b) => {
-        const na = Number(a.stockQty);
-        const nb = Number(b.stockQty);
-        const va = Number.isFinite(na) ? na : 0;
-        const vb = Number.isFinite(nb) ? nb : 0;
-        return mul * (va - vb);
-      });
-    } else if (by === 'price') {
-      out.sort((a, b) => {
-        const pa = Number(a.salePrice);
-        const pb = Number(b.salePrice);
-        const va = Number.isFinite(pa) ? pa : 0;
-        const vb = Number.isFinite(pb) ? pb : 0;
-        return mul * (va - vb);
-      });
-    } else {
-      out.sort(
-        (a, b) =>
-          mul *
-          String(a.title || a.titleUrl || '')
-            .trim()
-            .localeCompare(String(b.title || b.titleUrl || '').trim(), locale, { sensitivity: 'base' }),
-      );
-    }
     return out;
+  }
+
+  /** Rejilla: mismos filtros, orden fijo por nombre. */
+  visibleProductsForGrid(): Product[] {
+    const locale = this.langVal() || 'es';
+    return [...this.catalogFilteredOnly()].sort((a, b) =>
+      String(a.title || a.titleUrl || '')
+        .trim()
+        .localeCompare(String(b.title || b.titleUrl || '').trim(), locale, { sensitivity: 'base' }),
+    );
   }
 
   private productHasCategorySlug(p: Product, slug: string): boolean {

@@ -15,8 +15,26 @@
                 @for (chipKey of announcementChipKeys(); track chipKey) {
                   @if (chipKey === shippingChipToken) {
                     <span [class]="announcementChipClass(chipKey)">
-                      {{ 'Free_shipping_limit' | translate | async }} {{ cart.shippingLimit | priceFormat }}
+                      {{ 'ANNOUNCE_SHIPPING_FULL' | translate | async }} {{ cart.shippingLimit | priceFormat }}
                     </span>
+                  } @else if (chipKey === enterizosChipToken) {
+                    <button
+                      type="button"
+                      [class]="announcementChipClass(chipKey)"
+                      (click)="goAnnouncementCtaFilter($event)"
+                      [attr.aria-label]="('ANNOUNCE_CTA_ENTERIZOS_ARIA' | translate | async) || ''"
+                    >
+                      {{ 'ANNOUNCE_CTA_ENTERIZOS' | translate | async }}
+                    </button>
+                  } @else if (isCatalogPromoChipKey(chipKey)) {
+                    <button
+                      type="button"
+                      [class]="announcementChipClass(chipKey)"
+                      (click)="goCatalogPromoDeals($event)"
+                      [attr.aria-label]="('ANNOUNCE_CTA_PROMOS_ARIA' | translate | async) || ''"
+                    >
+                      {{ chipKey | translate | async }}
+                    </button>
                   } @else {
                     <span [class]="announcementChipClass(chipKey)">
                       {{ chipKey | translate | async }}
@@ -28,8 +46,28 @@
                 @for (chipKey of announcementChipKeys(); track chipKey) {
                   @if (chipKey === shippingChipToken) {
                     <span [class]="announcementChipClass(chipKey)">
-                      {{ 'Free_shipping_limit' | translate | async }} {{ cart.shippingLimit | priceFormat }}
+                      {{ 'ANNOUNCE_SHIPPING_FULL' | translate | async }} {{ cart.shippingLimit | priceFormat }}
                     </span>
+                  } @else if (chipKey === enterizosChipToken) {
+                    <button
+                      type="button"
+                      [class]="announcementChipClass(chipKey)"
+                      (click)="goAnnouncementCtaFilter($event)"
+                      [attr.aria-label]="('ANNOUNCE_CTA_ENTERIZOS_ARIA' | translate | async) || ''"
+                      tabindex="-1"
+                    >
+                      {{ 'ANNOUNCE_CTA_ENTERIZOS' | translate | async }}
+                    </button>
+                  } @else if (isCatalogPromoChipKey(chipKey)) {
+                    <button
+                      type="button"
+                      [class]="announcementChipClass(chipKey)"
+                      (click)="goCatalogPromoDeals($event)"
+                      [attr.aria-label]="('ANNOUNCE_CTA_PROMOS_ARIA' | translate | async) || ''"
+                      tabindex="-1"
+                    >
+                      {{ chipKey | translate | async }}
+                    </button>
                   } @else {
                     <span [class]="announcementChipClass(chipKey)">
                       {{ chipKey | translate | async }}
@@ -56,10 +94,13 @@
             <div class="home-promo-slide-scrim" aria-hidden="true"></div>
             <div class="home-promo-slide-cta">
               <div class="home-promo-slide-hero-card">
+                <div class="home-promo-slide-hero-accent" aria-hidden="true">
+                  <span class="home-promo-slide-hero-accent__hair"></span>
+                  <mat-icon class="home-promo-slide-hero-accent__spark">auto_awesome</mat-icon>
+                  <span class="home-promo-slide-hero-accent__hair"></span>
+                </div>
                 <p class="home-promo-slide-kicker">{{ siteBrandName }}</p>
-                <h2 class="home-promo-slide-headline">
-                  {{ 'Eshop_subtitle' | translate | async }}
-                </h2>
+                <h2 class="home-promo-slide-headline">{{ 'Eshop_subtitle' | translate | async }}</h2>
                 @if (('Home_promo_text_link' | translate | async); as promoText) {
                   @if (('Home_promo_link' | translate | async); as promoLink) {
                     <div class="home-promo-slide-actions">
@@ -110,58 +151,51 @@
           }
         </app-carousel>
       </div>
-      } @if ((categories())?.length) {
-      <div class="home-primary-header">
-        <div class="home-primary-container">
-          <a
-            class="home-mobile-catalog-cta"
-            [routerLink]="['/' + lang() + '/product/all']"
-            [queryParams]="{ page: 1, sort: 'newest' }"
-            [attr.aria-label]="('HOME_VIEW_ALL_PRODUCTS_ARIA' | translate | async) || ('HOME_VIEW_ALL_PRODUCTS' | translate | async) || 'Ver productos'"
-          >
-            {{ ('HOME_VIEW_ALL_PRODUCTS' | translate | async) || 'Ver productos' }}
-          </a>
-          <div class="home-categories-links-wrap">
-            <div class="home-categories-links">
-              @for (cat of categories(); track cat.titleUrl) {
-              @if (!cat.menuHidden && !cat.parentTitleUrl && !cat.virtualNav) {
-              <a class="home-title-category" [routerLink]="['/' + lang() + '/product/category/' + cat.titleUrl]">
-                {{ cat.title }}
-              </a>
-              }
-              }
-            </div>
-          </div>
-        </div>
-      </div>
       }
-      <div class="container">
+      <div class="container home-content-stack">
         @if (loadingProducts()) {
         <mat-progress-bar mode="indeterminate"></mat-progress-bar>
         } @if (categories(); as categories) {
-        <div>
+        <div class="home-categories-embed">
           <app-categories-list
+            class="home-embed"
             [categories]="categories"
             [lang]="lang()"
             [expandCarouselCategories]="true"
-          >
-          </app-categories-list>
+          />
         </div>
-        }
-      </div>
-      @if (products()) {
-      <div class="home-primary-header">
-        <div class="home-primary-container">
-          <h1 class="home-title">{{ 'Products' | translate | async }}</h1>
+        } @if (loadingProducts() && !products()) {
+        <div class="home-loading-products" aria-hidden="true">
+          <mat-spinner class="home-spinner" diameter="36"></mat-spinner>
         </div>
-      </div>
-      }
-      <div class="container">
-        @if (loadingProducts()) {
-        <mat-spinner class="home-spinner"></mat-spinner>
-        }
-        @if (products(); as products) {
+        } @if (products(); as products) {
         <div>
+          <section class="home-catalog-bar" aria-labelledby="home-catalog-heading">
+            <div class="home-catalog-bar__inner">
+              <div class="home-catalog-bar__left">
+                <div class="home-catalog-bar__mark" aria-hidden="true">
+                  <mat-icon>auto_awesome</mat-icon>
+                </div>
+                <h2 class="home-catalog-bar__title" id="home-catalog-heading">
+                  <span class="home-catalog-bar__kicker">{{ 'HOME_CATALOG_EYEBROW' | translate | async }}</span>
+                  <span class="home-catalog-bar__title-sep" aria-hidden="true">·</span>
+                  <span class="home-catalog-bar__name">{{ 'Products' | translate | async }}</span>
+                </h2>
+              </div>
+              <a
+                class="home-catalog-bar__cta"
+                [routerLink]="['/', lang() || 'es', 'product', 'all']"
+                [queryParams]="{ page: 1, sort: 'newest' }"
+                [attr.aria-label]="('HOME_CATALOG_SEE_ALL_ARIA' | translate | async) || ''"
+                [attr.title]="('HOME_CATALOG_SEE_ALL_HINT' | translate | async) || ''"
+              >
+                <span class="home-catalog-bar__cta-text">{{ 'HOME_CATALOG_SEE_ALL' | translate | async }}</span>
+                <span class="home-catalog-bar__cta-ico" aria-hidden="true">
+                  <mat-icon>arrow_outward</mat-icon>
+                </span>
+              </a>
+            </div>
+          </section>
           <app-recent-products-strip [lang]="lang()" />
           <app-products-list
             [class.disabled]="loadingProducts()"

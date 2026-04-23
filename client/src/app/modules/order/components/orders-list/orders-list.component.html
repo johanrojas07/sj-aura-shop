@@ -1,54 +1,210 @@
 <div class="orders-page">
   <div class="orders-page-inner">
+    @if (showViewToggle && orders?.length) {
+      <div class="dash-admin-toolbar orders-view-toolbar">
+        <span class="orders-view-toolbar__label">{{ 'DASH_ORDERS_VIEW_LABEL' | translate | async }}</span>
+        <mat-button-toggle-group
+          class="orders-view-toggle"
+          [value]="viewMode()"
+          (change)="onViewChange($event)"
+          hideSingleSelectionIndicator
+        >
+          <mat-button-toggle value="table">
+            <mat-icon class="orders-mat-icon">table_view</mat-icon>
+            {{ 'DASH_ORDERS_VIEW_TABLE' | translate | async }}
+          </mat-button-toggle>
+          <mat-button-toggle value="cards">
+            <mat-icon class="orders-mat-icon">view_quilt</mat-icon>
+            {{ 'DASH_ORDERS_VIEW_CARDS' | translate | async }}
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+    }
+
     @if (orders === null || orders === undefined) {
       <mat-progress-bar mode="indeterminate" class="orders-progress"></mat-progress-bar>
     } @else if (!orders.length) {
       <p class="orders-list-empty">{{ 'ORDERS_LIST_EMPTY' | translate | async }}</p>
+    } @else if (viewMode() === 'table') {
+      <div class="dash-admin-table-wrap orders-table-shell">
+        <div class="orders-table-scroll" tabindex="0" role="region" [attr.aria-label]="'DASH_ORDERS_VIEW_TABLE' | translate | async">
+        <table mat-table matSort [dataSource]="dataSource" class="dash-admin-table orders-table">
+          <ng-container matColumnDef="orderId">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="orderId">{{ 'ORDER_TABLE_ID' | translate | async }}</th>
+            <td mat-cell *matCellDef="let order">
+              <span class="orders-table__id-cell">
+                <mat-icon class="orders-mat-icon orders-table__id-icon" aria-hidden="true">receipt_long</mat-icon>
+                <span class="orders-table__id">{{ order?.orderId }}</span>
+              </span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="status">{{ 'ORDER_TABLE_STATUS' | translate | async }}</th>
+            <td mat-cell *matCellDef="let order">
+              @if (allowStatusChange) {
+                <mat-form-field appearance="outline" floatLabel="always" class="orders-table__select" subscriptSizing="dynamic">
+                  <mat-select
+                    [value]="order.status"
+                    (selectionChange)="onStatusChange(order, $event.value)"
+                    [attr.aria-label]="'ORDER_CARD_CHANGE_STATUS' | translate | async"
+                  >
+                    @for (st of orderStatuses; track st) {
+                      <mat-option [value]="st">
+                        {{ ('ORDER_STATUS_' + st) | translate | async }}
+                      </mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              } @else {
+                <span class="order-status-badge orders-table__badge" [attr.data-status]="order?.status">
+                  {{ ('ORDER_STATUS_' + order?.status) | translate | async }}
+                </span>
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="amount">{{ 'ORDER_TABLE_AMOUNT' | translate | async }}</th>
+            <td mat-cell *matCellDef="let order">
+              <span class="orders-table__amount-pill">
+                <mat-icon class="orders-mat-icon orders-table__amount-icon" aria-hidden="true">payments</mat-icon>
+                <span class="orders-table__amount">{{ order?.amount | priceFormat }}</span>
+                @if (order?.currency) {
+                  <span class="orders-table__cur">{{ order?.currency }}</span>
+                }
+              </span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="customer">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="customer">{{ 'ORDER_TABLE_CUSTOMER' | translate | async }}</th>
+            <td mat-cell *matCellDef="let order">
+              <span class="orders-table__customer-cell">
+                <mat-icon class="orders-mat-icon orders-table__customer-icon" aria-hidden="true">person</mat-icon>
+                <span class="orders-table__email">{{ order?.customerEmail }}</span>
+              </span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="date">{{ 'ORDER_TABLE_DATE' | translate | async }}</th>
+            <td mat-cell *matCellDef="let order">
+              <div class="orders-table__date-wrap">
+                <mat-icon class="orders-mat-icon orders-table__date-icon" aria-hidden="true">calendar_today</mat-icon>
+                <div class="orders-table__date-stack">
+                  <span class="orders-table__date-main">{{ order?.dateAdded | date: 'mediumDate' }}</span>
+                  <span class="orders-table__date-sub">{{ order?.dateAdded | date: 'shortTime' }}</span>
+                  <span class="orders-table__date-rel" [title]="order?.dateAdded | date: 'medium'">
+                    {{ order?.dateAdded | relativeTime: currentLang }}
+                  </span>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="orders-table__actions-h"></th>
+            <td mat-cell *matCellDef="let order" class="orders-table__actions">
+              <a
+                mat-icon-button
+                class="dash-admin-icon-btn orders-table__icon-btn"
+                [routerLink]="detailLink(order?.orderId)"
+                [matTooltip]="'ORDER_ACTION_VIEW' | translate | async"
+                matTooltipPosition="left"
+                [attr.aria-label]="'ORDER_ACTION_VIEW' | translate | async"
+              >
+                <mat-icon class="orders-mat-icon">open_in_new</mat-icon>
+              </a>
+              <a
+                mat-icon-button
+                class="dash-admin-icon-btn orders-table__icon-btn orders-table__action-edit"
+                [routerLink]="detailLink(order?.orderId)"
+                [matTooltip]="'ORDER_ACTION_EDIT' | translate | async"
+                matTooltipPosition="left"
+                [attr.aria-label]="'ORDER_ACTION_EDIT' | translate | async"
+              >
+                <mat-icon class="orders-mat-icon">edit_square</mat-icon>
+              </a>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayColumns; trackBy: trackByOrderId"></tr>
+        </table>
+        </div>
+        <mat-paginator
+          class="orders-table-paginator"
+          [pageSizeOptions]="[10, 25, 50, 100]"
+          showFirstLastButtons
+          [attr.aria-label]="'ORDER_TABLE_PAGINATOR' | translate | async"
+        ></mat-paginator>
+      </div>
     } @else {
       <div class="orders-grid">
         @for (order of orders; track order.orderId) {
-          <mat-card class="order-card" appearance="outlined">
-            <mat-card-header class="order-card-header">
-              <div class="order-card-header-text">
+          <mat-card class="order-card" appearance="outlined" [attr.data-status]="order?.status">
+            <div class="order-card-top">
+              <div class="order-card-top__mark" aria-hidden="true">
+                <mat-icon class="orders-mat-icon order-card-top__mark-icon">shopping_bag</mat-icon>
+              </div>
+              <div class="order-card-top__meta">
+                <span class="order-card-kicker">{{ 'ORDER_TABLE_ID' | translate | async }}</span>
                 <span class="order-card-id">{{ order?.orderId }}</span>
-                <span class="order-card-status-chip" [attr.data-status]="order?.status">
+                <span class="order-status-badge order-card__badge" [attr.data-status]="order?.status">
                   {{ ('ORDER_STATUS_' + order?.status) | translate | async }}
                 </span>
               </div>
-            </mat-card-header>
-            <mat-card-content class="order-card-body">
-              <div class="order-card-row">
-                <span class="order-card-label">{{ 'ORDER_CARD_CREATED' | translate | async }}</span>
-                <span class="order-card-value order-card-time" [title]="order?.dateAdded | date: 'medium'">
-                  {{ order?.dateAdded | relativeTime: currentLang }}
-                </span>
-              </div>
-              <div class="order-card-row">
-                <span class="order-card-label">{{ 'ORDER_CARD_AMOUNT' | translate | async }}</span>
-                <span class="order-card-value order-card-amount">
+            </div>
+
+            <div class="order-card-hero-amount">
+              <mat-icon class="orders-mat-icon order-card-hero-amount__icon" aria-hidden="true">payments</mat-icon>
+              <div class="order-card-hero-amount__text">
+                <span class="order-card-hero-amount__label">{{ 'ORDER_CARD_AMOUNT' | translate | async }}</span>
+                <span class="order-card-hero-amount__value">
                   {{ order?.amount | priceFormat }}
                   @if (order?.currency) {
-                    <span class="order-card-currency">{{ order?.currency }}</span>
+                    <span class="order-card-hero-amount__cur">{{ order?.currency }}</span>
                   }
                 </span>
               </div>
-              <div class="order-card-row">
-                <span class="order-card-label">{{ 'ORDER_CARD_CUSTOMER' | translate | async }}</span>
-                <span class="order-card-value order-card-email">{{ order?.customerEmail }}</span>
+            </div>
+
+            <mat-card-content class="order-card-body">
+              <div class="order-card-stat">
+                <mat-icon class="orders-mat-icon order-card-stat__icon" aria-hidden="true">schedule</mat-icon>
+                <div class="order-card-stat__body">
+                  <span class="order-card-label">{{ 'ORDER_CARD_CREATED' | translate | async }}</span>
+                  <span class="order-card-value order-card-value--primary" [title]="order?.dateAdded | date: 'medium'">
+                    {{ order?.dateAdded | relativeTime: currentLang }}
+                  </span>
+                  <span class="order-card-sub">{{ order?.dateAdded | date: 'medium' }}</span>
+                </div>
               </div>
-              <div class="order-card-row">
-                <span class="order-card-label">{{ 'ORDER_CARD_TYPE' | translate | async }}</span>
-                <span class="order-card-value">{{ order?.type }}</span>
+
+              <div class="order-card-stat">
+                <mat-icon class="orders-mat-icon order-card-stat__icon" aria-hidden="true">person</mat-icon>
+                <div class="order-card-stat__body">
+                  <span class="order-card-label">{{ 'ORDER_CARD_CUSTOMER' | translate | async }}</span>
+                  <span class="order-card-value">{{ order?.customerEmail }}</span>
+                </div>
               </div>
-              <div class="order-card-row order-card-row--payment">
-                <span class="order-card-label">{{ 'ORDER_CARD_PAYMENT' | translate | async }}</span>
-                <span class="order-card-value">{{ order?.outcome?.seller_message || '—' }}</span>
+
+              <div class="order-card-stat">
+                <mat-icon class="orders-mat-icon order-card-stat__icon" aria-hidden="true">sell</mat-icon>
+                <div class="order-card-stat__body">
+                  <span class="order-card-label">{{ 'ORDER_CARD_TYPE' | translate | async }}</span>
+                  <span class="order-card-value">{{ order?.type }}</span>
+                </div>
+              </div>
+
+              <div class="order-card-stat order-card-stat--wide">
+                <mat-icon class="orders-mat-icon order-card-stat__icon" aria-hidden="true">credit_card</mat-icon>
+                <div class="order-card-stat__body">
+                  <span class="order-card-label">{{ 'ORDER_CARD_PAYMENT' | translate | async }}</span>
+                  <span class="order-card-value order-card-value--muted">{{ order?.outcome?.seller_message || '—' }}</span>
+                </div>
               </div>
 
               @if (allowStatusChange) {
                 <div class="order-card-admin">
-                  <mat-form-field appearance="outline" class="order-card-status-field" subscriptSizing="fixed">
+                  <mat-form-field appearance="outline" floatLabel="always" class="order-card-status-field" subscriptSizing="dynamic">
                     <mat-label>{{ 'ORDER_CARD_CHANGE_STATUS' | translate | async }}</mat-label>
+                    <mat-icon matPrefix class="orders-mat-icon order-card-admin__prefix">tune</mat-icon>
                     <mat-select
                       [value]="order.status"
                       (selectionChange)="onStatusChange(order, $event.value)"
@@ -60,14 +216,29 @@
                         </mat-option>
                       }
                     </mat-select>
-                    <mat-hint>{{ 'ORDER_CARD_STATUS_HINT' | translate | async }}</mat-hint>
                   </mat-form-field>
                 </div>
               }
 
               <div class="order-card-actions">
-                <a mat-flat-button color="primary" [routerLink]="[orderUrl + order?.orderId]" class="order-card-btn">
-                  {{ 'ORDER_CARD_DETAIL' | translate | async }}
+                <a
+                  mat-icon-button
+                  class="dash-admin-icon-btn orders-table__icon-btn"
+                  [routerLink]="detailLink(order?.orderId)"
+                  [matTooltip]="'ORDER_ACTION_VIEW' | translate | async"
+                  [attr.aria-label]="'ORDER_ACTION_VIEW' | translate | async"
+                >
+                  <mat-icon class="orders-mat-icon">open_in_new</mat-icon>
+                </a>
+                <a
+                  mat-icon-button
+                  color="primary"
+                  class="dash-admin-icon-btn order-card-icon-detail orders-table__icon-btn"
+                  [routerLink]="detailLink(order?.orderId)"
+                  [matTooltip]="'ORDER_ACTION_EDIT' | translate | async"
+                  [attr.aria-label]="'ORDER_ACTION_EDIT' | translate | async"
+                >
+                  <mat-icon class="orders-mat-icon">edit_square</mat-icon>
                 </a>
               </div>
             </mat-card-content>

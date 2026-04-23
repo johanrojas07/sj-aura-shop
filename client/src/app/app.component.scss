@@ -1,11 +1,14 @@
-/* Panel carrito: el contenido define el ancho (bolsa + sugerencias). Material suele forzar ~360px sin esto. */
+/* Panel carrito: ancho al contenido; altura forzada a viewport (evita media panel en móvil). */
 .cart-drawer-sidenav {
   width: fit-content !important;
   min-width: min(100vw - 8px, 300px);
   max-width: min(100vw - 8px, 1040px) !important;
-  height: 100dvh;
-  max-height: 100dvh;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  max-height: 100dvh !important;
+  top: 0 !important;
   box-sizing: border-box;
+  align-self: flex-start;
 }
 
 .cart-drawer-sidenav .mat-drawer-inner-container {

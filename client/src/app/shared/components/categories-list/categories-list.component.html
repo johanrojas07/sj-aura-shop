@@ -1,11 +1,18 @@
 @if (withSlider) {
-<app-carousel
-  [intervalForSlider]="carouselIntervalMs"
-  [showDots]="carouselShowDots"
-  [autoAdvance]="carouselAutoAdvance"
+<div
+  class="categories-carousel-wrap"
+  role="region"
+  [attr.aria-label]="('CATEGORIES_CAROUSEL_ARIA' | translate | async) || 'Categories'"
 >
-  <ng-container *ngTemplateOutlet="categoriesTemplate"></ng-container>
-</app-carousel>
+  <p class="categories-carousel-hint" aria-hidden="true">{{ 'CATEGORIES_CAROUSEL_HINT' | translate | async }}</p>
+  <app-carousel
+    [intervalForSlider]="carouselIntervalMs"
+    [showDots]="carouselShowDots"
+    [autoAdvance]="carouselAutoAdvance"
+  >
+    <ng-container *ngTemplateOutlet="categoriesTemplate"></ng-container>
+  </app-carousel>
+</div>
 } @if (!withSlider) {
 <div class="categories-list">
   <ng-container *ngTemplateOutlet="categoriesTemplate"></ng-container>

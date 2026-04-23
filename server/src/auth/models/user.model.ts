@@ -11,5 +11,7 @@ export interface EshopUser {
   roles?: string[];
   /** Puntos de fidelidad (Firestore); se incrementan al completar pedidos. */
   loyaltyPoints?: number;
+  /** Hash HMAC del último móvil verificado para fidelización (evita merges duplicados). */
+  loyaltyVerifiedPhoneHash?: string;
   [key: string]: unknown;
 }

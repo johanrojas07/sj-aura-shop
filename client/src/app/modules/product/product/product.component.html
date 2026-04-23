@@ -25,7 +25,10 @@
       </app-product-content>
 
       <section class="product-pdp-extra" aria-labelledby="pdp-desc-heading">
-        <h2 id="pdp-desc-heading" class="product-pdp-section-title">{{ 'Description' | translate | async }}</h2>
+        <h2 id="pdp-desc-heading" class="product-pdp-section-title">
+          <i class="material-icons product-pdp-section-ico" aria-hidden="true">description</i>
+          <span class="product-pdp-section-title-text">{{ 'Description' | translate | async }}</span>
+        </h2>
         <div class="product-pdp-tab-body">
           @for (block of product$()?.descriptionFull || []; track $index) {
           <div class="product-pdp-prose" [innerHTML]="block"></div>

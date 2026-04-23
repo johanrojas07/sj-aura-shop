@@ -5,10 +5,16 @@ import { ReactiveFormsModule } from '@angular/forms';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule } from '@angular/material/sort';
 
 import { OrdersListComponent } from './orders-list/orders-list.component';
 import { OrderDetailComponent } from './order-detail/order-detail.component';
@@ -31,10 +37,16 @@ import { RelativeTimePipe } from '../../../pipes/relative-time.pipe';
     PriceFormatPipe,
     MatCardModule,
     MatButtonModule,
+    MatButtonToggleModule,
     MatChipsModule,
+    MatIconModule,
     MatProgressBarModule,
     MatSelectModule,
     MatFormFieldModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatTooltipModule,
     RelativeTimePipe,
   ],
   exports: [

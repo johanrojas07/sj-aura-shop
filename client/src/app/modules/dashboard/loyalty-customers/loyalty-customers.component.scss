@@ -1,0 +1,444 @@
+:host {
+  display: block;
+  padding: 1.1rem 1.25rem 2.25rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+// --- Page header: jerarquía y separación del cuerpo
+.dash-loyalty__head.dash-admin-page-header {
+  margin-bottom: 0;
+  padding-bottom: 1.15rem;
+  border-bottom: 1px solid var(--admin-border, #e2e8f0);
+  align-items: flex-start;
+}
+
+.dash-loyalty__title.dash-admin-page-title {
+  font-size: clamp(1.4rem, 2.5vw, 1.75rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.dash-loyalty__head-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding-top: 0.1rem;
+}
+
+.dash-loyalty__manual-btn {
+  border-radius: var(--admin-radius-sm, 8px) !important;
+  font-weight: 600 !important;
+
+  mat-icon {
+    margin-right: 0.35rem;
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    vertical-align: middle;
+  }
+}
+
+// --- Aviso cap
+.dash-loyalty__warn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--admin-radius-sm, 10px);
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #92400e;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  margin: 0.9rem 0 0;
+
+  mat-icon {
+    font-size: 1.15rem;
+    width: 1.15rem;
+    height: 1.15rem;
+    flex-shrink: 0;
+  }
+}
+
+// --- Card de filtros (alineada con detalle de cliente)
+.dash-loyalty__filters {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+:host ::ng-deep .dash-loyalty__filter-card.dash-admin-card .mat-mdc-card-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  min-height: 2.85rem;
+  margin: 0;
+  padding: 0.65rem 1rem 0.7rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #fafbfc 50%, #fff 100%);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.07);
+  border-radius: 0;
+}
+
+:host ::ng-deep .dash-loyalty__filter-header .mat-mdc-card-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0.55rem 0 0;
+  width: auto;
+  height: auto;
+  flex-shrink: 0;
+}
+
+:host ::ng-deep .dash-loyalty__filter-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 10px;
+  background: #fff;
+  color: #4338ca;
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+
+  mat-icon {
+    font-size: 1.15rem;
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+}
+
+:host ::ng-deep .dash-loyalty__filter-card .mat-mdc-card-header-text {
+  min-width: 0;
+  flex: 1 1 auto;
+  padding: 0;
+  align-self: center;
+}
+
+:host ::ng-deep .dash-loyalty__filter-card .mat-mdc-card-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--admin-text, #0f172a);
+}
+
+:host ::ng-deep .dash-loyalty__filter-card .mat-mdc-card-content {
+  padding: 0.75rem 1rem 0.9rem;
+}
+
+// Grid de filtros: reutiliza .dash-admin-form-grid--tight; refuerzo local
+.dash-loyalty__filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+  gap: 0.45rem 0.75rem;
+  align-items: start;
+}
+
+.dash-loyalty__field-icon {
+  margin-right: 0.1rem;
+  opacity: 0.72;
+  font-size: 1rem;
+  width: 1rem;
+  height: 1rem;
+}
+
+.dash-loyalty__field--num {
+  max-width: 132px;
+}
+
+.dash-loyalty__filter-actions {
+  display: flex;
+  align-items: flex-end;
+  min-height: 2.5rem;
+  padding-bottom: 0.1rem;
+}
+
+// --- Errores / carga
+.dash-loyalty__skeleton-wrap {
+  margin: 0.5rem 0 1.15rem;
+}
+
+.dash-loyalty__alert {
+  margin: 0 0 0.9rem;
+}
+
+// --- Tabla: más compacta, escaneo rápido
+.dash-loyalty__table-wrap {
+  margin: 0.2rem 0 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+:host ::ng-deep .dash-loyalty__mat-table.dash-admin-table {
+  .mat-mdc-header-cell,
+  .mat-mdc-cell {
+    padding: 0.4rem 0.5rem;
+  }
+
+  // Las celdas deben ser table-cell para que el borde de fila recorra toda la fila
+  tr.mat-mdc-row .mat-mdc-cell {
+    box-sizing: border-box;
+    vertical-align: middle;
+  }
+
+  .mat-mdc-header-row.dash-loyalty__header-row {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  .mat-mdc-header-row .mat-mdc-header-cell {
+    background: #f1f5f9;
+  }
+
+  .mat-mdc-cell {
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+
+}
+
+.dash-loyalty__col-type,
+.dash-loyalty__kind-cell {
+  width: 1%;
+  min-width: 6.5rem;
+  max-width: 8.5rem;
+}
+
+.dash-loyalty__col-points,
+.dash-loyalty__points-cell {
+  width: 1%;
+  min-width: 5.5rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.dash-loyalty__col-actions {
+  width: 3rem;
+  min-width: 3rem;
+  text-align: right;
+  white-space: nowrap;
+  padding-right: 0.2rem !important;
+}
+
+.dash-loyalty__name-cell {
+  font-weight: 500;
+  color: var(--admin-text, #0f172a);
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dash-loyalty__col-email,
+.dash-loyalty__email-cell {
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.78rem;
+  color: var(--admin-text-muted, #64748b);
+}
+
+// El td no puede ser flex (rompe altura/borde de fila en la tabla)
+.dash-loyalty__kind-cell {
+  vertical-align: middle;
+}
+
+.dash-loyalty__kind-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.25rem;
+  min-width: 0;
+}
+
+.dash-loyalty__mono {
+  font-family: ui-monospace, 'Cascadia Mono', 'Segoe UI', monospace;
+  font-size: 0.8rem;
+}
+
+.dash-loyalty__phone-cell {
+  font-size: 0.78rem;
+  color: var(--admin-text, #0f172a);
+}
+
+.dash-loyalty__points-cell {
+  vertical-align: middle;
+}
+
+.dash-loyalty__points-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  padding: 0.12rem 0.38rem 0.12rem 0.4rem;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  background: rgba(79, 70, 229, 0.1);
+  color: #4338ca;
+}
+
+.dash-loyalty__points-cell--zero .dash-loyalty__points-pill {
+  background: rgba(100, 116, 139, 0.1);
+  color: #64748b;
+  font-weight: 600;
+}
+
+.dash-loyalty__points-suffix {
+  margin-left: 0.15rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--admin-text-muted, #64748b);
+  text-transform: lowercase;
+}
+
+.dash-loyalty__muted {
+  color: var(--dash-muted, #64748b);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  max-width: 10.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Badges tipo / fusionado
+.dash-loyalty__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.4rem;
+  border-radius: 6px;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  margin: 0;
+  border: 1px solid transparent;
+}
+
+.dash-loyalty__badge--reg {
+  background: rgba(124, 58, 237, 0.1);
+  color: #5b21b6;
+  border-color: rgba(91, 33, 182, 0.16);
+}
+
+.dash-loyalty__badge--guest {
+  background: rgba(14, 165, 233, 0.1);
+  color: #0369a1;
+  border-color: rgba(3, 105, 161, 0.14);
+}
+
+.dash-loyalty__badge--merged {
+  background: rgba(100, 116, 139, 0.1);
+  color: #475569;
+  border-color: rgba(71, 85, 105, 0.2);
+}
+
+// Pager
+.dash-loyalty__pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem 1rem;
+  margin-top: 0.75rem;
+  padding-top: 0.4rem;
+}
+
+.dash-loyalty__pager-info {
+  flex: 1 1 12rem;
+  min-width: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--admin-text-muted, #64748b);
+}
+
+.dash-loyalty__pager-page {
+  font-weight: 700;
+  color: var(--admin-text, #0f172a);
+}
+
+.dash-loyalty__pager-sep {
+  margin: 0 0.2rem;
+  color: #cbd5e1;
+}
+
+.dash-loyalty__pager-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+:host ::ng-deep .dash-loyalty__pager-nav .mat-mdc-icon-button {
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+
+  .mat-mdc-button-touch-target {
+    height: 2.25rem;
+  }
+}
+
+.dash-loyalty__empty {
+  padding: 1.75rem 1rem;
+  text-align: center;
+  color: var(--dash-muted, #64748b);
+  font-size: 0.875rem;
+  border: 1px dashed var(--admin-border, #e2e8f0);
+  border-radius: var(--admin-radius-md, 12px);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+// --- Responsive
+@media (max-width: 720px) {
+  :host {
+    padding: 0.75rem 0.9rem 1.75rem;
+  }
+
+  .dash-loyalty__head.dash-admin-page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dash-loyalty__head-actions {
+    width: 100%;
+  }
+
+  .dash-loyalty__manual-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .dash-loyalty__field--num {
+    max-width: 100%;
+  }
+
+  :host ::ng-deep .dash-loyalty__mat-table.dash-admin-table {
+    .mat-mdc-header-cell,
+    .mat-mdc-cell {
+      padding: 0.35rem 0.4rem;
+    }
+  }
+
+  .dash-loyalty__col-email,
+  .dash-loyalty__email-cell {
+    max-width: 9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dash-loyalty__pager {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dash-loyalty__pager-nav {
+    justify-content: flex-end;
+  }
+}

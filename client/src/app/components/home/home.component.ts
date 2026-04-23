@@ -7,9 +7,9 @@ import { Observable, combineLatest, Subscription, of } from 'rxjs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
 
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 
 import { TranslateService } from '../../services/translate.service';
 import { languages, sortOptions } from '../../shared/constants';
@@ -33,7 +33,7 @@ import { CartDrawerService } from '../../services/cart-drawer.service';
     selector: 'app-home',
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.scss'],
-    imports: [CommonModule, MatSnackBarModule, CategoriesListComponent, CarouselComponent, ProductContentComponent, ProductsListComponent, RecentProductsStripComponent, PaginationComponent, RouterLink, MatProgressBarModule, MatProgressSpinnerModule, TranslatePipe, PriceFormatPipe],
+    imports: [CommonModule, CategoriesListComponent, CarouselComponent, ProductContentComponent, ProductsListComponent, RecentProductsStripComponent, PaginationComponent, RouterLink, MatProgressBarModule, MatProgressSpinnerModule, MatIconModule, TranslatePipe, PriceFormatPipe],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeComponent implements AfterViewInit, OnDestroy {
@@ -60,16 +60,27 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   readonly component = 'homeComponent';
 
-  /** Token en `announcementChipKeys` (config) para el chip con umbral de envío + precio. */
+  /** Chip: texto “Envío gratis en pedidos desde” + monto (cart.shippingLimit). */
   static readonly ANNOUNCEMENT_SHIPPING_TOKEN = '__SHIPPING__';
+  /**
+   * Chip clicable: navega a catálogo con categoría + solo en oferta (`ofertas=1`).
+   * Ajusta slug en `ANNOUNCE_CTA_CATEGORY_SLUG` si tu categoría en Firestore es otra.
+   */
+  static readonly ANNOUNCEMENT_ENTERIZOS_TOKEN = '__ENTERIZOS_DISCOUNT__';
+  static readonly ANNOUNCE_CTA_CATEGORY_SLUG = 'enterizos';
 
-  /** Expuesto al template para comparar con `chipKey`. */
   readonly shippingChipToken = HomeComponent.ANNOUNCEMENT_SHIPPING_TOKEN;
+  readonly enterizosChipToken = HomeComponent.ANNOUNCEMENT_ENTERIZOS_TOKEN;
+
+  /** Claves cuyo texto (ANNOUNCE_BAR_*) abre el catálogo con filtro ofertas. */
+  isCatalogPromoChipKey(key: string): boolean {
+    return key === 'ANNOUNCE_BAR_MID' || key === 'ANNOUNCE_BAR_FLASH';
+  }
 
   /** Orden de chips: Firestore `configs/default` → `es|en.announcementChipKeys`; si no hay, demo. */
   announcementChipKeys: Signal<string[]>;
 
-  /** 3 productos por slide en pantallas anchas; 2 en las demás (BreakpointObserver). */
+  /** 3 (≥1100px), 4 (móvil ≤767, grid 2×2), 2 (tablet) — BreakpointObserver. */
   readonly heroChunkSize: Signal<number>;
   readonly heroSpotlightSlides: Signal<Product[][]>;
 
@@ -81,7 +92,6 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     private meta: Meta,
     private title: Title,
     private translate: TranslateService,
-    private snackBar: MatSnackBar,
     private store: SignalStore,
     private selectors: SignalStoreSelectors,
     private themeService: ThemeService,
@@ -115,14 +125,14 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       const locale = (def?.[lang] ?? def?.['es']) as Record<string, unknown> | undefined;
       const raw = locale?.['announcementChipKeys'];
       if (Array.isArray(raw) && raw.length) {
-        return raw.filter((k): k is string => typeof k === 'string');
+        return raw
+          .filter((k): k is string => typeof k === 'string')
+          .filter((k) => k !== 'Home_promo');
       }
       return [
-        'Home_promo',
-        'ANNOUNCE_BAR_MID',
-        'ANNOUNCE_BAR_FLASH',
         HomeComponent.ANNOUNCEMENT_SHIPPING_TOKEN,
-        'ANNOUNCE_BAR_NOTE',
+        'ANNOUNCE_BAR_FLASH',
+        HomeComponent.ANNOUNCEMENT_ENTERIZOS_TOKEN,
       ];
     });
 
@@ -138,12 +148,17 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     this.products =  this.selectors.products;
 
     this.heroChunkSize = toSignal(
-      this.breakpointObserver.observe('(min-width: 1100px)').pipe(map((r) => (r.matches ? 3 : 2))),
+      combineLatest([
+        this.breakpointObserver.observe('(min-width: 1100px)'),
+        this.breakpointObserver.observe('(max-width: 767px)'),
+      ]).pipe(
+        map(([wide, mobile]) => (wide.matches ? 3 : mobile.matches ? 4 : 2)),
+      ),
       { initialValue: 2 },
     );
 
     /**
-     * Slides del carrusel: trozos de 3 o 2 productos según ancho; hasta 3 slides (chunk×3 ítems).
+     * Slides del carrusel: 3, 2 o 4 productos/slide (según ancho). Hasta 3 slides (hasta chunk×3 ítems en total).
      */
     this.heroSpotlightSlides = computed(() => {
       const chunk = this.heroChunkSize();
@@ -187,8 +202,14 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     if (key === HomeComponent.ANNOUNCEMENT_SHIPPING_TOKEN) {
       return `${base} ${base}--soft home-promo-shipping`;
     }
+    if (key === HomeComponent.ANNOUNCEMENT_ENTERIZOS_TOKEN) {
+      return `${base} ${base}--accent ${base}--action`;
+    }
     if (key === 'Home_promo') {
       return `${base} ${base}--soft home-promo-basic`;
+    }
+    if (this.isCatalogPromoChipKey(key)) {
+      return `${base} ${base}--accent ${base}--action`;
     }
     if (key.startsWith('ANNOUNCE_BAR_')) {
       return `${base} ${base}--accent`;
@@ -196,24 +217,48 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     return `${base} ${base}--soft`;
   }
 
+  /**
+   * Catálogo filtrado: enterizos (u otro slug) y solo ofertas (API: `onSale` / ofertas=1).
+   */
+  goAnnouncementCtaFilter(event?: Event): void {
+    event?.preventDefault();
+    const lang = this.lang() || languages[0];
+    this.router
+      .navigate([`/${lang}/product/all`], {
+        queryParams: {
+          categories: HomeComponent.ANNOUNCE_CTA_CATEGORY_SLUG,
+          ofertas: '1',
+          page: 1,
+          sort: this.sortBy() || 'newest',
+        },
+      })
+      .then(() => {
+        this.store.updatePosition({ productsComponent: 0 });
+      });
+  }
+
+  /**
+   * Catálogo general: novedades / ofertas (misma query que usa el módulo productos).
+   */
+  goCatalogPromoDeals(event?: Event): void {
+    event?.preventDefault();
+    const lang = this.lang() || languages[0];
+    this.router
+      .navigate([`/${lang}/product/all`], {
+        queryParams: {
+          page: 1,
+          sort: 'newest',
+          ofertas: '1',
+        },
+      })
+      .then(() => {
+        this.store.updatePosition({ productsComponent: 0 });
+      });
+  }
+
   addToCart(id: string): void {
     this.cartDrawer.open();
     this.store.addToCart('?id=' + id);
-
-    this.translate.getTranslations$()
-      .pipe(map(translations => translations
-        ? { message: translations['ADDED_TO_CART'] || 'Producto agregado al carrito', action: translations['TO_CART'] || 'Ver bolsa' }
-        : { message: 'Producto agregado al carrito', action: 'Ver bolsa' }
-        ), take(1))
-      .subscribe(({ message, action }) => {
-        const snackBarRef = this.snackBar.open(message, action, {
-          duration: 3800,
-          panelClass: ['eshop-toast'],
-          horizontalPosition: 'center',
-          verticalPosition: 'bottom',
-        });
-        snackBarRef.onAction().pipe(take(1)).subscribe(() => this.cartDrawer.open());
-      });
   }
 
   removeFromCart(id: string): void {
@@ -271,7 +316,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     return slide.map((p) => p._id || p.titleUrl).join('\0');
   }
 
-  /** Slide 0 = hero; slides ≥1 = vitrina (2 o 3 productos según pantalla). */
+  /** Slide 0 = hero; slides ≥1 = vitrina (2, 3 o 4 productos/slide según ancho). */
   onHeroCarouselSlide(index: number): void {
     const html = this._document.documentElement;
     if (index > 0) {

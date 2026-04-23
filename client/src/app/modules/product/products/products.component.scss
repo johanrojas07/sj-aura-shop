@@ -242,4 +242,152 @@
     container-type: inline-size;
     container-name: catalog-main;
   }
+
+  /**
+   * Móvil: acceso a filtros al hacer scroll (mismo breakpoint que .products-mobile-filter).
+   */
+  .products-filter-fab {
+    display: none;
+  }
+
+  @media screen and (max-width: 600px) {
+    .container.products-content {
+      padding-bottom: max(4.75rem, env(safe-area-inset-bottom, 0px) + 3.5rem);
+    }
+
+    .products-filter-fab {
+      position: fixed;
+      right: max(14px, env(safe-area-inset-right, 0px) + 8px);
+      bottom: max(1.1rem, env(safe-area-inset-bottom, 0px) + 14px);
+      z-index: 80;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      min-height: 48px;
+      padding: 0 1rem 0 0.85rem;
+      margin: 0;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      font-family: var(--font-nav);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      background: linear-gradient(155deg, rgba(255, 252, 254, 0.98) 0%, var(--section-tint) 55%, var(--surface-blush) 100%);
+      box-shadow:
+        0 2px 0 rgba(255, 255, 255, 0.88) inset,
+        0 10px 32px rgba(42, 36, 38, 0.12),
+        0 4px 14px rgba(168, 72, 114, 0.1);
+      -webkit-tap-highlight-color: transparent;
+      transition:
+        transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.22s ease,
+        opacity 0.25s ease;
+
+      &:active {
+        transform: scale(0.97);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--accent-brand-green-mid);
+        outline-offset: 3px;
+      }
+
+      &--open {
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(0.92) translateY(6px);
+      }
+
+      &__ico {
+        font-size: 1.15rem !important;
+        width: 1.15rem !important;
+        height: 1.15rem !important;
+        line-height: 1 !important;
+        color: var(--accent-brand-green);
+        opacity: 0.95;
+      }
+
+      &__text {
+        max-width: 6.5rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      &__badge {
+        position: absolute;
+        top: -6px;
+        right: -4px;
+        min-width: 1.2rem;
+        height: 1.2rem;
+        padding: 0 5px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-full);
+        font-size: 0.62rem;
+        font-weight: 800;
+        font-family: var(--font-display);
+        line-height: 1;
+        color: #fffefd;
+        background: linear-gradient(135deg, var(--accent-brand-green-mid), var(--accent-brand-green));
+        border: 2px solid rgba(255, 252, 254, 0.95);
+        box-shadow: 0 2px 8px rgba(168, 72, 114, 0.35);
+      }
+    }
+
+    /**
+     * Drawer de filtros: vive dentro del scroll de `#main-content`. Si el usuario baja y abre
+     * el panel, sin `position: fixed` al viewport el panel queda fuera de la zona visible (pantalla en blanco).
+     * Alineamos top con `.main-scroll-wrap` para que coincida con el área de contenido bajo el header.
+     */
+    --catalog-drawer-top: calc(
+      var(--nav-stack-height, var(--nav-height)) + var(--site-announcement-height, 0px)
+    );
+
+    & ::ng-deep .products-sidebar-container {
+      overflow: visible !important;
+    }
+
+    & ::ng-deep .products-sidebar-container .mat-drawer-backdrop {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: auto !important;
+      height: auto !important;
+      z-index: 209 !important;
+    }
+
+    & ::ng-deep .products-sidebar-container .mat-drawer.products-sidebar {
+      position: fixed !important;
+      top: var(--catalog-drawer-top) !important;
+      left: 0 !important;
+      bottom: 0 !important;
+      right: auto !important;
+      height: auto !important;
+      max-height: none !important;
+      min-height: 0 !important;
+      width: min(100vw, 22rem) !important;
+      max-width: min(92vw, 22rem) !important;
+      z-index: 210 !important;
+      box-sizing: border-box;
+      box-shadow: 4px 0 28px rgba(15, 23, 42, 0.14);
+    }
+
+    & ::ng-deep .products-sidebar-container .mat-drawer.products-sidebar .mat-drawer-inner-container {
+      height: 100% !important;
+      max-height: calc(100dvh - var(--catalog-drawer-top)) !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      -webkit-overflow-scrolling: touch;
+      box-sizing: border-box;
+      padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+    }
+  }
 }

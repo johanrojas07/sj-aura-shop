@@ -210,7 +210,14 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 4px;
-  scrollbar-width: thin;
+  /* Sin barra visible: el listado sigue con scroll. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    width: 0;
+    display: none;
+  }
 }
 
 .shop-mega-link {

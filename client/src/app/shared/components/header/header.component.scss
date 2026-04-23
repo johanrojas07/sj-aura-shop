@@ -1510,7 +1510,7 @@
 
   .nav-search-panel {
     width: min(560px, 100%);
-    max-height: min(72vh, 640px);
+    max-height: min(78vh, 680px);
     background: var(--surface);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-subtle);
@@ -1547,6 +1547,95 @@
     &::placeholder {
       color: var(--text-muted);
     }
+  }
+
+  .nav-search-hint {
+    margin: 0;
+    padding: 8px 14px 4px;
+    font-size: 0.72rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--surface);
+  }
+
+  .nav-search-chips {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 10px 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    border-bottom: 1px solid var(--border-subtle);
+    background: linear-gradient(180deg, var(--surface-muted) 0%, var(--surface) 100%);
+
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.45);
+      border-radius: 4px;
+    }
+  }
+
+  .nav-search-chip {
+    flex: 0 0 auto;
+    cursor: pointer;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    padding: 0.4rem 0.85rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-family: var(--font-nav);
+    color: var(--text-secondary);
+    background: var(--surface);
+    transition:
+      background 0.18s ease,
+      border-color 0.18s ease,
+      color 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      border-color: rgba(168, 85, 120, 0.35);
+      color: var(--text-primary);
+    }
+
+    &--active {
+      border-color: rgba(79, 70, 229, 0.45);
+      color: var(--text-primary);
+      background: linear-gradient(145deg, rgba(79, 70, 229, 0.1), rgba(168, 85, 120, 0.08));
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+    }
+  }
+
+  .nav-search-actions {
+    padding: 8px 12px 4px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--surface);
+  }
+
+  .nav-search-see-all {
+    width: 100%;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    border-radius: var(--radius-md) !important;
+    min-height: 40px !important;
+  }
+
+  .nav-search-see-all__ico {
+    font-size: 1.1rem !important;
+    width: 1.1rem !important;
+    height: 1.1rem !important;
+    opacity: 0.85;
   }
 
   .nav-search-hits {

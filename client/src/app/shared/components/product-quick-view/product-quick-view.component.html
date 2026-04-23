@@ -1,0 +1,71 @@
+@if (quickView.isOpen()) {
+  <div
+    class="product-quick-view-backdrop"
+    (click)="onBackdropClick()"
+    role="presentation"
+    aria-hidden="true"
+  ></div>
+  <div
+    class="product-quick-view-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="qv-dialog-title"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="product-quick-view-head">
+      <div class="product-quick-view-head-text">
+        <p class="product-quick-view-kicker">{{ ('PRODUCT_QUICK_VIEW_TITLE' | translate | async) || 'Vista rápida' }}</p>
+        <h2
+          id="qv-dialog-title"
+          class="product-quick-view-product-name"
+          [class.product-quick-view-product-name--muted]="!product()"
+        >
+          @if (product(); as headProduct) {
+            {{ headProduct.title }}
+          } @else {
+            {{ ('PRODUCT_QUICK_VIEW_LOADING_TITLE' | translate | async) || 'Cargando…' }}
+          }
+        </h2>
+      </div>
+      <button type="button" mat-icon-button class="product-quick-view-close" (click)="onClose()" [attr.aria-label]="('Close' | translate | async) || 'Cerrar'">
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" class="product-quick-view-progress" />
+    }
+
+    <div class="product-quick-view-body eshop-scrollbar-y">
+      @if (loadError() && !loading()) {
+        <p class="product-quick-view-error">{{ ('PRODUCT_QUICK_VIEW_ERROR' | translate | async) || 'No se pudo cargar el producto.' }}</p>
+      }
+      @if (product(); as p) {
+        <div class="product-quick-view-inner">
+          <app-product-content
+            layout="compact"
+            [compactGallery]="true"
+            [hideTitle]="true"
+            [categoriesInput]="selectors.categories()"
+            [product]="p"
+            [cartIds]="cartIds()"
+            [currency]="selectors.currency()"
+            [lang]="selectors.appLang()"
+            (addProduct)="addToCart($event)"
+          />
+        </div>
+      }
+    </div>
+    @if (product()) {
+      <footer class="product-quick-view-foot">
+        <button type="button" mat-flat-button color="primary" class="product-quick-view-cta-primary" (click)="goToFullPage()">
+          <mat-icon aria-hidden="true">open_in_new</mat-icon>
+          {{ ('PRODUCT_SEE_FULL_PAGE' | translate | async) || 'Ver ficha completa' }}
+        </button>
+        <button type="button" mat-stroked-button class="product-quick-view-cta-secondary" (click)="onClose()">
+          {{ ('PRODUCT_QUICK_VIEW_KEEP_BROWSING' | translate | async) || 'Seguir viendo' }}
+        </button>
+      </footer>
+    }
+  </div>
+}

@@ -1,15 +1,23 @@
-import { filter, map, take } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Component, Input, Signal, effect } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  effect,
+  inject,
+  Input,
+  Signal,
+  signal,
+} from '@angular/core';
 import { Location } from '@angular/common';
-import { Observable, combineLatest } from 'rxjs';
+import { combineLatest } from 'rxjs';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 
 import { TranslateService } from '../../../../services/translate.service';
 import { Order, OrderStatus } from '../../../../shared/models';
 import { SignalStore } from '../../../../store/signal.store';
 import { SignalStoreSelectors } from '../../../../store/signal.store.selectors';
-import { toObservable } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-order-detail',
@@ -24,17 +32,26 @@ export class OrderDetailComponent {
   statusForm: FormGroup;
   orderId: string;
   readonly orderStatuses = Object.values(OrderStatus);
-  lang$: Observable<string>;
+
+  /** Idioma de rutas públicas (evita `async` repetido en la plantilla). */
+  readonly dashboardLang = signal('es');
+
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(
-    private store: SignalStore,
-    private selectors: SignalStoreSelectors,
-    private route: ActivatedRoute,
-    private fb: FormBuilder,
-    private location: Location,
+    private readonly store: SignalStore,
+    private readonly selectors: SignalStoreSelectors,
+    private readonly route: ActivatedRoute,
+    private readonly fb: FormBuilder,
+    private readonly location: Location,
     private readonly translateService: TranslateService,
   ) {
-    this.lang$ = this.translateService.getLang$();
+    this.translateService
+      .getLang$()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((lang) => {
+        this.dashboardLang.set(lang?.trim() ? lang : 'es');
+      });
 
     this.statusForm = this.fb.group({
       status: ['', Validators.required],
@@ -73,5 +90,10 @@ export class OrderDetailComponent {
 
   goBack(): void {
     this.location.back();
+  }
+
+  productLink(titleUrl: string | undefined): string[] {
+    const slug = titleUrl || '';
+    return ['/', this.dashboardLang(), 'product', slug];
   }
 }

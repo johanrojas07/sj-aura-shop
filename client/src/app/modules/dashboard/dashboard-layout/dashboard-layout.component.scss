@@ -1,20 +1,28 @@
+@use '../dash-admin-tokens';
+
 :host {
   display: block;
   min-height: 100vh;
   --dash-brand: #b83d6f;
   --dash-brand-deep: #9d174d;
-  --dash-accent: #7c3aed;
-  --dash-surface: #fafaf9;
-  --dash-ink: #1c1917;
-  --dash-muted: #78716c;
-  --dash-line: #e7e5e4;
+  --dash-accent: #4f46e5;
+  --dash-surface: var(--admin-bg, #f1f5f9);
+  --dash-ink: var(--admin-text, #0f172a);
+  --dash-muted: var(--admin-text-muted, #64748b);
+  --dash-line: var(--admin-border, #e2e8f0);
+  font-family: var(--admin-font, system-ui, sans-serif);
 }
 
 .dash-shell {
   display: grid;
   grid-template-columns: 16rem 1fr;
   min-height: 100vh;
-  background: linear-gradient(145deg, #fafaf9 0%, #fdf4ff 42%, #fff7ed 100%);
+  background: linear-gradient(
+    160deg,
+    var(--admin-bg, #f1f5f9) 0%,
+    #f8fafc 38%,
+    rgba(244, 244, 255, 0.85) 100%
+  );
 
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
@@ -263,6 +271,16 @@
 
     .mat-mdc-button-base {
       letter-spacing: 0.01em;
+    }
+
+    /* Formularios Material en el área principal del admin */
+    .mat-mdc-text-field-wrapper {
+      border-radius: 10px !important;
+    }
+
+    .mat-mdc-form-field-subscript-wrapper,
+    .mat-mdc-form-field-error {
+      font-size: 0.78rem !important;
     }
   }
 }

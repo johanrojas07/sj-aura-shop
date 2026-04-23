@@ -1,7 +1,7 @@
 @if (!sendRequest) {
 @let chooseLang = (choosenLanguageSub$ | async) ?? languageOptions[0];
 
-<div class="product-edit-shell">
+<div class="product-edit-shell dash-admin-form-page">
   <header class="product-edit-hero">
     <div class="product-edit-hero-text">
       <p class="product-edit-kicker">{{ action | uppercase }} · {{ 'PRODUCT_EDIT_HERO_TITLE' | translate | async }}</p>
@@ -21,7 +21,7 @@
     </div>
     <div class="product-edit-hero-lang">
       <mat-icon class="product-edit-hero-lang__icon" aria-hidden="true">translate</mat-icon>
-      <mat-form-field class="product-edit-lang" appearance="outline" subscriptSizing="fixed">
+      <mat-form-field class="product-edit-lang dash-admin-field dash-admin-field--compact" appearance="outline" floatLabel="always" subscriptSizing="dynamic">
         <mat-label>{{ 'PRODUCT_EDIT_LANG_SELECTOR' | translate | async }}</mat-label>
         <mat-select [ngModel]="chooseLang" (ngModelChange)="setLang($event)">
           @for (option of languageOptions; track option) {
@@ -50,8 +50,9 @@
       <mat-card-content class="product-edit-card-body">
         <div class="product_edit-full-input">
           @if ((!titles || !titles.length) || action === 'add') {
-            <mat-form-field class="product_edit-field" appearance="outline" subscriptSizing="fixed">
+            <mat-form-field class="product_edit-field dash-admin-field" appearance="outline" floatLabel="always" subscriptSizing="dynamic">
               <mat-label>Title URL</mat-label>
+              <mat-icon matPrefix class="product-edit-field-prefix">link</mat-icon>
               <input
                 matInput
                 formControlName="titleUrl"
@@ -68,8 +69,9 @@
             </mat-form-field>
           }
           @if ((titles && titles.length) && action !== 'add') {
-            <mat-form-field class="product_edit-field" appearance="outline" subscriptSizing="fixed">
+            <mat-form-field class="product_edit-field dash-admin-field" appearance="outline" floatLabel="always" subscriptSizing="dynamic">
               <mat-label>Title URL</mat-label>
+              <mat-icon matPrefix class="product-edit-field-prefix">link</mat-icon>
               <input matInput placeholder="Buscar producto…" aria-label="TitleUrl" [matAutocomplete]="auto" formControlName="titleUrl" />
               <mat-autocomplete #auto="matAutocomplete" (optionSelected)="findProduct()">
                 @for (title of (filteredTitles$ | async); track title) {
@@ -102,8 +104,9 @@
           </div>
         </mat-card-header>
         <mat-card-content class="product-edit-card-body product-edit-inventory">
-          <mat-form-field class="product-edit-qty-field" appearance="outline" subscriptSizing="fixed">
+          <mat-form-field class="product-edit-qty-field dash-admin-field dash-admin-field--compact" appearance="outline" floatLabel="always" subscriptSizing="dynamic">
             <mat-label>{{ 'PRODUCT_EDIT_STOCK_QTY' | translate | async }}</mat-label>
+            <mat-icon matPrefix class="product-edit-field-prefix">inventory</mat-icon>
             <input matInput type="number" min="0" formControlName="inventoryQty" />
             @if (productEditForm.get('inventoryQty')?.invalid && productEditForm.get('inventoryQty')?.touched) {
               <mat-error>0 o más.</mat-error>
@@ -136,8 +139,9 @@
         </mat-card-header>
         <mat-card-content class="product-edit-card-body" [formGroupName]="chooseLang">
           <div class="product_edit-full-input product-edit-title-row">
-            <mat-form-field class="product_edit-field" appearance="outline" subscriptSizing="fixed">
+            <mat-form-field class="product_edit-field dash-admin-field" appearance="outline" floatLabel="always" subscriptSizing="dynamic">
               <mat-label>{{ 'PRODUCT_EDIT_FIELD_TITLE' | translate | async }} ({{ chooseLang | uppercase }})</mat-label>
+              <mat-icon matPrefix class="product-edit-field-prefix">title</mat-icon>
               <input matInput formControlName="title" type="text" name="title" />
               @if (chooseLang === 'es' && productEditForm.get('es')?.get('title')?.invalid && productEditForm.get('es')?.get('title')?.touched) {
                 <mat-error>Obligatorio (mín. 2 caracteres).</mat-error>
@@ -147,7 +151,7 @@
           <div class="product-edit-prices-block">
             <p class="product-edit-prices-caption">{{ 'PRODUCT_EDIT_PRICES_BLOCK_INTRO' | translate | async }}</p>
             <div class="product_edit-full-input product-edit-prices-row">
-              <mat-form-field class="product_edit-field-small product-edit-cop-field" appearance="outline" subscriptSizing="dynamic">
+              <mat-form-field class="product_edit-field-small product-edit-cop-field" appearance="outline" floatLabel="always" subscriptSizing="dynamic">
                 <mat-label>{{ 'PRODUCT_EDIT_PRICE_LIST_LABEL' | translate | async }}</mat-label>
                 <span matPrefix class="product-edit-cop-prefix">$&nbsp;</span>
                 <input
@@ -163,7 +167,7 @@
                   <mat-error>{{ 'PRODUCT_EDIT_PRICE_COP_ERROR' | translate | async }}</mat-error>
                 }
               </mat-form-field>
-              <mat-form-field class="product_edit-field-small product-edit-cop-field" appearance="outline" subscriptSizing="dynamic">
+              <mat-form-field class="product_edit-field-small product-edit-cop-field" appearance="outline" floatLabel="always" subscriptSizing="dynamic">
                 <mat-label>{{ 'PRODUCT_EDIT_PRICE_CURRENT_LABEL' | translate | async }}</mat-label>
                 <span matPrefix class="product-edit-cop-prefix">$&nbsp;</span>
                 <input
@@ -189,7 +193,7 @@
             <p class="product-edit-price-format-note">{{ 'PRODUCT_EDIT_PRICE_COP_HINT' | translate | async }}</p>
           </div>
           <div class="product_edit-full-input">
-            <mat-form-field class="product_edit-field" appearance="outline" subscriptSizing="dynamic">
+            <mat-form-field class="product_edit-field" appearance="outline" floatLabel="always" subscriptSizing="dynamic">
               <mat-label>{{ 'PRODUCT_EDIT_FIELD_SHORT_DESC' | translate | async }}</mat-label>
               <textarea matInput formControlName="description" name="description" rows="3"></textarea>
               <mat-hint class="product-edit-hint-clip">{{ 'PRODUCT_EDIT_SHORT_DESC_HINT' | translate | async }}</mat-hint>
@@ -243,7 +247,7 @@
             </div>
           }
           <div class="product_edit-full-input product-edit-tags-input-row">
-            <mat-form-field class="product_edit-field" appearance="outline" subscriptSizing="fixed">
+            <mat-form-field class="product_edit-field" appearance="outline" floatLabel="always" subscriptSizing="fixed">
               <mat-label>{{ 'PRODUCT_EDIT_TAGS_INPUT' | translate | async }}</mat-label>
               <input
                 matInput
@@ -298,7 +302,7 @@
         </mat-card-header>
         <mat-card-content class="product-edit-card-body">
           <div class="product_edit-full-input">
-            <mat-form-field class="product_edit-field" appearance="outline" subscriptSizing="fixed">
+            <mat-form-field class="product_edit-field" appearance="outline" floatLabel="always" subscriptSizing="fixed">
               <mat-label>{{ 'Main_image_url' | translate | async }}</mat-label>
               <input matInput formControlName="mainImage" name="mainImage" type="url" placeholder="https://…" />
               <mat-hint>{{ 'PRODUCT_EDIT_MAIN_URL_HINT' | translate | async }}</mat-hint>
@@ -334,7 +338,7 @@
             <span class="product_edit-file-hint">{{ 'PRODUCT_EDIT_UPLOAD_HINT' | translate | async }}</span>
           </div>
           <div class="product_edit-full-input">
-            <mat-form-field class="product_edit-field-small" appearance="outline" subscriptSizing="fixed">
+            <mat-form-field class="product_edit-field-small" appearance="outline" floatLabel="always" subscriptSizing="fixed">
               <mat-label>URL de imagen extra</mat-label>
               <input matInput formControlName="imageUrl" name="imageUrl" type="url" placeholder="https://…" />
             </mat-form-field>

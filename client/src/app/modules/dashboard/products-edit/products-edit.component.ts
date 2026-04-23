@@ -18,7 +18,7 @@ import { ProductImageCropDialogComponent } from './product-image-crop-dialog.com
 @Component({
     selector: 'app-products-edit',
     templateUrl: './products-edit.component.html',
-    styleUrls: ['./products-edit.component.scss'],
+    styleUrls: ['./products-edit.component.scss', '../_dash-admin-forms.shared.scss'],
     standalone: false
 })
 export class ProductsEditComponent implements OnInit, OnDestroy {

@@ -1,79 +1,184 @@
 :host {
-  ::ng-deep .mat-mdc-radio-button ~ .mat-radio-button {
-    margin-left: 16px;
+  display: block;
+  padding: 1.25rem 1.5rem 2.5rem;
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.dash-categories__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dash-categories__lang {
+  flex: 0 1 220px;
+  margin: 0;
+}
+
+.dash-categories__card {
+  margin: 0;
+}
+
+.dash-categories__card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  margin-bottom: 0.25rem;
+}
+
+.dash-categories__card-icon {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--admin-radius-sm, 8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--admin-accent-soft, rgba(79, 70, 229, 0.12));
+  color: var(--admin-accent, #4f46e5);
+
+  mat-icon {
+    font-size: 1.35rem;
+    width: 1.35rem;
+    height: 1.35rem;
   }
 
-  @media screen and (max-width: 600px) {
-    ::ng-deep .mat-mdc-radio-button ~ .mat-radio-button {
-      margin-left: 4px;
-    }
+  &--teal {
+    background: rgba(13, 148, 136, 0.12);
+    color: #0d9488;
   }
 
-  .category_edit {
-    &-form {
-      width: 100%;
-    }
-
-    &-field {
-      width: 100%;
-      margin: 0 5px;
-    }
-
-    &-field-small {
-      margin: 0 5px;
-      flex: 1;
-    }
-
-    &-full-input {
-      display: flex;
-      align-items: center;
-      margin-bottom: 10px;
-      flex-flow: wrap;
-    }
-
-    &-subtitle {
-      font-weight: 500;
-      margin: 40px 5px 20px 5px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    }
-
-    &-infotitle {
-      font-weight: 500;
-    }
-
-    &-add-images {
-      margin: 25px 0;
-    }
-
-    &-after-send {
-      display: flex;
-      align-items: center;
-      padding: 50px;
-    }
-
-    &-btn-action {
-      margin: 0 10px;
-    }
-
-    &-subCategories {
-      margin: 10px 0 50px 0;
-      display: block;
-    }
+  &--violet {
+    background: rgba(124, 58, 237, 0.12);
+    color: #6d28d9;
   }
 
-  .check-title {
-    color: #9e9e9e;
-    font-size: 0.8rem;
-    padding: 5px 0;
-    margin-top: 15px;
+  &--amber {
+    background: rgba(217, 119, 6, 0.12);
+    color: #b45309;
   }
+}
 
-  .file-field .btn {
-    float: none !important;
-  }
+.dash-categories__find-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.65rem 0.85rem;
+}
 
-  .categories-title-wrapp {
-    display: flex;
-    justify-content: space-between;
-  }
+.dash-categories__find-field {
+  flex: 1 1 220px;
+  min-width: 0;
+  margin: 0;
+}
+
+.dash-categories__load-btn mat-icon {
+  margin-right: 0.35rem;
+  font-size: 1.15rem;
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.dash-categories__products-block {
+  margin-top: 1.15rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--admin-border, #e2e8f0);
+}
+
+.dash-categories__block-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--admin-text-muted, #64748b);
+  margin-bottom: 0.5rem;
+}
+
+.dash-categories__chip-readonly {
+  opacity: 0.92;
+  background: #f1f5f9 !important;
+  border: 1px solid var(--admin-border, #e2e8f0) !important;
+}
+
+.dash-categories__choices {
+  margin-top: 0.85rem;
+}
+
+.dash-categories__radio-row.mat-mdc-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+}
+
+.dash-categories__image-type {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.dash-categories__sub-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.65rem 0.85rem;
+}
+
+.dash-categories__sub-field {
+  flex: 1 1 240px;
+  min-width: 0;
+  margin: 0;
+}
+
+.dash-categories__add-sub mat-icon {
+  margin-right: 0.25rem;
+  font-size: 1.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.dash-categories__sub-chips {
+  margin-top: 0.85rem;
+}
+
+.dash-categories__footer {
+  margin-top: 0.5rem;
+  border-top: none;
+  padding-top: 0;
+  justify-content: space-between;
+}
+
+.dash-categories__remove mat-icon {
+  margin-right: 0.35rem;
+  font-size: 1.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.dash-categories__sent {
+  max-width: 520px;
+  margin: 2rem auto;
+}
+
+.dash-categories__sent-inner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0 !important;
+}
+
+.dash-categories__sent-icon {
+  font-size: 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--admin-success, #059669);
+}
+
+.dash-categories__sent-title {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--admin-text, #0f172a);
 }

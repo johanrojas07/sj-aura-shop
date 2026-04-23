@@ -1,0 +1,863 @@
+:host {
+  display: block;
+  padding: 0.75rem 1.1rem 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  --ld-border: var(--admin-border, #e2e8f0);
+  --ld-text: var(--admin-text, #0f172a);
+  --ld-muted: var(--admin-text-muted, #64748b);
+  --ld-ok: var(--admin-success, #059669);
+  --ld-ok-bg: rgba(5, 150, 105, 0.1);
+  --ld-err: #b91c1c;
+  --ld-err-bg: rgba(254, 202, 202, 0.4);
+  --ld-accent: var(--admin-accent, #4f46e5);
+  --ld-radius: var(--admin-radius-md, 12px);
+  font-family: var(--admin-font, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  color: var(--ld-text);
+}
+
+// --- Navegación
+.dash-loyalty-detail__back {
+  margin: 0 0 0.9rem;
+  font-weight: 600;
+
+  mat-icon {
+    margin-right: 0.25rem;
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    vertical-align: middle;
+  }
+}
+
+// --- Carga
+.dash-loyalty-detail__load-wrap {
+  border-radius: var(--ld-radius);
+  overflow: hidden;
+  border: 1px solid var(--ld-border);
+}
+
+.dash-loyalty-detail__load-bar {
+  --mdc-linear-progress-active-indicator-color: var(--ld-accent);
+  height: 3px;
+}
+
+// --- Error banner
+.dash-loyalty-detail__err-banner {
+  margin: 0 0 0.5rem;
+}
+
+// --- Héroe (jerarquía: kicker > título > identidad)
+.dash-loyalty-detail__hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  margin: 0 0 0.9rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--ld-border);
+}
+
+.dash-loyalty-detail__identity-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin: 0.35rem 0 0;
+  line-height: 1.35;
+}
+
+.dash-loyalty-detail__identity {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--ld-text);
+  max-width: min(100%, 32rem);
+  word-break: break-word;
+}
+
+.dash-loyalty-detail__points-pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.2rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.12) 0%, rgba(79, 70, 229, 0.06) 100%);
+  border: 1px solid rgba(79, 70, 229, 0.2);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #3730a3;
+}
+
+.dash-loyalty-detail__points-pill--zero {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: var(--ld-muted);
+  font-weight: 600;
+}
+
+.dash-loyalty-detail__points-pill__num {
+  font-size: 0.95rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.dash-loyalty-detail__points-pill__suf {
+  font-size: 0.7rem;
+  text-transform: lowercase;
+  opacity: 0.9;
+  font-weight: 700;
+}
+
+// Badges tipo
+.dash-loyalty-detail__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  align-items: center;
+  padding-top: 0.15rem;
+}
+
+.dash-loyalty-detail__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  border: 1px solid transparent;
+}
+
+.dash-loyalty-detail__badge--reg {
+  background: rgba(99, 102, 241, 0.1);
+  color: #4338ca;
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.dash-loyalty-detail__badge--guest {
+  background: rgba(14, 165, 233, 0.1);
+  color: #0c4a6e;
+  border-color: rgba(14, 165, 233, 0.22);
+}
+
+.dash-loyalty-detail__badge--merged {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+
+// --- Cards
+.dash-loyalty-detail__card {
+  margin-bottom: 0.8rem;
+}
+
+// Cabecera de sección: alineación icono + título, aire, tipografía y “header bar”
+:host ::ng-deep .dash-loyalty-detail__card.dash-admin-card .mat-mdc-card-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 3.1rem;
+  margin: 0;
+  padding: 0.75rem 1.1rem 0.8rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #fafbfc 45%, #fff 100%);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.07);
+  border-radius: 0;
+}
+
+:host ::ng-deep .dash-loyalty-detail__card.dash-admin-card .mat-mdc-card-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0.65rem 0 0;
+  width: auto;
+  height: auto;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+:host ::ng-deep .dash-loyalty-detail__card-h .mat-mdc-card-header-text {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  justify-content: center;
+  padding: 0;
+}
+
+:host ::ng-deep .dash-loyalty-detail__card .mat-mdc-card-title {
+  margin: 0;
+  padding: 0;
+  line-height: 1.3;
+  letter-spacing: -0.03em;
+}
+
+:host ::ng-deep .dash-loyalty-detail__card .mat-mdc-card-content {
+  padding: 0.9rem 1.1rem 1.1rem;
+}
+
+.dash-loyalty-detail__card-h {
+  align-items: center;
+  padding: 0;
+}
+
+.dash-loyalty-detail__ico-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 11px;
+  background: #fff;
+  color: #4338ca;
+  font-size: 0;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  flex-shrink: 0;
+  line-height: 0;
+
+  mat-icon {
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+.dash-loyalty-detail__sec-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin: 0;
+  line-height: 1.3;
+  color: var(--ld-text, #0f172a);
+}
+
+// --- Perfil
+.dash-loyalty-detail__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.65rem 0.9rem;
+}
+
+.dash-loyalty-detail__field--span {
+  grid-column: 1 / -1;
+}
+
+.dash-loyalty-detail__field--points {
+  @media (min-width: 520px) {
+    min-width: 0;
+  }
+}
+
+.dash-loyalty-detail__label {
+  display: block;
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ld-muted);
+  font-weight: 600;
+  margin: 0 0 0.2rem;
+}
+
+.dash-loyalty-detail__value {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: var(--ld-text);
+  font-weight: 500;
+}
+
+.dash-loyalty-detail__mono {
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 0.8rem;
+  color: #334155;
+  font-weight: 500;
+}
+
+.dash-loyalty-detail__points-hero {
+  font-size: 1.2rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: #3730a3;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.dash-loyalty-detail__hashcode {
+  display: block;
+  margin: 0.2rem 0 0;
+  font-size: 0.7rem;
+  line-height: 1.4;
+  word-break: break-all;
+  color: #475569;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.4rem 0.5rem;
+  font-family: ui-monospace, monospace;
+}
+
+// --- Split columnas
+.dash-loyalty-detail__split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// --- Listados compactos
+.dash-loyalty-detail__empty {
+  margin: 0;
+  padding: 0.2rem 0 0.15rem;
+  color: var(--ld-muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+// — Tablas: historial + libro (compactas, `dash-admin-data-table` + refinamientos)
+.dash-loyalty-detail__mov-table-wrap {
+  margin: 0.1rem 0 0;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+}
+
+.dash-loyalty-detail__split .dash-loyalty-detail__mov-table-wrap {
+  max-height: 16rem;
+  overflow: auto;
+  padding-bottom: 0.05rem;
+}
+
+.dash-loyalty-detail__ledger-table-wrap {
+  max-height: 16rem;
+  overflow: auto;
+  margin: 0.1rem 0 0;
+  padding-bottom: 0.05rem;
+}
+
+.dash-loyalty-detail__card--ledger {
+  margin-bottom: 0.6rem;
+}
+
+:host
+  ::ng-deep
+  .dash-loyalty-detail__mov-table.dash-admin-data-table
+  th,
+:host ::ng-deep .dash-loyalty-detail__mov-table.dash-admin-data-table td {
+  padding: 0.35rem 0.45rem;
+  font-size: 0.74rem;
+  line-height: 1.3;
+  vertical-align: middle;
+}
+
+:host ::ng-deep .dash-loyalty-detail__mov-table.dash-admin-data-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-size: 0.65rem;
+  background: #f1f5f9;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .dash-loyalty-detail__mov-table.dash-admin-data-table tbody tr {
+  transition: background 0.1s ease;
+}
+
+@media (hover: hover) {
+  :host
+    ::ng-deep
+    .dash-loyalty-detail__mov-table.dash-admin-data-table
+    tbody
+    tr:hover {
+    background: rgba(79, 70, 229, 0.04);
+  }
+}
+
+.dash-loyalty-detail__th-num,
+.dash-loyalty-detail__td-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  width: 1%;
+  white-space: nowrap;
+}
+
+.dash-loyalty-detail__th-when,
+.dash-loyalty-detail__th-cop,
+.dash-loyalty-detail__th-order,
+.dash-loyalty-detail__td-when {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.dash-loyalty-detail__td-cop {
+  text-align: right;
+}
+
+.dash-loyalty-detail__td-mono {
+  color: #64748b;
+  font-size: 0.7rem;
+}
+
+.dash-loyalty-detail__td-when {
+  color: #64748b;
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  cursor: default;
+}
+
+.dash-loyalty-detail__td-cop-v {
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.dash-loyalty-detail__td-em {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  display: inline-block;
+}
+
+.dash-loyalty-detail__td-desc {
+  max-width: 18rem;
+  word-break: break-word;
+  color: #475569;
+  font-size: 0.73rem;
+  line-height: 1.3;
+}
+
+.dash-loyalty-detail__td-pill {
+  display: inline-block;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  padding: 0.1rem 0.35rem;
+  border-radius: 5px;
+  font-size: 0.72rem;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+// Color de pastilla: priorizamos signo (ledger) y fila (auditoría)
+tr.dash-loyalty-detail__mov--in .dash-loyalty-detail__td-pill--pos,
+tr.dash-loyalty-detail__mov--in .dash-loyalty-detail__td-pill:not([class*='pill--']),
+.dash-loyalty-detail__td-pill--pos {
+  color: #0f5132;
+  background: var(--ld-ok-bg, rgba(16, 185, 129, 0.14));
+}
+
+tr.dash-loyalty-detail__mov--out .dash-loyalty-detail__td-pill--neg,
+tr.dash-loyalty-detail__mov--out .dash-loyalty-detail__td-pill,
+.dash-loyalty-detail__td-pill--neg {
+  color: #991b1b;
+  background: var(--ld-err-bg, #fee2e2);
+}
+
+tr.dash-loyalty-detail__mov--adj .dash-loyalty-detail__td-pill--pos,
+tr.dash-loyalty-detail__mov--adj .dash-loyalty-detail__td-pill--neg,
+tr.dash-loyalty-detail__mov--adj .dash-loyalty-detail__td-pill--zero,
+tr.dash-loyalty-detail__mov--adj .dash-loyalty-detail__td-pill {
+  color: #92400e;
+  background: rgba(234, 179, 8, 0.2);
+}
+
+// Transferir recibida (+) o sin clase duplicada
+tr.dash-loyalty-detail__mov--xfer .dash-loyalty-detail__td-pill {
+  color: #5b21b6;
+  background: rgba(139, 92, 246, 0.12);
+}
+
+.dash-loyalty-detail__td-pill--zero {
+  color: var(--ld-muted) !important;
+  background: #f1f5f9 !important;
+  font-weight: 600;
+}
+
+// --- Pedidos
+.dash-loyalty-detail__orders {
+  list-style: none;
+  margin: 0.1rem 0 0;
+  padding: 0;
+}
+
+.dash-loyalty-detail__orders li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.65rem;
+  padding: 0.4rem 0.35rem;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.8rem;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.dash-loyalty-detail__order-id {
+  font-weight: 700;
+  color: #4338ca;
+  text-decoration: none;
+  font-size: 0.8rem;
+  min-width: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.dash-loyalty-detail__order-meta {
+  color: #64748b;
+  font-size: 0.76rem;
+}
+
+.dash-loyalty-detail__pts {
+  display: inline-flex;
+  font-size: 0.7rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: #15803d;
+  background: rgba(22, 163, 74, 0.1);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  line-height: 1.2;
+  margin-left: auto;
+}
+
+:host ::ng-deep .dash-loyalty-detail__card--action .mat-mdc-card-content {
+  // Mismo ancho que el cuerpo de la card; un poco más aire arriba en formularios
+  padding: 0.85rem 1.1rem 1.1rem;
+}
+
+.dash-loyalty-detail__xfer-hint {
+  margin: 0 0 0.65rem;
+  color: var(--ld-muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  max-width: 48rem;
+}
+
+.dash-loyalty-detail__xfer-label {
+  display: block;
+  margin: 0 0 0.2rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ld-text);
+
+  &--manual {
+    margin-top: 0.9rem;
+  }
+}
+
+.dash-loyalty-detail__xfer-sublabel {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--ld-muted);
+  max-width: 44rem;
+}
+
+.dash-loyalty-detail__xfer-search-field {
+  width: 100%;
+  display: block;
+  margin: 0;
+}
+
+.dash-loyalty-detail__xfer-progress {
+  margin: 0.1rem 0 0.35rem;
+  border-radius: 4px;
+  height: 3px;
+  --mdc-linear-progress-active-indicator-color: var(--ld-accent);
+}
+
+.dash-loyalty-detail__xfer-hits {
+  list-style: none;
+  margin: 0.45rem 0 0.35rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 14rem;
+  overflow: auto;
+}
+
+.dash-loyalty-detail__xfer-hit {
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+  height: auto;
+  min-height: 2.65rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: var(--ld-radius);
+  border-color: var(--ld-border) !important;
+  background: #fff;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+  line-height: 1.3;
+
+  &:hover {
+    border-color: rgba(79, 70, 229, 0.38) !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  }
+}
+
+.dash-loyalty-detail__xfer-hit-name {
+  display: block;
+  font-weight: 700;
+  font-size: 0.86rem;
+  color: var(--ld-text);
+}
+
+.dash-loyalty-detail__xfer-hit-meta {
+  display: block;
+  font-size: 0.74rem;
+  color: var(--ld-muted);
+  margin-top: 0.1rem;
+}
+
+.dash-loyalty-detail__xfer-picked {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 0.65rem 0 0.25rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: var(--ld-radius);
+  background: rgba(5, 150, 105, 0.08);
+  border: 1px solid rgba(5, 150, 105, 0.24);
+
+  > mat-icon {
+    color: var(--ld-ok);
+    font-size: 1.35rem;
+    width: 1.35rem;
+    height: 1.35rem;
+    flex-shrink: 0;
+    margin-top: 0.05rem;
+  }
+}
+
+.dash-loyalty-detail__xfer-picked-text {
+  flex: 1 1 10rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.82rem;
+  color: var(--ld-text);
+  line-height: 1.35;
+}
+
+.dash-loyalty-detail__xfer-picked-k {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #047857;
+}
+
+.dash-loyalty-detail__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.65rem;
+  align-items: flex-start;
+}
+
+.dash-loyalty-detail__grow {
+  flex: 1 1 180px;
+  min-width: 140px;
+}
+
+.dash-loyalty-detail__full {
+  flex: 1 1 100%;
+  min-width: 100%;
+}
+
+.dash-loyalty-detail__field-ico {
+  color: #94a3b8;
+  font-size: 1.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-right: 0.1rem;
+}
+
+.dash-loyalty-detail__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-radius: 10px;
+  font-weight: 600;
+  min-height: 2.4rem;
+  margin-top: 0.1rem;
+  mat-icon {
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+}
+
+.dash-loyalty-detail__btn--stroke {
+  min-height: 2.4rem;
+}
+
+.dash-loyalty-detail__btn--xfer:disabled {
+  opacity: 0.55;
+}
+
+// Saldo / disponible (encima de ajuste y transferencia)
+.dash-loyalty-detail__balance-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  margin: 0 0 0.7rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: var(--ld-text);
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid var(--ld-border);
+}
+
+.dash-loyalty-detail__balance-hint--xfer {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(5, 150, 105, 0.06) 100%);
+  border-color: rgba(99, 102, 241, 0.18);
+}
+
+.dash-loyalty-detail__bal-ico {
+  font-size: 1.15rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--ld-muted);
+  flex-shrink: 0;
+}
+
+.dash-loyalty-detail__bal-warn {
+  color: #b91c1c !important;
+  font-weight: 800;
+}
+
+// Sumar / Restar
+.dash-loyalty-detail__adjust-mode {
+  display: flex;
+  margin: 0 0 0.7rem;
+  width: 100%;
+  max-width: 20rem;
+  border-radius: 10px;
+  border: 1px solid var(--ld-border) !important;
+  overflow: hidden;
+}
+
+:host ::ng-deep .dash-loyalty-detail__adjust-mode .mat-button-toggle {
+  flex: 1 1 50%;
+}
+
+:host ::ng-deep .dash-loyalty-detail__adjust-mode .mat-button-toggle-button {
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 0.4rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  mat-icon {
+    font-size: 1.05rem;
+  }
+}
+
+:host
+  ::ng-deep
+  .dash-loyalty-detail__toggle--add.mat-mdc-button-toggle.mat-button-toggle-checked
+  .mat-mdc-button-toggle-button {
+  background: rgba(22, 163, 74, 0.12) !important;
+  color: #15803d !important;
+}
+
+:host
+  ::ng-deep
+  .dash-loyalty-detail__toggle--sub.mat-mdc-button-toggle.mat-button-toggle-checked
+  .mat-mdc-button-toggle-button {
+  background: rgba(220, 38, 38, 0.1) !important;
+  color: #b91c1c !important;
+}
+
+// Preview ajuste
+.dash-loyalty-detail__preview {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin: 0.55rem 0 0;
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  font-size: 0.84rem;
+  line-height: 1.35;
+  border: 1px solid var(--ld-border);
+  mat-icon {
+    font-size: 1.1rem;
+    color: #64748b;
+    margin-top: 0.1rem;
+  }
+  strong {
+    font-size: 1.05rem;
+  }
+
+  &--add {
+    color: #166534;
+    background: rgba(22, 163, 74, 0.08);
+    border-color: rgba(22, 163, 74, 0.2);
+  }
+
+  &--sub {
+    color: #991b1b;
+    background: rgba(254, 202, 202, 0.3);
+    border-color: rgba(220, 38, 38, 0.22);
+  }
+}
+
+// Mensajes (validación: claves *ERR* vs *OK* en i18n)
+.dash-loyalty-detail__hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  padding: 0.4rem 0.55rem;
+  border-radius: 8px;
+  color: #991b1b;
+  background: rgba(254, 242, 242, 0.6);
+  border: 1px solid rgba(252, 165, 165, 0.45);
+
+  &--ok {
+    color: #14532d;
+    background: rgba(220, 252, 231, 0.55);
+    border: 1px solid rgba(74, 222, 128, 0.4);
+  }
+}
+
+.dash-loyalty-detail__hint-sub {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.76rem;
+  opacity: 0.9;
+  font-style: normal;
+  font-weight: 500;
+  color: #64748b;
+  word-break: break-word;
+}

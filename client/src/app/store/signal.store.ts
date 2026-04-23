@@ -423,7 +423,7 @@ getProduct = (payload) => {
   });
 };
 
-getProductSearch = (payload: string) => {
+getProductSearch = (payload: string, categorySlug?: string | null) => {
   const raw = (payload || '').replace(/EMPTY___QUERY/gi, '').trim();
   if (!raw.length) {
     this.selectors.productState.update((state) => ({
@@ -433,7 +433,9 @@ getProductSearch = (payload: string) => {
     }));
     return;
   }
-  this.apiService.getProductsSearchPreview(raw, 12).subscribe((hits: Product[]) => {
+  const slug = (categorySlug || '').trim();
+  const filters = slug ? { category: slug } : undefined;
+  this.apiService.getProductsSearchPreview(raw, 12, filters).subscribe((hits: Product[]) => {
     const productSearchHits = Array.isArray(hits) ? hits : [];
     this.selectors.productState.update((state) => ({
       ...state,

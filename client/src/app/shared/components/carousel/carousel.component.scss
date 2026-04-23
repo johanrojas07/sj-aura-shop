@@ -128,35 +128,44 @@
 ::ng-deep .mat-mdc-raised-button.slider-arrow {
   position: absolute;
   top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
+  z-index: 5;
   min-width: 44px !important;
   width: 44px !important;
   height: 44px !important;
   padding: 0 !important;
   border-radius: var(--radius-full) !important;
-  background: rgba(255, 255, 255, 0.92) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
   border: 1px solid var(--border-subtle) !important;
   box-shadow: var(--shadow-sm) !important;
   color: var(--text-primary) !important;
-  opacity: 0;
-  transition: opacity var(--transition-slow), background var(--transition), transform var(--transition) !important;
+  pointer-events: auto;
+  opacity: 0.95;
+  transform: translateY(-50%);
+  transition: background var(--transition), box-shadow var(--transition), transform var(--transition) !important;
 
-  .slider-container:hover & {
-    opacity: 1;
+  /* Móvil: solo gesto; las flechas tap-ean y compiten con el desliz. */
+  @media (max-width: 767px) {
+    display: none !important;
   }
 
-  &:hover {
-    background: var(--surface) !important;
-    transform: translateY(-50%) scale(1.04);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: var(--surface) !important;
+      transform: translateY(-50%) scale(1.04);
+    }
+  }
+
+  &:focus-visible {
+    opacity: 1;
+    z-index: 6;
   }
 
   &.slider-arrow-left {
-    left: 12px;
+    left: 8px;
   }
 
   &.slider-arrow-right {
-    right: 12px;
+    right: 8px;
   }
 
   &.slider-arrow-absolute {
@@ -167,12 +176,32 @@
 .slides {
   display: flex;
   overflow-x: auto;
+  overflow-y: hidden;
   scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
+  /* smooth + gesto a veces “pelea”; en táctil el desplazamiento es nativo. */
+  scroll-behavior: auto;
   width: 100%;
   max-width: 100%;
-  scrollbar-width: none;
   margin-bottom: 0;
+  /* auto: el motor decide h vs v; pan-x sola bloqueaba a veces el scroll vertical de la página. */
+  touch-action: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  /* Escritorio: sin barra horizontal; móvil: fina (ver media query al final). */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @media (min-width: 900px) {
+      scroll-behavior: smooth;
+    }
+  }
 
   /* Cada slide ocupa todo el ancho del viewport del carrusel (contenido proyectado = hijos directos). */
   > * {
@@ -183,8 +212,39 @@
     box-sizing: border-box;
   }
 
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  @media (max-width: 767px) {
+    margin-bottom: 4px;
+    padding-bottom: 2px;
+    scrollbar-width: thin;
+    -ms-overflow-style: auto;
+    scrollbar-color: rgba(168, 86, 116, 0.75) rgba(42, 36, 40, 0.08);
 
+    &::-webkit-scrollbar {
+      display: block;
+      height: 7px;
+      width: auto;
+    }
+
+    &::-webkit-scrollbar-track {
+      margin: 0 2px;
+      background: rgba(42, 36, 40, 0.08);
+      border-radius: 100px;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(168, 72, 114, 0.55);
+      border-radius: 100px;
+      border: 2px solid rgba(255, 251, 252, 0.9);
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: rgba(168, 72, 114, 0.78);
+    }
+
+    &::-webkit-scrollbar-button:horizontal {
+      display: block;
+      width: 0;
+    }
+  }
 }

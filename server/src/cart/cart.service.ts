@@ -6,17 +6,19 @@ import { CartModel } from './models/cart.model';
 import { prepareCart } from '../shared/utils/prepareUtils';
 import { ProductsService } from '../products/products.service';
 
+const CART_PREPARE_OPTS = { keepAllSessionLines: true } as const;
+
 @Injectable()
 export class CartService {
   constructor(private readonly productsService: ProductsService) {}
 
   async getCart(session: { cart?: Cart; config?: unknown } | undefined, lang: string): Promise<CartModel> {
     if (!session) {
-      return prepareCart(new Cart({ items: [] }), lang, undefined, { keepAllSessionLines: true });
+      return prepareCart(new Cart({ items: [] }), lang, undefined, CART_PREPARE_OPTS);
     }
     const { cart, config } = session;
     const savedCart = cart || new Cart({ items: [] });
-    return prepareCart(savedCart, lang, config, { keepAllSessionLines: true });
+    return prepareCart(savedCart, lang, config, CART_PREPARE_OPTS);
   }
 
   async addToCart(
@@ -26,7 +28,7 @@ export class CartService {
   ): Promise<{ newCart; langCart }> {
     if (!session) {
       const empty = new Cart({ items: [] });
-      return { newCart: empty, langCart: prepareCart(empty, lang, undefined) };
+      return { newCart: empty, langCart: prepareCart(empty, lang, undefined, CART_PREPARE_OPTS) };
     }
     const { cart, config } = session;
     const { id } = getCartChangeDto;
@@ -36,9 +38,9 @@ export class CartService {
       if (product) {
         newCart.add(product, id);
       }
-      return { newCart, langCart: prepareCart(newCart, lang, config) };
+      return { newCart, langCart: prepareCart(newCart, lang, config, CART_PREPARE_OPTS) };
     } catch {
-      return { newCart, langCart: prepareCart(newCart, lang, config) };
+      return { newCart, langCart: prepareCart(newCart, lang, config, CART_PREPARE_OPTS) };
     }
   }
 
@@ -49,7 +51,7 @@ export class CartService {
   ): Promise<{ newCart; langCart }> {
     if (!session) {
       const empty = new Cart({ items: [] });
-      return { newCart: empty, langCart: prepareCart(empty, lang, undefined) };
+      return { newCart: empty, langCart: prepareCart(empty, lang, undefined, CART_PREPARE_OPTS) };
     }
     const { cart, config } = session;
     const { id } = getCartChangeDto;
@@ -62,13 +64,13 @@ export class CartService {
 
         if (itIsInCart) {
           const emptyCart = new Cart({ items: [] });
-          return { newCart: emptyCart, langCart: emptyCart };
+          return { newCart: emptyCart, langCart: prepareCart(emptyCart, lang, config, CART_PREPARE_OPTS) };
         }
       }
       newCart.remove(id);
-      return { newCart, langCart: prepareCart(newCart, lang, config) };
+      return { newCart, langCart: prepareCart(newCart, lang, config, CART_PREPARE_OPTS) };
     } catch {
-      return { newCart, langCart: prepareCart(newCart, lang, config) };
+      return { newCart, langCart: prepareCart(newCart, lang, config, CART_PREPARE_OPTS) };
     }
   }
 
@@ -80,20 +82,20 @@ export class CartService {
   ): Promise<{ newCart: Cart; langCart: CartModel }> {
     if (!session) {
       const empty = new Cart({ items: [] });
-      return { newCart: empty, langCart: prepareCart(empty, lang, undefined) };
+      return { newCart: empty, langCart: prepareCart(empty, lang, undefined, CART_PREPARE_OPTS) };
     }
     const { cart, config } = session;
     const newCart = new Cart(cart || { items: [] });
     const parsed = Number.parseInt(String(qtyRaw ?? '').trim(), 10);
     if (!Number.isFinite(parsed)) {
-      return { newCart, langCart: prepareCart(newCart, lang, config) };
+      return { newCart, langCart: prepareCart(newCart, lang, config, CART_PREPARE_OPTS) };
     }
     const qty = Math.max(0, Math.min(999, parsed));
     const lineExists = newCart.items.some((ci) => ci.id === id);
     if (!lineExists) {
-      return { newCart, langCart: prepareCart(newCart, lang, config) };
+      return { newCart, langCart: prepareCart(newCart, lang, config, CART_PREPARE_OPTS) };
     }
     newCart.setLineQty(id, qty);
-    return { newCart, langCart: prepareCart(newCart, lang, config) };
+    return { newCart, langCart: prepareCart(newCart, lang, config, CART_PREPARE_OPTS) };
   }
 }

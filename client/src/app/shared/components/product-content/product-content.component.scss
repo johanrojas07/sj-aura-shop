@@ -11,10 +11,22 @@
   &--compact {
     flex-direction: row;
     justify-content: space-between;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    /* En columna, media + detalle deben compartir el mismo ancho; evita CTA desalineado con la imagen. */
+    align-items: stretch;
+
+    .product-media,
+    .product-detail {
+      box-sizing: border-box;
+      min-width: 0;
+    }
 
     .product-media {
       flex: 0 0 42%;
       max-width: 320px;
+      position: relative;
 
       img {
         aspect-ratio: 3 / 4;
@@ -37,10 +49,20 @@
 
     @media screen and (max-width: 600px) {
       flex-direction: column;
+      align-items: stretch;
+      width: 100%;
+      max-width: 100%;
+
+      .product-media,
+      .product-detail {
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+      }
 
       .product-media {
         flex: none;
-        width: 100%;
         max-width: none;
 
         img {
@@ -55,6 +77,10 @@
     flex-wrap: nowrap;
     gap: clamp(1.5rem, 4vw, 4rem);
     padding: clamp(0.5rem, 2vw, 1rem) 0;
+
+    .product-badge-row {
+      margin-bottom: 0.75rem;
+    }
 
     .product-media {
       flex: 1 1 48%;
@@ -108,6 +134,7 @@
       margin-bottom: 1.5rem;
       padding-bottom: 1.5rem;
       border-bottom: 1px solid var(--border-subtle);
+      align-items: center;
     }
 
     .product-description {
@@ -150,6 +177,132 @@
     object-fit: cover;
     object-position: center top;
   }
+
+  &--compact-multi {
+    overflow: visible;
+    background: transparent;
+    border: none;
+  }
+}
+
+/** Mini galería (vista rápida / compact con varias fotos). */
+.product-compact-gallery {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/** Cinta de descuento sobre la imagen (misma idea que `product_card-save-ribbon` en catálogo). */
+.product-compact-sale-ribbon {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.28rem 0.42rem;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  background: linear-gradient(135deg, #c45a6b, #9b2d4a);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  max-width: calc(100% - 16px);
+  line-height: 1.2;
+  pointer-events: none;
+}
+
+.product-compact-gallery__main {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-muted) 100%);
+  box-shadow: var(--shadow-xs);
+
+  img {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    max-height: 280px;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+    transition: opacity 0.2s ease;
+  }
+}
+
+.product-compact-gallery__thumbs {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 6px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.45);
+    border-radius: 4px;
+  }
+}
+
+.product-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 0.5rem;
+}
+
+.product-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: var(--font-nav, inherit);
+
+  &--sale {
+    color: #5c1f32;
+    background: linear-gradient(135deg, rgba(255, 214, 224, 0.95), rgba(232, 180, 196, 0.55));
+    border: 1px solid rgba(168, 72, 114, 0.28);
+    box-shadow: 0 1px 3px rgba(168, 72, 114, 0.12);
+  }
+
+  .product-badge__ico {
+    font-size: 1rem !important;
+    width: 1rem !important;
+    height: 1rem !important;
+    opacity: 0.9;
+  }
+}
+
+.product-stock--labeled {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.product-stock__ico {
+  flex-shrink: 0;
+  font-size: 1.05rem !important;
+  width: 1.05rem !important;
+  height: 1.05rem !important;
+  color: var(--text-muted);
+  opacity: 0.85;
+}
+
+.product-stock__text {
+  min-width: 0;
 }
 
 .product-thumbs {
@@ -186,6 +339,12 @@
   &--active {
     border-color: var(--accent-gold);
     box-shadow: var(--shadow-sm);
+  }
+
+  &--compact {
+    width: 52px;
+    height: 64px;
+    flex-shrink: 0;
   }
 }
 
@@ -241,6 +400,18 @@
   font-weight: 500;
   color: var(--text-primary);
   letter-spacing: 0.02em;
+
+  &--sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
 }
 
 .product-description {
@@ -251,7 +422,7 @@
 .product-meta-row {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1.25rem;
@@ -390,5 +561,40 @@
   &:hover {
     color: var(--accent-gold);
     border-bottom-color: var(--accent-gold);
+  }
+}
+
+/* Compact (listados, home): el CTA a ancho de tarjeta; el global align-items: flex-start + padding 0 2rem
+   encogía el botón o desbordaba en móvil. */
+.product-content--compact {
+  .product-actions {
+    width: 100%;
+    max-width: 100%;
+    align-items: stretch;
+  }
+
+  a.product-add-cta,
+  button.product-add-cta,
+  .product-add-cta {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+    justify-content: center;
+    padding: 0.4rem 0.75rem !important;
+  }
+
+  /* MDC a veces deja espacios al proyectar el texto; el ojo lee el label corrido. */
+  .mdc-button__label {
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  @media screen and (min-width: 768px) {
+    a.product-add-cta,
+    button.product-add-cta,
+    .product-add-cta {
+      padding: 0.4rem 1.1rem !important;
+    }
   }
 }

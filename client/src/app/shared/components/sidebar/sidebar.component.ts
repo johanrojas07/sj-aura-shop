@@ -55,7 +55,7 @@ export class SidebarComponent implements OnChanges, OnInit, OnDestroy {
   @Input() priceMinFilter = 0;
   /** Catálogo productos: slider con dos extremos (desde / hasta). */
   @Input() usePriceRange = false;
-  @Input() sortOptions: { name: string; id: string }[];
+  @Input() sortOptions: { name: string; id: string; icon?: string }[];
   @Input() choosenSort: string;
   @Input() currency: string;
   @Input() lang: string;
@@ -469,8 +469,24 @@ export class SidebarComponent implements OnChanges, OnInit, OnDestroy {
     return this.sidebarChildren(parentTitleUrl).some((s) => s.titleUrl === active);
   }
 
+  /** Opción mostrada en el trigger del `mat-select` de orden. */
+  sortTriggerOption(): { name: string; id: string; icon?: string } {
+    const list = this.sortOptions;
+    if (!list?.length) {
+      return { name: 'Newest', id: 'newest', icon: 'sort' };
+    }
+    const id = (this.choosenSort || 'newest').trim();
+    return list.find((o) => o.id === id) ?? list[0];
+  }
+
   onInputChange($event: string): void {
-    this.changeSort.emit($event);
+    const next = ($event || 'newest').trim();
+    const cur = (this.choosenSort || 'newest').trim();
+    /** Evita emit al montar / abrir drawer: ngModelChange repetido disparaba scroll al inicio en el catálogo. */
+    if (next === cur) {
+      return;
+    }
+    this.changeSort.emit(next);
   }
 
   onChangePrice(value: number): void {

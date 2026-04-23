@@ -1,6 +1,5 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { JsonLDService } from './../../../services/jsonLD.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { filter, map, take, distinctUntilChanged, skip, withLatestFrom } from 'rxjs/operators';
 import { Component, OnDestroy, Signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -39,7 +38,6 @@ export class ProductComponent implements OnDestroy {
     private location: Location,
     private meta: Meta,
     private title: Title,
-    private snackBar: MatSnackBar,
     private cartDrawer: CartDrawerService,
     private translate: TranslateService,
     private jsonLDService: JsonLDService,
@@ -79,29 +77,6 @@ export class ProductComponent implements OnDestroy {
     if (type === 'add') {
       this.cartDrawer.open();
       this.store.addToCart('?id=' + id);
-
-      this.translate
-        .getTranslations$()
-        .pipe(
-          map((translations) =>
-            translations
-              ? { message: translations['ADDED_TO_CART'] || 'Producto agregado al carrito', action: translations['TO_CART'] || 'Ver bolsa' }
-              : { message: 'Producto agregado al carrito', action: 'Ver bolsa' },
-          ),
-          take(1),
-        )
-        .subscribe(({ message, action }) => {
-          const snackBarRef = this.snackBar.open(message, action, {
-            duration: 3800,
-            panelClass: ['eshop-toast'],
-            horizontalPosition: 'center',
-            verticalPosition: 'bottom',
-          });
-          snackBarRef
-            .onAction()
-            .pipe(take(1))
-            .subscribe(() => this.cartDrawer.open());
-        });
     }
   }
 

@@ -2,7 +2,7 @@
   <div class="order-detail-inner">
     <div class="order-detail-toolbar">
       <button type="button" mat-stroked-button color="primary" (click)="goBack()" class="order-back">
-        <span class="material-icons order-back-icon" aria-hidden="true">arrow_back</span>
+        <mat-icon class="order-back-mat-icon" aria-hidden="true">arrow_back</mat-icon>
         {{ 'Back' | translate | async }}
       </button>
     </div>
@@ -12,9 +12,10 @@
     }
 
     @if (order$(); as ord) {
-      <mat-card class="order-hero" appearance="outlined">
+      <mat-card class="order-hero order-hero--elevated" appearance="outlined">
         <mat-card-content class="order-hero-content">
           <div class="order-hero-main">
+            <p class="order-hero-kicker">{{ 'DASH_NAV_ORDERS' | translate | async }}</p>
             <p class="order-hero-label">{{ 'ORDER_RECEIPT_NUMBER' | translate | async }}</p>
             <h1 class="order-hero-id">{{ ord.orderId }}</h1>
             <div class="order-hero-meta">
@@ -22,28 +23,40 @@
                 {{ ('ORDER_STATUS_' + ord.status) | translate | async }}
               </span>
               <span class="order-hero-time" [title]="ord.dateAdded | date: 'medium'">
-                {{ 'ORDER_CARD_CREATED' | translate | async }}:
-                {{ ord.dateAdded | relativeTime: (lang$ | async) }}
-              </span>
-              <span class="order-hero-abs">
-                ({{ 'ORDER_DETAIL_ABSOLUTE_DATE' | translate | async }}: {{ ord.dateAdded | date: 'medium' }})
+                {{ ord.dateAdded | relativeTime: dashboardLang() }}
               </span>
             </div>
+            <p class="order-hero-abs">{{ ord.dateAdded | date: 'full' }}</p>
           </div>
           <div class="order-hero-side">
-            <p class="order-hero-side-label">{{ 'Amount' | translate | async }}</p>
-            <p class="order-hero-amount">{{ ord.amount | priceFormat }} <span class="order-hero-cur">{{ ord.currency }}</span></p>
+            <div class="order-hero-side-inner">
+              <mat-icon class="order-hero-money-icon" aria-hidden="true">payments</mat-icon>
+              <div>
+                <p class="order-hero-side-label">{{ 'Amount' | translate | async }}</p>
+                <p class="order-hero-amount">{{ ord.amount | priceFormat }} <span class="order-hero-cur">{{ ord.currency }}</span></p>
+                @if (ord.cart?.totalPrice != null) {
+                  <p class="order-hero-cart-total">
+                    {{ 'Total_price' | translate | async }}: {{ ord.cart?.totalPrice | priceFormat }} {{ ord.currency }}
+                  </p>
+                }
+              </div>
+            </div>
           </div>
         </mat-card-content>
       </mat-card>
 
       @if (type === 'EDIT') {
         <mat-card class="order-status-card" appearance="outlined">
+          <mat-card-header class="order-card-head-row">
+            <div mat-card-avatar class="order-card-avatar order-card-avatar--status">
+              <mat-icon>tune</mat-icon>
+            </div>
+            <mat-card-title>{{ 'ORDER_DETAIL_STATUS_TITLE' | translate | async }}</mat-card-title>
+            <mat-card-subtitle>{{ 'ORDER_DETAIL_STATUS_HINT' | translate | async }}</mat-card-subtitle>
+          </mat-card-header>
           <mat-card-content class="order-card-pad">
-            <h2 class="order-section-title">{{ 'ORDER_DETAIL_STATUS_TITLE' | translate | async }}</h2>
-            <p class="order-section-lead">{{ 'ORDER_DETAIL_STATUS_HINT' | translate | async }}</p>
             <form class="order-status-form" [formGroup]="statusForm" (ngSubmit)="submit()">
-              <mat-form-field appearance="outline" class="order-status-field" subscriptSizing="fixed">
+              <mat-form-field appearance="outline" floatLabel="always" class="order-status-field" subscriptSizing="dynamic">
                 <mat-label>{{ 'ORDER_CARD_CHANGE_STATUS' | translate | async }}</mat-label>
                 <mat-select formControlName="status">
                   @for (st of orderStatuses; track st) {
@@ -58,6 +71,7 @@
                 class="order-status-save"
                 [disabled]="statusForm.invalid || statusForm.value?.status === ord.status"
               >
+                <mat-icon>save</mat-icon>
                 {{ 'ORDER_DETAIL_SAVE_STATUS' | translate | async }}
               </button>
             </form>
@@ -65,56 +79,134 @@
         </mat-card>
       }
 
-      <mat-card class="order-info-card" appearance="outlined">
-        <mat-card-content class="order-info-grid order-card-pad">
-          <div>
-            @if (ord.description) {
-              <p><strong>{{ 'Description' | translate | async }}:</strong> {{ ord.description }}</p>
+      <div class="order-detail-grid">
+        <mat-card class="order-panel order-panel--customer" appearance="outlined">
+          <mat-card-header class="order-card-head-row">
+            <div mat-card-avatar class="order-card-avatar order-card-avatar--person">
+              <mat-icon>person</mat-icon>
+            </div>
+            <mat-card-title>{{ 'ORDER_DETAIL_CARD_CUSTOMER' | translate | async }}</mat-card-title>
+            <mat-card-subtitle>{{ 'ORDER_DETAIL_CARD_CUSTOMER_SUB' | translate | async }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content class="order-card-pad">
+            <dl class="order-dl">
+              <div class="order-dl-row">
+                <dt>{{ 'Customer' | translate | async }}</dt>
+                <dd>{{ ord.customerEmail }}</dd>
+              </div>
+              @if (ord.customerPhone) {
+                <div class="order-dl-row">
+                  <dt>{{ 'ORDER_DETAIL_PHONE' | translate | async }}</dt>
+                  <dd>{{ ord.customerPhone }}</dd>
+                </div>
+              }
+              @if (ord.description) {
+                <div class="order-dl-row">
+                  <dt>{{ 'Description' | translate | async }}</dt>
+                  <dd>{{ ord.description }}</dd>
+                </div>
+              }
+              <div class="order-dl-row">
+                <dt>{{ 'Paid' | translate | async }}</dt>
+                <dd>{{ ord.outcome?.seller_message || '—' }}</dd>
+              </div>
+              <div class="order-dl-row">
+                <dt>{{ 'ORDER_CARD_TYPE' | translate | async }}</dt>
+                <dd>{{ ord.type }}</dd>
+              </div>
+            </dl>
+          </mat-card-content>
+        </mat-card>
+
+        @if (ord.addresses?.[0]; as address) {
+          <mat-card class="order-panel order-panel--shipping" appearance="outlined">
+            <mat-card-header class="order-card-head-row">
+              <div mat-card-avatar class="order-card-avatar order-card-avatar--place">
+                <mat-icon>local_shipping</mat-icon>
+              </div>
+              <mat-card-title>{{ 'About_customer' | translate | async }}</mat-card-title>
+              <mat-card-subtitle>{{ 'ORDER_DETAIL_CARD_ADDRESS_SUB' | translate | async }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content class="order-card-pad">
+              <dl class="order-dl">
+                @if (address.name) {
+                  <div class="order-dl-row">
+                    <dt>{{ 'Name' | translate | async }}</dt>
+                    <dd>{{ address.name }}</dd>
+                  </div>
+                }
+                <div class="order-dl-row">
+                  <dt>{{ 'Address' | translate | async }}</dt>
+                  <dd>{{ address.line1 }}</dd>
+                </div>
+                <div class="order-dl-row">
+                  <dt>{{ 'City' | translate | async }}</dt>
+                  <dd>{{ address.city }}, {{ address.zip }}</dd>
+                </div>
+                <div class="order-dl-row">
+                  <dt>{{ 'Country' | translate | async }}</dt>
+                  <dd>{{ address.country }}</dd>
+                </div>
+              </dl>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+
+      <mat-card class="order-panel order-panel--items" appearance="outlined">
+        <mat-card-header class="order-card-head-row">
+          <div mat-card-avatar class="order-card-avatar order-card-avatar--cart">
+            <mat-icon>shopping_bag</mat-icon>
+          </div>
+          <mat-card-title>{{ 'ORDER_RECEIPT_ITEMS' | translate | async }}</mat-card-title>
+          <mat-card-subtitle>
+            {{ 'Total_quantity' | translate | async }}: <strong>{{ ord.cart?.totalQty }}</strong>
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="order-card-pad order-card-pad--flush">
+          <div class="order-cart-list">
+            @for (cartItem of ord.cart?.items; track cartItem.item?._id ?? cartItem.item?.titleUrl ?? $index) {
+              <div class="order-cart-row">
+                <a class="order-cart-thumb" [routerLink]="productLink(cartItem?.item?.titleUrl)">
+                  <img [src]="cartItem?.item?.mainImage?.url" [alt]="cartItem?.item?.title || ''" />
+                </a>
+                <div class="order-cart-body">
+                  <a class="order-cart-title-link" [routerLink]="productLink(cartItem?.item?.titleUrl)">{{ cartItem?.item?.title }}</a>
+                  <div class="order-cart-meta">
+                    <span class="order-cart-qty">{{ cartItem.qty }}×</span>
+                    <span class="order-cart-price-pill">{{ cartItem.price | priceFormat }} {{ ord.currency }}</span>
+                  </div>
+                </div>
+              </div>
             }
-            <p><strong>{{ 'Customer' | translate | async }}:</strong> {{ ord.customerEmail }}</p>
-            <p><strong>{{ 'Paid' | translate | async }}:</strong> {{ ord.outcome?.seller_message || '—' }}</p>
-            <p><strong>{{ 'Total_price' | translate | async }}:</strong> {{ ord.cart?.totalPrice | priceFormat }}</p>
-            <p><strong>{{ 'Total_quantity' | translate | async }}:</strong> {{ ord.cart?.totalQty }}</p>
           </div>
         </mat-card-content>
       </mat-card>
 
-      <div class="order-detail-columns">
-        @if (ord.addresses?.[0]; as address) {
-          <mat-card class="order-subcard" appearance="outlined">
-            <mat-card-content class="order-card-pad">
-              <h2 class="order-section-title">{{ 'About_customer' | translate | async }}</h2>
-              <p><strong>{{ 'City' | translate | async }}:</strong> {{ address.city }}</p>
-              <p><strong>{{ 'Country' | translate | async }}:</strong> {{ address.country }}</p>
-              <p><strong>{{ 'Address' | translate | async }}:</strong> {{ address.line1 }}</p>
-              <p><strong>{{ 'Zip' | translate | async }}:</strong> {{ address.zip }}</p>
-              @if (address.name) {
-                <p><strong>{{ 'Name' | translate | async }}:</strong> {{ address.name }}</p>
-              }
-            </mat-card-content>
-          </mat-card>
-        }
-
-        <mat-card class="order-subcard order-subcard--wide" appearance="outlined">
-          <mat-card-content class="order-card-pad">
-            <h2 class="order-section-title">{{ 'ORDER_RECEIPT_ITEMS' | translate | async }}</h2>
-            <div class="order-cart-list">
-              @for (cartItem of ord.cart?.items; track cartItem.item?._id ?? cartItem.item?.titleUrl ?? $index) {
-                <div class="order-cart-row">
-                  <a class="order-cart-thumb" [routerLink]="['/' + (lang$ | async) + '/product/' + cartItem?.item?.titleUrl]">
-                    <img [src]="cartItem?.item?.mainImage?.url" [alt]="cartItem?.item?.title || ''" />
-                  </a>
-                  <div class="order-cart-info">
-                    <span class="order-cart-qty">{{ cartItem.qty }}×</span>
-                    <span class="order-cart-title">{{ cartItem?.item?.title }}</span>
-                    <span class="order-cart-price">{{ cartItem.price | priceFormat }} {{ ord.currency }}</span>
-                  </div>
-                </div>
-              }
+      <mat-card class="order-panel order-panel--totals" appearance="outlined">
+        <mat-card-header class="order-card-head-row">
+          <div mat-card-avatar class="order-card-avatar order-card-avatar--total">
+            <mat-icon>receipt_long</mat-icon>
+          </div>
+          <mat-card-title>{{ 'ORDER_RECEIPT_SUMMARY' | translate | async }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="order-card-pad">
+          <div class="order-totals">
+            <div class="order-totals-row">
+              <span>{{ 'Total_quantity' | translate | async }}</span>
+              <strong>{{ ord.cart?.totalQty }}</strong>
             </div>
-          </mat-card-content>
-        </mat-card>
-      </div>
+            <div class="order-totals-row">
+              <span>{{ 'Total_price' | translate | async }}</span>
+              <strong>{{ ord.cart?.totalPrice | priceFormat }} {{ ord.currency }}</strong>
+            </div>
+            <div class="order-totals-row order-totals-row--grand">
+              <span>{{ 'Amount' | translate | async }}</span>
+              <strong>{{ ord.amount | priceFormat }} {{ ord.currency }}</strong>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
     }
   </div>
 </div>

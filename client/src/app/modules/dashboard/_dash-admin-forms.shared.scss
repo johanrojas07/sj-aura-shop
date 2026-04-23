@@ -1,0 +1,453 @@
+/**
+ * Estilos reutilizables para formularios y cards del admin AURA (loyalty y otros módulos).
+ * Importar como segundo `styleUrls` en el componente: `['./x.scss', '../_dash-admin-forms.shared.scss']`
+ */
+@use '@angular/material' as mat;
+
+:host {
+  --dash-field-radius: var(--admin-radius-sm, 8px);
+  --dash-field-border: var(--admin-border, #e2e8f0);
+  --dash-field-border-focus: rgba(79, 70, 229, 0.42);
+  --dash-field-bg: var(--admin-surface, #fff);
+  --dash-field-shadow-focus: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.dash-admin-form-page {
+  font-family: var(--admin-font, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  color: var(--admin-text, #0f172a);
+}
+
+.dash-admin-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem 1.25rem;
+  margin-bottom: 1.35rem;
+}
+
+.dash-admin-page-header__text {
+  min-width: 0;
+  flex: 1 1 12rem;
+}
+
+.dash-admin-page-kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--admin-text-muted, #64748b);
+}
+
+.dash-admin-page-title {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.35rem, 2.4vw, 1.65rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--admin-text, #0f172a);
+}
+
+.dash-admin-page-lead {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--admin-text-muted, #64748b);
+  max-width: 40rem;
+}
+
+.dash-admin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: 0.65rem 1rem;
+  align-items: start;
+}
+
+.dash-admin-form-grid--tight {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+  gap: 0.5rem 0.75rem;
+}
+
+.dash-admin-choice-panel {
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--admin-radius-md, 12px);
+  border: 1px solid var(--admin-border, #e2e8f0);
+  background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+}
+
+.dash-admin-choice-panel__label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--admin-text-muted, #64748b);
+  margin-bottom: 0.45rem;
+}
+
+.dash-admin-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem 0.65rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--admin-border, #e2e8f0);
+}
+
+.dash-admin-form-actions--start {
+  justify-content: flex-start;
+}
+
+.dash-admin-btn-primary.mat-mdc-unelevated-button,
+.dash-admin-btn-primary.mat-mdc-raised-button,
+.dash-admin-btn-primary.mat-mdc-outlined-button {
+  border-radius: var(--admin-radius-sm, 8px) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+}
+
+.dash-admin-btn-ghost.mat-mdc-button {
+  border-radius: var(--admin-radius-sm, 8px);
+  font-weight: 600;
+}
+
+.dash-admin-card.mat-mdc-card {
+  border-radius: 14px;
+  border: 1px solid var(--dash-line, #e7e5e4);
+  box-shadow:
+    0 1px 2px rgba(28, 25, 23, 0.04),
+    0 8px 24px rgba(28, 25, 23, 0.04);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+
+  .mat-mdc-card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--admin-text, #0f172a);
+    padding: 0 0 0.25rem;
+  }
+
+  .mat-mdc-card-subtitle {
+    color: var(--admin-text-muted, #64748b);
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+
+  .mat-mdc-card-content {
+    padding-top: 0.35rem;
+  }
+}
+
+.dash-admin-field.mat-mdc-form-field {
+  width: 100%;
+
+  // M3 default: 56px alto, 16px padding vertical. El prefijo (icono) añade ~40–55px al cálculo del label.
+  @include mat.form-field-overrides((
+    container-height: 40px,
+    container-vertical-padding: 6px,
+    container-text-size: 0.8125rem,
+    container-text-line-height: 1.4,
+    outlined-label-text-size: 0.8125rem,
+    subscript-text-size: 0.72rem,
+  ));
+
+  .mat-mdc-text-field-wrapper {
+    border-radius: var(--dash-field-radius);
+    transition:
+      box-shadow 0.15s ease,
+      background 0.15s ease;
+  }
+
+  &:hover:not(.mat-focused) .mat-mdc-text-field-wrapper {
+    background: rgba(248, 250, 252, 0.85);
+  }
+
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: var(--dash-field-border) !important;
+  }
+
+  &.mat-focused .mdc-notched-outline__leading,
+  &.mat-focused .mdc-notched-outline__notch,
+  &.mat-focused .mdc-notched-outline__trailing {
+    border-color: var(--dash-field-border-focus) !important;
+  }
+
+  &.mat-focused:not(.mat-form-field-invalid) .mat-mdc-text-field-wrapper {
+    box-shadow: var(--dash-field-shadow-focus);
+  }
+
+  &.mat-form-field-invalid.mat-focused .mdc-notched-outline__leading,
+  &.mat-form-field-invalid.mat-focused .mdc-notched-outline__notch,
+  &.mat-form-field-invalid.mat-focused .mdc-notched-outline__trailing {
+    border-color: rgba(220, 38, 38, 0.55) !important;
+  }
+
+  .mat-mdc-form-field-icon-prefix,
+  .mat-mdc-form-field-icon-suffix {
+    color: var(--admin-text-muted, #64748b);
+  }
+
+  .mat-mdc-form-field-icon-prefix > mat-icon,
+  .mat-mdc-form-field-icon-suffix > mat-icon {
+    // Icono más chico y menos aire: reduce el ancho usado en --mat-mdc-form-field-label-transform
+    font-size: 1rem;
+    width: 1.05rem;
+    height: 1.05rem;
+    opacity: 0.88;
+  }
+
+  // No fijar min-height ni align-items en flex/infix: MDC posiciona el label (outline) con
+  // márgenes internos; forzarlos deja el mat-label descentrado, “muy abajo”.
+
+  ::ng-deep .mat-mdc-floating-label {
+    font-weight: 600;
+    // Tamaño/altura de línea: dejar al tema (MDC) para alinear con el infix
+    color: var(--admin-text, #0f172a);
+  }
+
+  &.mat-form-field-appearance-outline ::ng-deep .mdc-floating-label--float-above {
+    color: var(--admin-text-muted, #64748b) !important;
+    font-weight: 700 !important;
+  }
+
+  // Tipografía en el control, no en el mat-form-field: si el host hereda line-height
+  // pequeña (p. ej. 1.25) el texto del <input> queda visualmente bajo y “descentrado”.
+  ::ng-deep .mat-mdc-input-element,
+  ::ng-deep textarea.mat-mdc-input-element {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  // Valor mostrado del mat-select
+  ::ng-deep .mat-mdc-select,
+  ::ng-deep .mat-mdc-select-min-line,
+  ::ng-deep .mat-mdc-select-value-text {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  ::ng-deep .mat-mdc-form-field-icon-prefix {
+    padding: 0 0 0 6px;
+  }
+
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    padding-top: 0.35rem;
+  }
+
+  ::ng-deep .mat-mdc-form-field-error-wrapper {
+    padding: 0 2px;
+  }
+}
+
+.dash-admin-field--compact.mat-mdc-form-field {
+  // No fijar font-size ni line-height en el host: se hereda al input y baja/encoge el texto raro.
+  // Nunca poner max-width al label: recorta el fondo del notch de MDC (parece un punto/bola blanco al final).
+  ::ng-deep .mat-mdc-floating-label,
+  ::ng-deep .mdc-floating-label--float-above,
+  ::ng-deep .mat-mdc-floating-label.mdc-floating-label--float-above {
+    max-width: 100%;
+  }
+}
+
+// Select: deja aire a la flecha; padding en infix, no en el label
+.dash-admin-field.mat-mdc-form-field-type-mat-select {
+  ::ng-deep .mat-mdc-form-field-infix {
+    padding-right: 0.25rem;
+  }
+}
+
+.dash-admin-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  line-height: 1.45;
+
+  &--error {
+    background: rgba(254, 226, 226, 0.65);
+    border: 1px solid rgba(248, 113, 113, 0.45);
+    color: #991b1b;
+  }
+
+  &--success {
+    background: rgba(220, 252, 231, 0.75);
+    border: 1px solid rgba(74, 222, 128, 0.45);
+    color: #166534;
+  }
+
+  mat-icon {
+    flex-shrink: 0;
+    font-size: 1.15rem;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-top: 0.1rem;
+  }
+}
+
+.dash-admin-preview-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(14, 165, 233, 0.08) 100%);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  color: var(--dash-ink, #1c1917);
+
+  strong {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #5b21b6;
+  }
+}
+
+.dash-admin-skeleton {
+  border-radius: 14px;
+  border: 1px solid var(--dash-line, #e7e5e4);
+  overflow: hidden;
+  background: #fff;
+}
+
+.dash-admin-skeleton-row {
+  height: 2.65rem;
+  border-bottom: 1px solid rgba(231, 229, 228, 0.85);
+  background: linear-gradient(
+    90deg,
+    rgba(250, 250, 249, 0.9) 0%,
+    rgba(244, 244, 245, 0.95) 45%,
+    rgba(250, 250, 249, 0.9) 90%
+  );
+  background-size: 200% 100%;
+  animation: dash-admin-shimmer 1.1s ease-in-out infinite;
+}
+
+@keyframes dash-admin-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.dash-admin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.dash-admin-icon-btn.mat-mdc-icon-button {
+  border-radius: var(--admin-radius-sm, 8px);
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.12s ease;
+
+  &:hover {
+    background: var(--admin-accent-soft, rgba(79, 70, 229, 0.1));
+    color: var(--admin-accent, #4f46e5);
+  }
+}
+
+.dash-admin-table-wrap {
+  width: 100%;
+  overflow: auto;
+  border-radius: var(--admin-radius-md, 12px);
+  border: 1px solid var(--admin-border, #e2e8f0);
+  background: var(--admin-surface, #fff);
+  box-shadow: var(--admin-shadow-sm, 0 1px 2px rgba(15, 23, 42, 0.05));
+}
+
+.dash-admin-table.mat-mdc-table {
+  width: 100%;
+  font-size: 0.8125rem;
+
+  .mat-mdc-header-cell {
+    font-weight: 700;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--admin-text-muted, #64748b);
+    background: #f8fafc;
+  }
+
+  .mat-mdc-cell,
+  .mat-mdc-header-cell {
+    padding: 0.5rem 0.65rem;
+    border-bottom-color: var(--admin-border, #e2e8f0);
+  }
+
+  .mat-mdc-row:hover .mat-mdc-cell {
+    background: rgba(79, 70, 229, 0.03);
+  }
+}
+
+/** Tablas HTML nativas (listados admin sin mat-table) */
+.dash-admin-data-table-wrap {
+  width: 100%;
+  overflow: auto;
+  border-radius: var(--admin-radius-md, 12px);
+  border: 1px solid var(--admin-border, #e2e8f0);
+  background: var(--admin-surface, #fff);
+  box-shadow: var(--admin-shadow-sm, 0 1px 2px rgba(15, 23, 42, 0.05));
+}
+
+table.dash-admin-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+
+  th,
+  td {
+    padding: 0.55rem 0.7rem;
+    text-align: left;
+    border-bottom: 1px solid var(--admin-border, #e2e8f0);
+    vertical-align: middle;
+  }
+
+  th {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--admin-text-muted, #64748b);
+    background: #f8fafc;
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    transition: background 0.12s ease;
+  }
+
+  tbody tr:hover {
+    background: rgba(79, 70, 229, 0.04);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.dash-admin-chip-set.mat-mdc-chip-set {
+  gap: 0.35rem;
+}
+
+.dash-admin-chip.mat-mdc-chip {
+  font-size: 0.78rem;
+  font-weight: 500;
+  border-radius: 8px;
+}

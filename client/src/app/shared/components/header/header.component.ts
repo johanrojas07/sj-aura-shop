@@ -1,5 +1,5 @@
 import { debounceTime, take, delay, distinctUntilChanged, filter, map } from 'rxjs/operators';
-import { Component, Inject, Injector, OnInit, PLATFORM_ID, Signal, signal } from '@angular/core';
+import { Component, computed, Inject, OnInit, PLATFORM_ID, Signal, signal } from '@angular/core';
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -18,7 +18,6 @@ import { NavShopMenuComponent } from './nav-shop-menu.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -48,7 +47,6 @@ export interface HeaderLastViewed {
     MatButtonModule,
     MatToolbarModule,
     MatMenuModule,
-    MatSnackBarModule,
     NavShopMenuComponent,
     PriceFormatPipe,
   ],
@@ -72,6 +70,15 @@ export class HeaderComponent implements OnInit {
   lang$: Observable<string>;
   readonly query: FormControl = new FormControl('');
   searchOpen = signal(false);
+  /** Slug de categoría de primer nivel para acotar la vista previa de búsqueda (`null` = todas). */
+  readonly searchCategorySlug = signal<string | null>(null);
+  /** Categorías raíz visibles para chips en el buscador global. */
+  readonly searchFilterCategories = computed(() => {
+    const list = this.categories() || [];
+    return [...list]
+      .filter((c) => !c.parentTitleUrl && !c.virtualNav && !c.menuHidden)
+      .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+  });
   /** Panel lateral catálogo (móvil); reemplaza el mat-menu básico. */
   mobileNavOpen = signal(false);
 
@@ -86,7 +93,6 @@ export class HeaderComponent implements OnInit {
     @Inject(DOCUMENT) private readonly document: Document,
     @Inject(PLATFORM_ID) private readonly platformId: object,
     private readonly router: Router,
-    private readonly injector: Injector,
   ) {
     this.categories = this.selectors.categories;
     this.productSearchHits = this.selectors.productSearchHits;
@@ -147,7 +153,7 @@ export class HeaderComponent implements OnInit {
         distinctUntilChanged(),
       )
       .subscribe((value) => {
-        this.store.getProductSearch(value);
+        this.store.getProductSearch(value, this.searchCategorySlug());
       });
   }
 
@@ -159,6 +165,7 @@ export class HeaderComponent implements OnInit {
     }
     if (!next) {
       this.query.setValue('', { emitEvent: false });
+      this.searchCategorySlug.set(null);
       this.store.getProductSearch('');
     }
   }
@@ -177,7 +184,38 @@ export class HeaderComponent implements OnInit {
   closeSearch(): void {
     this.searchOpen.set(false);
     this.query.setValue('', { emitEvent: false });
+    this.searchCategorySlug.set(null);
     this.store.getProductSearch('');
+  }
+
+  /** Acota la vista previa a una colección (slug `titleUrl`). */
+  setSearchCategoryFilter(slug: string | null): void {
+    this.searchCategorySlug.set(slug);
+    const q = (this.query.value ?? '').trim();
+    if (q.length) {
+      this.store.getProductSearch(q, slug);
+    }
+  }
+
+  /** Abre el catálogo completo con la misma búsqueda y categoría activa en chips. */
+  goToCatalogSearch(): void {
+    const term = (this.query.value ?? '').trim();
+    if (!term.length) {
+      return;
+    }
+    const slug = this.searchCategorySlug();
+    this.lang$.pipe(take(1)).subscribe((lang) => {
+      const l = (lang && String(lang).trim()) || languages[0];
+      this.router.navigate([`/${l}/product/all`], {
+        queryParams: {
+          search: term,
+          page: 1,
+          sort: 'newest',
+          ...(slug ? { categories: slug } : {}),
+        },
+      });
+      this.closeSearch();
+    });
   }
 
   addHitToCart(id: string, ev?: Event): void {
@@ -187,32 +225,6 @@ export class HeaderComponent implements OnInit {
     }
     this.cartDrawer.open();
     this.store.addToCart('?id=' + id);
-    this.translate
-      .getTranslations$()
-      .pipe(
-        map((translations) =>
-          translations
-            ? {
-                message: translations['ADDED_TO_CART'] || 'Producto agregado al carrito',
-                action: translations['TO_CART'] || 'Ver bolsa',
-              }
-            : { message: 'Producto agregado al carrito', action: 'Ver bolsa' },
-        ),
-        take(1),
-      )
-      .subscribe(({ message, action }) => {
-        if (!isPlatformBrowser(this.platformId)) {
-          return;
-        }
-        const snackBar = this.injector.get(MatSnackBar);
-        const ref = snackBar.open(message, action, {
-          duration: 3800,
-          panelClass: ['eshop-toast'],
-          horizontalPosition: 'center',
-          verticalPosition: 'bottom',
-        });
-        ref.onAction().pipe(take(1)).subscribe(() => this.cartDrawer.open());
-      });
   }
 
   trackHit(_i: number, p: Product): string {

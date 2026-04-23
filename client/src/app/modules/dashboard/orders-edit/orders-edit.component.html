@@ -1,13 +1,55 @@
-@if (orders$()?.length) {
-  <app-orders-list
-    [orders]="orders$()"
-    [orderUrl]="'/' + (lang$ | async) + '/dashboard/orders/'"
-    [allowStatusChange]="true"
-    [currentLang]="(lang$ | async) || 'es'"
-  >
-  </app-orders-list>
-} @else {
-  <div class="orders-edit-empty">
-    <p>{{ 'DASH_ORDERS_EMPTY' | translate | async }}</p>
-  </div>
-}
+<div class="orders-dash dash-admin-form-page">
+  <header class="dash-admin-page-header orders-dash__header">
+    <div class="dash-admin-page-header__text">
+      <p class="dash-admin-page-kicker">{{ 'DASH_NAV_ORDERS' | translate | async }}</p>
+      <h1 class="dash-admin-page-title">{{ 'DASH_ORDERS_TITLE' | translate | async }}</h1>
+      <p class="dash-admin-page-lead">{{ 'DASH_ORDERS_LEAD' | translate | async }}</p>
+    </div>
+  </header>
+
+  @if (orders$()?.length) {
+    <section class="orders-kpi" [attr.aria-label]="'DASH_ORDERS_TITLE' | translate | async">
+      <div class="orders-kpi__card orders-kpi__card--slate">
+        <div class="orders-kpi__icon" aria-hidden="true">
+          <mat-icon>receipt_long</mat-icon>
+        </div>
+        <div class="orders-kpi__body">
+          <span class="orders-kpi__value">{{ orderStats().total }}</span>
+          <span class="orders-kpi__label">{{ 'ORDER_KPI_TOTAL' | translate | async }}</span>
+        </div>
+      </div>
+      <div class="orders-kpi__card orders-kpi__card--emerald">
+        <div class="orders-kpi__icon" aria-hidden="true">
+          <mat-icon>savings</mat-icon>
+        </div>
+        <div class="orders-kpi__body">
+          <span class="orders-kpi__value">{{ orderStats().revenue | priceFormat }}</span>
+          <span class="orders-kpi__label">{{ 'ORDER_KPI_REVENUE' | translate | async }}</span>
+        </div>
+      </div>
+      <div class="orders-kpi__card orders-kpi__card--amber">
+        <div class="orders-kpi__icon" aria-hidden="true">
+          <mat-icon>pending_actions</mat-icon>
+        </div>
+        <div class="orders-kpi__body">
+          <span class="orders-kpi__value">{{ orderStats().open }}</span>
+          <span class="orders-kpi__label">{{ 'ORDER_KPI_OPEN' | translate | async }}</span>
+        </div>
+      </div>
+    </section>
+
+    <app-orders-list
+      [orders]="orders$()"
+      [orderUrl]="orderUrl()"
+      [allowStatusChange]="true"
+      [currentLang]="effectiveLang()"
+      [showViewToggle]="true"
+    >
+    </app-orders-list>
+  } @else {
+    <div class="orders-edit-empty">
+      <mat-icon class="orders-edit-empty__icon" aria-hidden="true">inbox</mat-icon>
+      <p>{{ 'DASH_ORDERS_EMPTY' | translate | async }}</p>
+    </div>
+  }
+</div>

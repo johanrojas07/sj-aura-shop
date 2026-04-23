@@ -32,7 +32,7 @@
               <mat-progress-spinner diameter="28" mode="indeterminate" />
             </div>
           } @else {
-            <div class="cart-drawer-similar-list">
+            <div class="cart-drawer-similar-list eshop-scrollbar-y">
               @for (p of relatedProducts(); track p._id ?? p.titleUrl) {
                 <article class="cart-drawer-similar-card">
                   <button
@@ -108,7 +108,7 @@
           </button>
         </header>
 
-        <div class="cart-drawer-body">
+        <div class="cart-drawer-body eshop-scrollbar-y">
           <ul class="cart-drawer-list">
             @for (row of c.items; track row.item?._id ?? $index) {
               <li class="cart-drawer-row">
@@ -208,7 +208,10 @@
             <mat-progress-spinner diameter="36" mode="indeterminate" />
           </div>
         }
-        <div class="cart-drawer-quick-scroll" [class.cart-drawer-quick-scroll--dim]="quickViewLoading()">
+        <div
+          class="cart-drawer-quick-scroll eshop-scrollbar-y"
+          [class.cart-drawer-quick-scroll--dim]="quickViewLoading()"
+        >
           <app-product-content
             layout="editorial"
             [fullGalleryStack]="true"

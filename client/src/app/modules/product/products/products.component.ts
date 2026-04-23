@@ -1,4 +1,3 @@
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { map, distinctUntilChanged, filter, take, skip } from 'rxjs/operators';
 import { Component, ChangeDetectionStrategy, OnDestroy, Signal, computed } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
@@ -54,6 +53,9 @@ export class ProductsComponent implements OnDestroy {
   sortOptions = sortOptions;
   sidebarOpened = false;
 
+  /** Scroll de `#main-content` a restaurar al abrir el drawer móvil (evita subir al tope por foco del panel). */
+  private catalogMainScrollToRestore: number | null = null;
+
   /** Slugs en `?categories=` (puede estar vacío aunque haya categoría en la ruta). */
   readonly categoryQueryFilters: Signal<string[]>;
 
@@ -74,7 +76,6 @@ export class ProductsComponent implements OnDestroy {
     private selectors: SignalStoreSelectors,
     private route: ActivatedRoute,
     private router: Router,
-    private snackBar: MatSnackBar,
     private meta: Meta,
     private title: Title,
     private translate: TranslateService,
@@ -206,21 +207,6 @@ export class ProductsComponent implements OnDestroy {
   addToCart(id: string): void {
     this.cartDrawer.open();
     this.store.addToCart('?id=' + id);
-
-    this.translate.getTranslations$()
-      .pipe(map(translations => translations
-        ? { message: translations['ADDED_TO_CART'] || 'Producto agregado al carrito', action: translations['TO_CART'] || 'Ver bolsa' }
-        : { message: 'Producto agregado al carrito', action: 'Ver bolsa' }
-        ), take(1))
-      .subscribe(({ message, action }) => {
-        const snackBarRef = this.snackBar.open(message, action, {
-          duration: 3800,
-          panelClass: ['eshop-toast'],
-          horizontalPosition: 'center',
-          verticalPosition: 'bottom',
-        });
-        snackBarRef.onAction().pipe(take(1)).subscribe(() => this.cartDrawer.open());
-      });
   }
 
   removeFromCart(id: string): void {
@@ -258,22 +244,55 @@ export class ProductsComponent implements OnDestroy {
   }
 
   changeSort(sort: string): void {
+    const next = (sort || 'newest').trim();
+    const cur = (this.sortBy() || 'newest').trim();
+    if (next === cur) {
+      return;
+    }
     if (this.category()) {
       this.router.navigate(['/' + this.lang() + '/product/category/' + this.category()], {
-        queryParams: { sort , page: this.page() || 1 },
+        queryParams: { sort: next, page: this.page() || 1 },
         queryParamsHandling: 'merge',
       });
     } else {
       this.router.navigate(['/' + this.lang() + '/product/all'], {
-        queryParams: { sort, page: this.page() || 1 },
+        queryParams: { sort: next, page: this.page() || 1 },
         queryParamsHandling: 'merge',
       });
     }
     this.store.updatePosition({ productsComponent: 0 });
   }
 
-  toggleSidebar() {
-    this.sidebarOpened = !this.sidebarOpened;
+  toggleSidebar(): void {
+    const opening = !this.sidebarOpened;
+    if (opening && typeof document !== 'undefined') {
+      this.catalogMainScrollToRestore = document.getElementById('main-content')?.scrollTop ?? 0;
+    } else if (!opening) {
+      this.catalogMainScrollToRestore = null;
+    }
+    this.sidebarOpened = opening;
+  }
+
+  onCatalogFiltersDrawerOpenedChange(opened: boolean): void {
+    if (!opened || typeof document === 'undefined') {
+      return;
+    }
+    const y = this.catalogMainScrollToRestore;
+    this.catalogMainScrollToRestore = null;
+    if (y == null) {
+      return;
+    }
+    const apply = (): void => {
+      const wrap = document.getElementById('main-content');
+      if (wrap) {
+        wrap.scrollTop = y;
+      }
+    };
+    queueMicrotask(apply);
+    requestAnimationFrame(apply);
+    requestAnimationFrame(() => requestAnimationFrame(apply));
+    setTimeout(apply, 0);
+    setTimeout(apply, 48);
   }
 
   ngOnDestroy(): void {
@@ -305,11 +324,12 @@ export class ProductsComponent implements OnDestroy {
           promo: params['promo'],
           minPrice: params['minPrice'],
           categories: params['categories'],
+          search: params['search'],
         })),
         distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b))
       ),
     ]).subscribe(
-      ([lang, category, filterPrice, filterPriceMin, { page, sort, ofertas, promo, minPrice, categories }]) => {
+      ([lang, category, filterPrice, filterPriceMin, { page, sort, ofertas, promo, minPrice, categories, search }]) => {
         const minPUrl = minPrice ? parseFloat(String(minPrice)) : undefined;
         const minPStore = filterPriceMin > 0 ? filterPriceMin : undefined;
         let effMin: number | undefined;
@@ -322,6 +342,8 @@ export class ProductsComponent implements OnDestroy {
         const virtualFilters = !cat;
         const multiSlugs = parseCategoryQueryParam(categories);
         const useMulti = multiSlugs.length > 0;
+        const searchTerm =
+          typeof search === 'string' && search.trim().length > 0 ? search.trim() : '';
         this.store.getProducts({
           lang,
           ...(useMulti
@@ -337,6 +359,7 @@ export class ProductsComponent implements OnDestroy {
           ...(effMin != null && !Number.isNaN(Number(effMin)) && Number(effMin) > 0
             ? { minPrice: effMin }
             : {}),
+          ...(searchTerm.length ? { search: searchTerm } : {}),
         });
       },
     );

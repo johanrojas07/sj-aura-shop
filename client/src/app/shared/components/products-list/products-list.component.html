@@ -1,20 +1,36 @@
 @if (adminMode && layout === 'list') {
-  <table class="admin-catalog-table">
-    <thead>
-      <tr>
-        <th class="admin-catalog-table__th admin-catalog-table__th--thumb" scope="col"></th>
-        <th class="admin-catalog-table__th" scope="col">{{ 'DASH_CATALOG_COL_NAME' | translate | async }}</th>
-        <th class="admin-catalog-table__th admin-catalog-table__th--num" scope="col">{{ 'DASH_CATALOG_COL_STOCK' | translate | async }}</th>
-        <th class="admin-catalog-table__th admin-catalog-table__th--price" scope="col">{{ 'DASH_CATALOG_COL_PRICE' | translate | async }}</th>
-        <th class="admin-catalog-table__th admin-catalog-table__th--actions" scope="col">{{ 'DASH_CATALOG_COL_ACTIONS' | translate | async }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (product of products; track product.titleUrl || product._id || $index) {
-        <tr class="admin-catalog-table__row">
-          <td class="admin-catalog-table__td admin-catalog-table__td--thumb">
+  <div class="catalog-table-shell">
+    <div class="catalog-table-scroll" tabindex="0" role="region" [attr.aria-label]="'DASH_CATALOG_VIEW_LIST' | translate | async">
+      <table
+        mat-table
+        matSort
+        matSortActive="name"
+        matSortDirection="asc"
+        matSortDisableClear
+        [dataSource]="dataSource"
+        class="admin-catalog-mat-table"
+      >
+        <colgroup>
+          <col class="admin-catalog-mat__col admin-catalog-mat__col--thumb" />
+          <col class="admin-catalog-mat__col admin-catalog-mat__col--name" />
+          <col class="admin-catalog-mat__col admin-catalog-mat__col--status" />
+          <col class="admin-catalog-mat__col admin-catalog-mat__col--stock" />
+          <col class="admin-catalog-mat__col admin-catalog-mat__col--price" />
+          <col class="admin-catalog-mat__col admin-catalog-mat__col--actions" />
+        </colgroup>
+        <ng-container matColumnDef="thumb">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            class="admin-catalog-mat__th admin-catalog-mat__th--thumb"
+            [attr.aria-label]="'DASH_CATALOG_COL_THUMB' | translate | async"
+            scope="col"
+          >
+            <mat-icon class="admin-catalog-mat__th-ico" aria-hidden="true">image</mat-icon>
+          </th>
+          <td mat-cell *matCellDef="let product" class="admin-catalog-mat__td admin-catalog-mat__td--thumb">
             <a
-              class="admin-catalog-table__thumb-link"
+              class="admin-catalog-mat__thumb-link"
               [routerLink]="['/' + lang + '/product/' + product?.titleUrl]"
               (mousemove)="onListCardImageMove(product, $event)"
               (mouseleave)="onListCardImageLeave(product)"
@@ -22,43 +38,156 @@
               <img [src]="listCardPreviewUrl(product)" [alt]="" loading="lazy" />
             </a>
           </td>
-          <td class="admin-catalog-table__td">
-            <span class="admin-catalog-table__name">{{ product?.title }}</span>
+        </ng-container>
+        <ng-container matColumnDef="name">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            mat-sort-header="name"
+            class="admin-catalog-mat__th admin-catalog-mat__th--name"
+            scope="col"
+          >
+            {{ 'DASH_CATALOG_COL_NAME' | translate | async }}
+          </th>
+          <td mat-cell *matCellDef="let product" class="admin-catalog-mat__td admin-catalog-mat__td--name">
+            <span class="admin-catalog-mat__name">{{ product?.title }}</span>
           </td>
-          <td class="admin-catalog-table__td admin-catalog-table__td--num">
-            <strong>{{ adminStockQty(product) }}</strong>
+        </ng-container>
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="status" class="admin-catalog-mat__th admin-catalog-mat__th--status" scope="col">
+            {{ 'DASH_CATALOG_COL_STATUS' | translate | async }}
+          </th>
+          <td mat-cell *matCellDef="let product" class="admin-catalog-mat__td admin-catalog-mat__td--status">
+            <span
+              class="catalog-status-badge admin-catalog-mat__badge--status"
+              [class.catalog-status-badge--on]="product?.visibility !== false"
+              [class.catalog-status-badge--off]="product?.visibility === false"
+              [attr.data-visible]="product?.visibility !== false"
+            >
+              {{
+                (product?.visibility !== false ? 'DASH_CATALOG_STATUS_VISIBLE' : 'DASH_CATALOG_STATUS_HIDDEN')
+                  | translate
+                  | async
+              }}
+            </span>
           </td>
-          <td class="admin-catalog-table__td admin-catalog-table__td--price">
-            @if (product.onSale && product.regularPrice && product.regularPrice > product.salePrice) {
-              <span class="admin-catalog-table__reg">{{ product.regularPrice | priceFormat }}</span>
-            }
-            <span class="admin-catalog-table__sale">{{ product?.salePrice | priceFormat }}</span>
+        </ng-container>
+        <ng-container matColumnDef="stock">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="stock" class="admin-catalog-mat__th admin-catalog-mat__th--stock" scope="col">
+            {{ 'DASH_CATALOG_COL_STOCK' | translate | async }}
+          </th>
+          <td mat-cell *matCellDef="let product" class="admin-catalog-mat__td admin-catalog-mat__td--stock">
+            <span
+              class="catalog-stock-pill admin-catalog-mat__pill--stock"
+              [class.catalog-stock-pill--low]="catalogStockIsLow(product)"
+              [class.catalog-stock-pill--out]="catalogStockIsOut(product)"
+            >
+              {{ adminStockQty(product) }}
+            </span>
           </td>
-          <td class="admin-catalog-table__td admin-catalog-table__td--actions">
-            <button type="button" mat-stroked-button class="admin-catalog-table__btn" (click)="onStockAdjust(product)">
-              {{ 'DASH_CATALOG_STOCK_BTN' | translate | async }}
-            </button>
-            <button type="button" mat-stroked-button class="admin-catalog-table__btn" (click)="onOpenAdminGallery(product)">
-              {{ 'DASH_CATALOG_GALLERY' | translate | async }}
-            </button>
-            @if (showEdit) {
-              <button type="button" mat-flat-button color="primary" class="admin-catalog-table__btn" (click)="onEditProduct(product?.titleUrl)">
-                {{ 'Edit' | translate | async }}
+        </ng-container>
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="price" class="admin-catalog-mat__th admin-catalog-mat__th--price" scope="col">
+            {{ 'DASH_CATALOG_COL_PRICE' | translate | async }}
+          </th>
+          <td mat-cell *matCellDef="let product" class="admin-catalog-mat__td admin-catalog-mat__td--price">
+            <div class="catalog-price-cell admin-catalog-mat__price-cell">
+              @if (product.onSale && product.regularPrice && product.regularPrice > product.salePrice) {
+                <span class="catalog-price-cell__reg">{{ product.regularPrice | priceFormat }}</span>
+              }
+              <span class="catalog-price-cell__sale">{{ product?.salePrice | priceFormat }}</span>
+            </div>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            class="admin-catalog-mat__th admin-catalog-mat__th--actions"
+            [attr.aria-label]="'DASH_CATALOG_COL_ACTIONS' | translate | async"
+            scope="col"
+          >
+            <mat-icon class="admin-catalog-mat__th-ico" aria-hidden="true">tune</mat-icon>
+          </th>
+          <td mat-cell *matCellDef="let product" class="admin-catalog-mat__td admin-catalog-mat__td--actions">
+            <div class="catalog-row-actions">
+              <button
+                type="button"
+                mat-icon-button
+                class="catalog-row-actions__btn dash-admin-icon-btn"
+                (click)="onStockAdjust(product)"
+                [matTooltip]="'DASH_CATALOG_STOCK_BTN' | translate | async"
+                matTooltipPosition="above"
+                [attr.aria-label]="'DASH_CATALOG_STOCK_BTN' | translate | async"
+              >
+                <mat-icon>inventory_2</mat-icon>
               </button>
-            }
-            <a mat-stroked-button class="admin-catalog-table__btn" [routerLink]="['/' + lang + '/product/' + product?.titleUrl]">
-              {{ 'DASH_CATALOG_LINK_STORE' | translate | async }}
-            </a>
+              <button
+                type="button"
+                mat-icon-button
+                class="catalog-row-actions__btn dash-admin-icon-btn"
+                (click)="onOpenAdminGallery(product)"
+                [matTooltip]="'DASH_CATALOG_GALLERY' | translate | async"
+                matTooltipPosition="above"
+                [attr.aria-label]="'DASH_CATALOG_GALLERY' | translate | async"
+              >
+                <mat-icon>photo_library</mat-icon>
+              </button>
+              @if (showEdit) {
+                <button
+                  type="button"
+                  mat-icon-button
+                  class="catalog-row-actions__btn dash-admin-icon-btn catalog-row-actions__btn--primary"
+                  color="primary"
+                  (click)="onEditProduct(product?.titleUrl)"
+                  [matTooltip]="'DASH_CATALOG_TT_EDIT' | translate | async"
+                  matTooltipPosition="above"
+                  [attr.aria-label]="'DASH_CATALOG_TT_EDIT' | translate | async"
+                >
+                  <mat-icon>edit_square</mat-icon>
+                </button>
+              }
+              <a
+                mat-icon-button
+                class="catalog-row-actions__btn dash-admin-icon-btn"
+                [routerLink]="['/' + lang + '/product/' + product?.titleUrl]"
+                [matTooltip]="'DASH_CATALOG_LINK_STORE' | translate | async"
+                matTooltipPosition="above"
+                [attr.aria-label]="'DASH_CATALOG_LINK_STORE' | translate | async"
+              >
+                <mat-icon>open_in_new</mat-icon>
+              </a>
+            </div>
           </td>
-        </tr>
-      }
-    </tbody>
-  </table>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="catalogDisplayColumns; sticky: false"></tr>
+        <tr mat-row *matRowDef="let row; columns: catalogDisplayColumns; trackBy: trackByRow"></tr>
+      </table>
+    </div>
+    <mat-paginator
+      class="catalog-mat-paginator"
+      [pageSizeOptions]="[10, 25, 50, 100]"
+      [pageSize]="10"
+      showFirstLastButtons
+      [attr.aria-label]="'DASH_CATALOG_PAGINATOR' | translate | async"
+    ></mat-paginator>
+  </div>
 } @else {
   @for (product of products; track product.titleUrl || product._id || $index) {
     @if (adminMode && layout === 'grid') {
       <div class="product_card product_card--admin-tight product_card--admin-grid">
         <div class="product_card-media">
+          <span
+            class="catalog-grid-status"
+            [class.catalog-grid-status--on]="product?.visibility !== false"
+            [class.catalog-grid-status--off]="product?.visibility === false"
+          >
+            {{
+              (product?.visibility !== false ? 'DASH_CATALOG_STATUS_VISIBLE' : 'DASH_CATALOG_STATUS_HIDDEN')
+                | translate
+                | async
+            }}
+          </span>
           <a
             class="product_card-image"
             [routerLink]="['/' + lang + '/product/' + product?.titleUrl]"
@@ -68,52 +197,90 @@
           >
             <img class="product_card-image-img" [src]="listCardPreviewUrl(product)" [alt]="product?.title || ''" loading="lazy" />
           </a>
-          <div class="product_card-media-actions">
+          <div class="product_card-media-actions product_card-media-actions--admin">
             <button
               type="button"
-              class="product_card-icon-btn product_card-icon-btn--round"
+              mat-icon-button
+              class="product_card-fab-ico dash-admin-icon-btn"
               (click)="$event.stopPropagation(); onOpenAdminGallery(product)"
+              [matTooltip]="'DASH_CATALOG_GALLERY' | translate | async"
               [attr.aria-label]="('DASH_CATALOG_GALLERY' | translate | async) || ''"
             >
-              <i class="material-icons md-18">photo_library</i>
+              <mat-icon>photo_library</mat-icon>
             </button>
             <a
-              class="product_card-icon-btn product_card-icon-btn--round"
+              mat-icon-button
+              class="product_card-fab-ico dash-admin-icon-btn"
               [routerLink]="['/' + lang + '/product/' + product?.titleUrl]"
+              [matTooltip]="'DASH_CATALOG_LINK_STORE' | translate | async"
               [attr.aria-label]="('DASH_CATALOG_LINK_STORE' | translate | async) || ''"
             >
-              <i class="material-icons md-18">search</i>
+              <mat-icon>open_in_new</mat-icon>
             </a>
           </div>
         </div>
         <div class="product_card-body product_card-body--admin-grid">
           <h2 class="product_card-title product_card-title--admin-top" [id]="'pt-' + product?.titleUrl">{{ product?.title }}</h2>
           <p class="product_card-admin-units">
-            {{ 'DASH_CATALOG_STOCK_LABEL' | translate | async }}: <strong>{{ adminStockQty(product) }}</strong>
+            <span class="catalog-stock-pill catalog-stock-pill--inline" [class.catalog-stock-pill--low]="catalogStockIsLow(product)" [class.catalog-stock-pill--out]="catalogStockIsOut(product)">
+              {{ adminStockQty(product) }}
+            </span>
+            <span class="product_card-admin-units__label">{{ 'DASH_CATALOG_COL_STOCK' | translate | async }}</span>
           </p>
-          <div class="product_card-admin-prices">
+          <div class="product_card-admin-prices product_card-admin-prices--highlight">
             @if (product.onSale && product.regularPrice && product.regularPrice > product.salePrice) {
               <span class="product_card-reg">{{ product.regularPrice | priceFormat }}</span>
-              <span class="product_card-price-sep" aria-hidden="true">·</span>
-              <span class="product_card-sale product_card-sale--deal">{{ product?.salePrice | priceFormat }}</span>
-            } @else {
-              <span class="product_card-sale product_card-sale--regular">{{ product?.salePrice | priceFormat }}</span>
             }
+            <span
+              class="product_card-sale"
+              [class.product_card-sale--deal]="product.onSale && product.regularPrice && product.regularPrice > product.salePrice"
+              [class.product_card-sale--regular]="!(product.onSale && product.regularPrice && product.regularPrice > product.salePrice)"
+            >
+              {{ product?.salePrice | priceFormat }}
+            </span>
           </div>
-          <div class="product_card-admin-actions">
-            <button type="button" mat-stroked-button class="product_card-admin-actions__btn" (click)="onStockAdjust(product)">
-              {{ 'DASH_CATALOG_STOCK_BTN' | translate | async }}
+          <div class="product_card-admin-actions product_card-admin-actions--icons">
+            <button
+              type="button"
+              mat-icon-button
+              class="product_card-admin-ico-btn dash-admin-icon-btn"
+              (click)="onStockAdjust(product)"
+              [matTooltip]="'DASH_CATALOG_STOCK_BTN' | translate | async"
+              [attr.aria-label]="('DASH_CATALOG_STOCK_BTN' | translate | async) || ''"
+            >
+              <mat-icon>inventory_2</mat-icon>
             </button>
             @if (showEdit) {
-              <button type="button" mat-flat-button color="primary" class="product_card-admin-actions__btn" (click)="onEditProduct(product?.titleUrl)">
-                {{ 'Edit' | translate | async }}
+              <button
+                type="button"
+                mat-icon-button
+                color="primary"
+                class="product_card-admin-ico-btn dash-admin-icon-btn"
+                (click)="onEditProduct(product?.titleUrl)"
+                [matTooltip]="'DASH_CATALOG_TT_EDIT' | translate | async"
+                [attr.aria-label]="('DASH_CATALOG_TT_EDIT' | translate | async) || ''"
+              >
+                <mat-icon>edit_square</mat-icon>
               </button>
             }
-            <button type="button" mat-stroked-button class="product_card-admin-actions__btn" (click)="onOpenAdminGallery(product)">
-              {{ 'DASH_CATALOG_GALLERY' | translate | async }}
+            <button
+              type="button"
+              mat-icon-button
+              class="product_card-admin-ico-btn dash-admin-icon-btn"
+              (click)="onOpenAdminGallery(product)"
+              [matTooltip]="'DASH_CATALOG_GALLERY' | translate | async"
+              [attr.aria-label]="('DASH_CATALOG_GALLERY' | translate | async) || ''"
+            >
+              <mat-icon>photo_library</mat-icon>
             </button>
-            <a mat-stroked-button class="product_card-admin-actions__btn" [routerLink]="['/' + lang + '/product/' + product?.titleUrl]">
-              {{ 'DASH_CATALOG_LINK_STORE' | translate | async }}
+            <a
+              mat-icon-button
+              class="product_card-admin-ico-btn dash-admin-icon-btn"
+              [routerLink]="['/' + lang + '/product/' + product?.titleUrl]"
+              [matTooltip]="'DASH_CATALOG_LINK_STORE' | translate | async"
+              [attr.aria-label]="('DASH_CATALOG_LINK_STORE' | translate | async) || ''"
+            >
+              <mat-icon>storefront</mat-icon>
             </a>
           </div>
         </div>
@@ -139,17 +306,20 @@
                 {{ 'Edit' | translate | async }}
               </button>
             }
-            <a
+            <button
+              type="button"
               class="product_card-icon-btn product_card-icon-btn--round"
-              [routerLink]="['/' + lang + '/product/' + product?.titleUrl]"
-              [attr.aria-label]="('Detail' | translate | async) || 'Ver producto'"
+              (click)="openQuickView($event, product?.titleUrl)"
+              [attr.aria-label]="('PRODUCT_QUICK_VIEW_OPEN' | translate | async) || 'Vista rápida'"
             >
-              <i class="material-icons md-18">search</i>
-            </a>
+              <i class="material-icons md-18">visibility</i>
+            </button>
           </div>
         </div>
 
         <div class="product_card-body">
+          <h2 class="product_card-title" [id]="'pt-' + product?.titleUrl">{{ product?.title }}</h2>
+
           <div class="product_card-meta">
             <div class="product_card-prices">
               @if (product.onSale && product.regularPrice && product.regularPrice > product.salePrice) {
@@ -164,7 +334,6 @@
                 </div>
               }
             </div>
-            <p class="product_card-stock">{{ product?.stock | translate | async }}</p>
           </div>
 
           @if (productColors(product).length > 0) {
@@ -183,7 +352,7 @@
             </div>
           }
 
-          <h2 class="product_card-title" [id]="'pt-' + product?.titleUrl">{{ product?.title }}</h2>
+          <p class="product_card-stock">{{ product?.stock | translate | async }}</p>
 
           <div class="product_card-footer">
             @if (cartIds?.[product._id]) {

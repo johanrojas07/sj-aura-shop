@@ -1,0 +1,227 @@
+<div class="dash-loyalty dash-admin-form-page">
+  <header class="dash-admin-page-header dash-loyalty__head">
+    <div class="dash-admin-page-header__text">
+      <p class="dash-admin-page-kicker">{{ 'DASH_NAV_LOYALTY' | translate | async }}</p>
+      <h1 class="dash-admin-page-title dash-loyalty__title">{{ 'DASH_LOYALTY_TITLE' | translate | async }}</h1>
+      <p class="dash-admin-page-lead">{{ 'DASH_LOYALTY_LEAD' | translate | async }}</p>
+    </div>
+    <div class="dash-loyalty__head-actions">
+      <a
+        mat-stroked-button
+        color="primary"
+        class="dash-loyalty__manual-btn dash-admin-btn-primary"
+        [routerLink]="['/', effectiveLang(), 'dashboard', 'loyalty', 'manual']"
+      >
+        <mat-icon aria-hidden="true">edit_note</mat-icon>
+        {{ 'DASH_NAV_LOYALTY_MANUAL' | translate | async }}
+      </a>
+    </div>
+  </header>
+
+  @if (scanMeta?.capped) {
+    <div class="dash-loyalty__warn" role="status">
+      <mat-icon aria-hidden="true">info</mat-icon>
+      <span>{{ 'DASH_LOYALTY_SCAN_CAP' | translate | async }}</span>
+    </div>
+  }
+
+  <mat-card class="dash-loyalty__filters dash-loyalty__filter-card dash-admin-card" appearance="outlined">
+    <mat-card-header class="dash-loyalty__filter-header">
+      <div mat-card-avatar class="dash-loyalty__filter-ico">
+        <mat-icon aria-hidden="true">tune</mat-icon>
+      </div>
+      <mat-card-title>{{ 'DASH_LOYALTY_FILTER_CARD_TITLE' | translate | async }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="dash-loyalty__filters-grid dash-admin-form-grid--tight">
+        <mat-form-field
+          appearance="outline"
+          class="dash-loyalty__field dash-admin-field"
+          subscriptSizing="fixed"
+        >
+          <mat-label>{{ 'DASH_LOYALTY_FILTER_SEARCH' | translate | async }}</mat-label>
+          <mat-icon matPrefix class="dash-loyalty__field-icon">search</mat-icon>
+          <input matInput [(ngModel)]="q" (keyup.enter)="applyFilters()" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="dash-loyalty__field dash-admin-field" subscriptSizing="fixed">
+          <mat-label>{{ 'DASH_LOYALTY_FILTER_TYPE' | translate | async }}</mat-label>
+          <mat-icon matPrefix class="dash-loyalty__field-icon">category</mat-icon>
+          <mat-select [(ngModel)]="typeFilter" (selectionChange)="applyFilters()">
+            <mat-option value="all">{{ 'DASH_LOYALTY_TYPE_ALL' | translate | async }}</mat-option>
+            <mat-option value="registered">{{ 'DASH_LOYALTY_TYPE_REGISTERED' | translate | async }}</mat-option>
+            <mat-option value="guest">{{ 'DASH_LOYALTY_TYPE_GUEST' | translate | async }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="dash-loyalty__field dash-admin-field" subscriptSizing="fixed">
+          <mat-label>{{ 'DASH_LOYALTY_FILTER_SORT' | translate | async }}</mat-label>
+          <mat-icon matPrefix class="dash-loyalty__field-icon">sort</mat-icon>
+          <mat-select [(ngModel)]="sort" (selectionChange)="applyFilters()">
+            <mat-option value="points_desc">{{ 'DASH_LOYALTY_SORT_POINTS_DESC' | translate | async }}</mat-option>
+            <mat-option value="points_asc">{{ 'DASH_LOYALTY_SORT_POINTS_ASC' | translate | async }}</mat-option>
+            <mat-option value="name_asc">{{ 'DASH_LOYALTY_SORT_NAME' | translate | async }}</mat-option>
+            <mat-option value="activity_desc">{{ 'DASH_LOYALTY_SORT_ACTIVITY' | translate | async }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field
+          appearance="outline"
+          class="dash-loyalty__field dash-loyalty__field--num dash-admin-field"
+          subscriptSizing="fixed"
+        >
+          <mat-label>{{ 'DASH_LOYALTY_FILTER_MIN_PTS' | translate | async }}</mat-label>
+          <mat-icon matPrefix class="dash-loyalty__field-icon">trending_down</mat-icon>
+          <input matInput type="number" [(ngModel)]="minPoints" />
+        </mat-form-field>
+        <mat-form-field
+          appearance="outline"
+          class="dash-loyalty__field dash-loyalty__field--num dash-admin-field"
+          subscriptSizing="fixed"
+        >
+          <mat-label>{{ 'DASH_LOYALTY_FILTER_MAX_PTS' | translate | async }}</mat-label>
+          <mat-icon matPrefix class="dash-loyalty__field-icon">trending_up</mat-icon>
+          <input matInput type="number" [(ngModel)]="maxPoints" />
+        </mat-form-field>
+        <div class="dash-loyalty__filter-actions">
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            class="dash-admin-btn-primary"
+            (click)="applyFilters()"
+            [disabled]="loading"
+          >
+            {{ 'DASH_LOYALTY_APPLY' | translate | async }}
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  @if (error) {
+    <div class="dash-admin-alert dash-admin-alert--error dash-loyalty__alert" role="alert">
+      <mat-icon aria-hidden="true">error_outline</mat-icon>
+      <span>{{ error | translate | async }}</span>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="dash-admin-skeleton dash-loyalty__skeleton-wrap" aria-busy="true" aria-label="Loading">
+      @for (s of skeletonRows; track s) {
+        <div class="dash-admin-skeleton-row"></div>
+      }
+    </div>
+  } @else if (!items.length) {
+    <div class="dash-loyalty__empty">{{ 'DASH_LOYALTY_EMPTY' | translate | async }}</div>
+  } @else {
+    <div class="dash-admin-table-wrap dash-loyalty__table-wrap">
+      <table mat-table [dataSource]="items" class="dash-admin-table dash-loyalty__mat-table">
+        <ng-container matColumnDef="kind">
+          <th mat-header-cell *matHeaderCellDef class="dash-loyalty__col-type">{{ 'DASH_LOYALTY_COL_TYPE' | translate | async }}</th>
+          <td mat-cell *matCellDef="let row" class="dash-loyalty__kind-cell">
+            <div class="dash-loyalty__kind-inner">
+              @if (row.kind === 'registered') {
+                <span class="dash-loyalty__badge dash-loyalty__badge--reg">
+                  {{ 'DASH_LOYALTY_BADGE_REGISTERED' | translate | async }}
+                </span>
+              } @else {
+                <span class="dash-loyalty__badge dash-loyalty__badge--guest">
+                  {{ 'DASH_LOYALTY_BADGE_GUEST' | translate | async }}
+                </span>
+              }
+              @if (row.mergedIntoUserId) {
+                <span class="dash-loyalty__badge dash-loyalty__badge--merged">{{
+                  'DASH_LOYALTY_BADGE_MERGED' | translate | async
+                }}</span>
+              }
+            </div>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>{{ 'DASH_LOYALTY_COL_NAME' | translate | async }}</th>
+          <td mat-cell *matCellDef="let row" class="dash-loyalty__name-cell">{{ row.name || '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef class="dash-loyalty__col-email">{{ 'DASH_LOYALTY_COL_EMAIL' | translate | async }}</th>
+          <td mat-cell *matCellDef="let row" class="dash-loyalty__email-cell">{{ row.email || '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="phone">
+          <th mat-header-cell *matHeaderCellDef>{{ 'DASH_LOYALTY_COL_PHONE' | translate | async }}</th>
+          <td mat-cell *matCellDef="let row" class="dash-loyalty__mono dash-loyalty__phone-cell">{{ row.phoneMasked }}</td>
+        </ng-container>
+        <ng-container matColumnDef="points">
+          <th mat-header-cell *matHeaderCellDef class="dash-loyalty__col-points">{{ 'DASH_LOYALTY_COL_POINTS' | translate | async }}</th>
+          <td
+            mat-cell
+            *matCellDef="let row"
+            class="dash-loyalty__points-cell"
+            [class.dash-loyalty__points-cell--zero]="(row.points ?? 0) === 0"
+          >
+            <span class="dash-loyalty__points-pill">{{ row.points ?? 0 }}</span
+            ><span class="dash-loyalty__points-suffix" aria-hidden="true">{{
+              'DASH_LOYALTY_PTS_ABBR' | translate | async
+            }}</span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="activity">
+          <th mat-header-cell *matHeaderCellDef>{{ 'DASH_LOYALTY_COL_ACTIVITY' | translate | async }}</th>
+          <td mat-cell *matCellDef="let row" class="dash-loyalty__muted">{{ formatActivity(row.lastActivityAt) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            class="dash-loyalty__col-actions"
+            scope="col"
+            [attr.aria-label]="'DASH_LOYALTY_COL_ACTIONS' | translate | async"
+          ></th>
+          <td mat-cell *matCellDef="let row" class="dash-loyalty__col-actions">
+            <a
+              mat-icon-button
+              class="dash-admin-icon-btn"
+              [routerLink]="['/', effectiveLang(), 'dashboard', 'loyalty', 'detail']"
+              [queryParams]="detailQuery(row.ref)"
+              [matTooltip]="'DASH_LOYALTY_VIEW' | translate | async"
+              matTooltipPosition="left"
+              [attr.aria-label]="'DASH_LOYALTY_VIEW' | translate | async"
+            >
+              <mat-icon>visibility</mat-icon>
+            </a>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="loyaltyTableColumns" class="dash-loyalty__header-row"></tr>
+        <tr mat-row *matRowDef="let row; columns: loyaltyTableColumns" class="dash-loyalty__data-row"></tr>
+      </table>
+    </div>
+
+    <div class="dash-loyalty__pager">
+      <span class="dash-loyalty__pager-info">
+        <strong class="dash-loyalty__pager-page">{{ 'DASH_LOYALTY_PAGE_OF' | translate | async }} {{ page }}</strong>
+        <span class="dash-loyalty__pager-sep" aria-hidden="true">·</span>
+        <span>{{ total }} {{ 'DASH_LOYALTY_TOTAL' | translate | async }}</span>
+      </span>
+      <div class="dash-loyalty__pager-nav">
+        <button
+          mat-icon-button
+          type="button"
+          class="dash-admin-icon-btn"
+          (click)="prevPage()"
+          [disabled]="page <= 1 || loading"
+          [matTooltip]="'DASH_LOYALTY_PREV' | translate | async"
+          [attr.aria-label]="'DASH_LOYALTY_PREV' | translate | async"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          type="button"
+          class="dash-admin-icon-btn"
+          (click)="nextPage()"
+          [disabled]="page * pageSize >= total || loading"
+          [matTooltip]="'DASH_LOYALTY_NEXT' | translate | async"
+          [attr.aria-label]="'DASH_LOYALTY_NEXT' | translate | async"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+  }
+</div>

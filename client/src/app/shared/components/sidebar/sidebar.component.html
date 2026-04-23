@@ -180,21 +180,36 @@
     <div class="sidebar-header sidebar-header--section">
       <h3 class="sidebar-title">{{ 'Sorting' | translate | async }}</h3>
     </div>
-    <mat-form-field class="sidebar-select" appearance="fill" subscriptSizing="dynamic">
-      <mat-select
-        aria-label="Sort"
-        panelClass="eshop-sidebar-sort-panel"
-        [hideSingleSelectionIndicator]="true"
-        [ngModel]="choosenSort || 'newest'"
-        (ngModelChange)="onInputChange($event)"
-      >
-        @for (option of sortOptions; track option.id) {
-        <mat-option [value]="option.id">
-          {{ option.name | translate | async }}
-        </mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
+    <div class="sidebar-sort-field">
+      <mat-form-field class="sidebar-select" appearance="fill" subscriptSizing="dynamic">
+        <mat-select
+          aria-label="Sort"
+          panelClass="eshop-sidebar-sort-panel"
+          [hideSingleSelectionIndicator]="true"
+          [ngModel]="choosenSort || 'newest'"
+          (ngModelChange)="onInputChange($event)"
+        >
+          <mat-select-trigger>
+            <span class="sidebar-sort-trigger">
+              <span class="sidebar-sort-trigger__ico-wrap" aria-hidden="true">
+                <i class="material-icons sidebar-sort-trigger__ico">{{ sortTriggerOption().icon || 'sort' }}</i>
+              </span>
+              <span class="sidebar-sort-trigger__text">{{ sortTriggerOption().name | translate | async }}</span>
+            </span>
+          </mat-select-trigger>
+          @for (option of sortOptions; track option.id) {
+            <mat-option [value]="option.id">
+              <span class="sidebar-sort-option">
+                <span class="sidebar-sort-option__ico-wrap" aria-hidden="true">
+                  <i class="material-icons sidebar-sort-option__ico">{{ option.icon || 'sort' }}</i>
+                </span>
+                <span class="sidebar-sort-option__label">{{ option.name | translate | async }}</span>
+              </span>
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
   </div>
 
   <div class="sidebar-section sidebar-section--price">

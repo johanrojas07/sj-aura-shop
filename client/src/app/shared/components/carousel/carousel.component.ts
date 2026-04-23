@@ -49,7 +49,6 @@ export class CarouselComponent implements AfterViewInit, OnDestroy {
   });
 
   private autoAdvanceSub?: Subscription;
-  dragging = false;
   private slidesScrollCleanup?: () => void;
   private mutationObs?: MutationObserver;
   private lastEmittedIndex = -1;
@@ -58,42 +57,66 @@ export class CarouselComponent implements AfterViewInit, OnDestroy {
     @Inject(PLATFORM_ID)
     private platformId : Object) { }
 
-  onClickLeft() {
-    const slidesElement = this.slides.nativeElement;
-    const slidesElementWIDTH = slidesElement.getBoundingClientRect().width;
-    slidesElement.scrollLeft -= slidesElementWIDTH;
-    if (!slidesElement.scrollLeft) {
-      slidesElement.scrollLeft += slidesElementWIDTH * slidesElement.children.length - 1;
+  private currentSlideIndexFromScroll(): number {
+    const el = this.slides?.nativeElement;
+    if (!el) {
+      return 0;
     }
-    requestAnimationFrame(() => this.emitActiveSlideIndex());
+    const w = el.getBoundingClientRect().width;
+    const n = el.children.length;
+    if (n <= 0 || w <= 0) {
+      return 0;
+    }
+    let i = Math.round(el.scrollLeft / w);
+    i = ((i % n) + n) % n;
+    return i;
   }
 
-  onClickRight() {
-    const slidesElement = this.slides.nativeElement;
-    const slidesElementWIDTH = slidesElement.getBoundingClientRect().width;
-    slidesElement.scrollLeft += slidesElementWIDTH;
-    if ((parseFloat((slidesElement.scrollWidth - slidesElement.scrollLeft).toFixed()) <= parseFloat(slidesElementWIDTH.toFixed()))) {
-      slidesElement.scrollLeft = 0;
-    }
-    requestAnimationFrame(() => this.emitActiveSlideIndex());
-  }
-
-  goToSlide(i: number): void {
+  /** Fija scroll al slide i (0..n-1); evita errores por subpíxeles y snap. */
+  private scrollToSlideIndex(i: number, useSmooth: boolean): void {
     const el = this.slides?.nativeElement;
     if (!el || !isPlatformBrowser(this.platformId)) {
       return;
     }
-    const n = el.children.length;
-    if (n <= 0) {
-      return;
-    }
     const w = el.getBoundingClientRect().width;
-    if (w <= 0) {
+    const n = el.children.length;
+    if (n <= 0 || w <= 0) {
       return;
     }
     const idx = ((i % n) + n) % n;
-    el.scrollTo({ left: idx * w, behavior: 'auto' });
+    const behavior: ScrollBehavior = useSmooth ? 'smooth' : 'auto';
+    el.scrollTo({ left: idx * w, behavior });
     requestAnimationFrame(() => this.emitActiveSlideIndex());
+  }
+
+  onClickLeft() {
+    const n = this.slides?.nativeElement?.children.length ?? 0;
+    if (n <= 0) {
+      return;
+    }
+    const current = this.currentSlideIndexFromScroll();
+    this.scrollToSlideIndex(current - 1, this.useSmoothForArrowClicks());
+  }
+
+  onClickRight() {
+    const n = this.slides?.nativeElement?.children.length ?? 0;
+    if (n <= 0) {
+      return;
+    }
+    const current = this.currentSlideIndexFromScroll();
+    this.scrollToSlideIndex(current + 1, this.useSmoothForArrowClicks());
+  }
+
+  /** Suave solo en escritorio; en móvil evita "saltos" raros. */
+  private useSmoothForArrowClicks(): boolean {
+    if (!isPlatformBrowser(this.platformId)) {
+      return false;
+    }
+    return typeof matchMedia === 'function' && matchMedia('(min-width: 900px)').matches;
+  }
+
+  goToSlide(i: number): void {
+    this.scrollToSlideIndex(i, false);
   }
 
   private syncSlideCount(): void {
@@ -171,6 +194,7 @@ export class CarouselComponent implements AfterViewInit, OnDestroy {
       const before = this.slideCount();
       this.syncSlideCount();
       const after = el.children.length;
+      this.updateShowArrowsVisibility();
       requestAnimationFrame(() => this.emitActiveSlideIndex());
       if (after > 1 && before <= 1) {
         this.scheduleNextSlide();
@@ -180,30 +204,32 @@ export class CarouselComponent implements AfterViewInit, OnDestroy {
     this.syncSlideCount();
   }
 
+  private updateShowArrowsVisibility(): void {
+    if (!isPlatformBrowser(this.platformId) || !this.showArrows) {
+      return;
+    }
+    const slidesElement = this.slides?.nativeElement;
+    if (!slidesElement) {
+      return;
+    }
+    if (slidesElement.children?.[0]) {
+      this.showArrowsSig.set(
+        slidesElement.offsetWidth < slidesElement.children[0].clientWidth * slidesElement.children.length
+      );
+    } else {
+      this.showArrowsSig.set(true);
+    }
+  }
+
   ngAfterViewInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       timer(0, 300)
         .pipe(take(1))
         .subscribe(() => {
-          const slidesElement = this.slides.nativeElement;
-          if (slidesElement.children && slidesElement.children[0]) {
-            this.showArrowsSig.set(
-              slidesElement.offsetWidth < slidesElement.children[0].clientWidth * slidesElement.children.length
-            );
-          } else {
-            this.showArrowsSig.set(true);
-          }
+          this.updateShowArrowsVisibility();
       });
       this.bindSlidesScroll();
       this.bindSlideChildrenObserver();
-    }
-  }
-
-  onDrag(e, type: string) {
-    this.dragging = type === 'down' ? true : (type === 'up' ? false : this.dragging);
-    if (this.dragging && type === 'move') {
-      const slidesElement = this.slides.nativeElement;
-      slidesElement.scrollLeft += e.movementX * -50;
     }
   }
 

@@ -4,7 +4,7 @@
     <i class="nav-cart-icon material-icons md-18">keyboard_arrow_left</i>
   </button>
   }
-  <div class="slides" #slides (touchstart)="onDrag($event, 'down')" (touchend)="onDrag($event, 'up')" (touch)="onDrag($event, 'move')">
+  <div class="slides" #slides>
     <ng-content></ng-content>
   </div>
   @if (showArrows && showArrowsSig()) {

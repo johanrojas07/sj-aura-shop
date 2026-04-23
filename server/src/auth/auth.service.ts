@@ -1,10 +1,18 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  Optional,
+  UnauthorizedException,
+  forwardRef,
+} from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 
 import { COL } from '../firebase/firebase-collections';
 import { FirebaseService } from '../firebase/firebase.service';
 import { docWithId } from '../firebase/firestore.utils';
+import { LoyaltyService } from '../loyalty/loyalty.service';
 import { EshopUser } from './models/user.model';
 import { PatchProfileDto } from './dto/patch-profile.dto';
 
@@ -12,7 +20,12 @@ import { PatchProfileDto } from './dto/patch-profile.dto';
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
-  constructor(private readonly firebase: FirebaseService) {}
+  constructor(
+    private readonly firebase: FirebaseService,
+    @Optional()
+    @Inject(forwardRef(() => LoyaltyService))
+    private readonly loyaltyService?: LoyaltyService,
+  ) {}
 
   async getOrCreateUserFromFirebase(
     decoded: admin.auth.DecodedIdToken,
@@ -24,7 +37,9 @@ export class AuthService {
 
     if (snap.exists) {
       const row = docWithId<EshopUser>(snap)!;
-      return this.normalizeUser(row, uid);
+      const user = this.normalizeUser(row, uid);
+      this.maybeMergeLoyaltyFromFirebasePhone(uid, decoded);
+      return user;
     }
 
     const emailToStore =
@@ -43,7 +58,41 @@ export class AuthService {
       ...(nameFromToken ? { name: nameFromToken } : {}),
     };
     await ref.set(newDoc);
-    return { _id: uid, ...newDoc };
+    const created = { _id: uid, ...newDoc } as EshopUser;
+    this.maybeMergeLoyaltyFromFirebasePhone(uid, decoded);
+    return this.normalizeUser(created, uid);
+  }
+
+  /**
+   * Si el token de Firebase incluye `phone_number` (p. ej. acceso con SMS),
+   * intenta fusionar puntos del wallet de invitado con la misma clave de móvil.
+   */
+  private maybeMergeLoyaltyFromFirebasePhone(
+    uid: string,
+    decoded: admin.auth.DecodedIdToken,
+  ): void {
+    if (!this.loyaltyService) {
+      return;
+    }
+    const phone =
+      typeof decoded.phone_number === 'string'
+        ? decoded.phone_number.trim()
+        : '';
+    if (!phone) {
+      return;
+    }
+    void this.loyaltyService
+      .mergeGuestWalletIntoUserByVerifiedPhone(uid, phone, {
+        actorUid: uid,
+        reason: 'firebase_id_token_phone_number',
+      })
+      .catch((e: unknown) =>
+        this.logger.warn(
+          `Fusión de puntos (token Firebase) omitida: ${
+            e instanceof Error ? e.message : String(e)
+          }`,
+        ),
+      );
   }
 
   async patchProfile(uid: string, dto: PatchProfileDto): Promise<EshopUser> {

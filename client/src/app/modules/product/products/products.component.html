@@ -1,5 +1,13 @@
 <mat-drawer-container class="products-sidebar-container" autosize hasBackdrop>
-  <mat-drawer #sideBar [(opened)]="sidebarOpened" class="products-sidebar" mode="over">
+  <mat-drawer
+    #sideBar
+    id="catalog-filters-drawer"
+    [(opened)]="sidebarOpened"
+    (openedChange)="onCatalogFiltersDrawerOpenedChange($event)"
+    class="products-sidebar"
+    mode="over"
+    [autoFocus]="false"
+  >
     <app-sidebar
       [class.disabled]="loadingProducts()"
       [categories]="categories()"
@@ -163,5 +171,20 @@
         }
       </div>
     </div>
+    <button
+      type="button"
+      class="products-filter-fab"
+      [class.products-filter-fab--open]="sidebarOpened"
+      (click)="toggleSidebar()"
+      [attr.aria-expanded]="sidebarOpened"
+      aria-controls="catalog-filters-drawer"
+      [attr.aria-label]="('Filter' | translate | async) || 'Filtrar'"
+    >
+      <i class="material-icons products-filter-fab__ico" aria-hidden="true">tune</i>
+      <span class="products-filter-fab__text">{{ 'Filter' | translate | async }}</span>
+      @if (hasActiveCatalogFilters()) {
+        <span class="products-filter-fab__badge" aria-hidden="true">{{ activeFilterCount() }}</span>
+      }
+    </button>
   </mat-drawer-content>
 </mat-drawer-container>

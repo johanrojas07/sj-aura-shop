@@ -11,7 +11,6 @@ import Stripe from 'stripe';
 
 import { Order, OrderStatus } from './models/order.model';
 import { EshopUser } from '../auth/models/user.model';
-import { AuthService } from '../auth/auth.service';
 import { OrderDto } from './dto/order.dto';
 import { sendMsg } from '../shared/utils/email/mailer';
 import { prepareCart } from '../shared/utils/prepareUtils';
@@ -21,6 +20,7 @@ import { COL } from '../firebase/firebase-collections';
 import { FirebaseService } from '../firebase/firebase.service';
 import { docWithId } from '../firebase/firestore.utils';
 import { WhatsAppOrderNotifyService } from './whatsapp-order-notify.service';
+import { LoyaltyService } from '../loyalty/loyalty.service';
 
 @Injectable()
 export class OrdersService {
@@ -30,7 +30,7 @@ export class OrdersService {
   constructor(
     private readonly firebase: FirebaseService,
     private readonly whatsappOrderNotify: WhatsAppOrderNotifyService,
-    private readonly authService: AuthService,
+    private readonly loyaltyService: LoyaltyService,
   ) {}
 
   private ordersCol() {
@@ -194,38 +194,14 @@ export class OrdersService {
     let updated = docWithId<Order>(snap)!;
 
     const newStatus = reqOrder['status'] as OrderStatus | string | undefined;
-    const userId = typeof updated._user === 'string' ? updated._user.trim() : '';
-    const alreadyGranted = prev?.loyaltyPointsGranted === true;
-    const wasCanceled = prev?.status === OrderStatus.CANCELED;
-    const isCardOrder = updated.type === 'WITH_PAYMENT';
-    const stripePaidPath =
-      !isCardOrder ||
-      prev?.status === OrderStatus.PAID ||
-      prev?.status === OrderStatus.SHIPPING;
-    if (
-      newStatus === OrderStatus.COMPLETED &&
-      prev?.status !== OrderStatus.COMPLETED &&
-      userId &&
-      !alreadyGranted &&
-      !wasCanceled &&
-      stripePaidPath &&
-      updated.cart
-    ) {
-      const pts = this.loyaltyPointsForOrder(updated.cart as CartModel);
-      if (pts > 0) {
-        await this.authService.addLoyaltyPoints(userId, pts);
-        await ref.set(
-          {
-            loyaltyPointsGranted: true,
-            loyaltyPointsGrantedAmount: pts,
-            loyaltyPointsGrantedAt: Date.now(),
-          },
-          { merge: true },
-        );
-        snap = await ref.get();
-        updated = docWithId<Order>(snap)!;
-      }
-    }
+    await this.loyaltyService.tryGrantLoyaltyOnOrderCompletion(
+      ref,
+      prev,
+      updated,
+      newStatus,
+    );
+    snap = await ref.get();
+    updated = docWithId<Order>(snap)!;
 
     return updated;
   }
@@ -267,28 +243,6 @@ export class OrdersService {
     }
     this.logger.error('allocateUniqueOrderId: demasiados intentos, usando id aleatorio');
     return `${datePart}-${tail}-${randomBytes(3).toString('hex').toUpperCase()}`;
-  }
-
-  /** Puntos otorgados por pedido: base + 1 pt cada LOYALTY_SPEND_PER_POINT unidades de total (tope LOYALTY_MAX_POINTS). */
-  private loyaltyPointsForOrder(cart: CartModel): number {
-    const total = Math.max(0, Number(cart.totalPrice) || 0);
-    const base = Math.max(0, Math.floor(Number(process.env.LOYALTY_BASE_POINTS) || 15));
-    const step = Math.max(1, Math.floor(Number(process.env.LOYALTY_SPEND_PER_POINT) || 50));
-    const cap = Math.max(base, Math.floor(Number(process.env.LOYALTY_MAX_POINTS) || 2000));
-    const fromSpend = Math.floor(total / step);
-    return Math.min(cap, base + fromSpend);
-  }
-
-  private async applyLoyaltyForCompletedOrder(
-    userId: string | undefined,
-    cart: CartModel,
-  ): Promise<void> {
-    const uid = typeof userId === 'string' ? userId.trim() : '';
-    if (!uid) {
-      return;
-    }
-    const pts = this.loyaltyPointsForOrder(cart);
-    await this.authService.addLoyaltyPoints(uid, pts);
   }
 
   private createOrder = (

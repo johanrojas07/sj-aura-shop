@@ -29,6 +29,23 @@
             <mat-icon>receipt_long</mat-icon>
             <span>{{ 'DASH_NAV_ORDERS' | translate | async }}</span>
           </a>
+          <a
+            class="dash-nav__link"
+            [routerLink]="['/', lang, 'dashboard', 'loyalty']"
+            routerLinkActive="dash-nav__link--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            <mat-icon>loyalty</mat-icon>
+            <span>{{ 'DASH_NAV_LOYALTY' | translate | async }}</span>
+          </a>
+          <a
+            class="dash-nav__link"
+            [routerLink]="['/', lang, 'dashboard', 'loyalty', 'manual']"
+            routerLinkActive="dash-nav__link--active"
+          >
+            <mat-icon>add_shopping_cart</mat-icon>
+            <span>{{ 'DASH_NAV_LOYALTY_MANUAL' | translate | async }}</span>
+          </a>
           <a class="dash-nav__link" [routerLink]="['/', lang, 'dashboard', 'product-add']" routerLinkActive="dash-nav__link--active">
             <mat-icon>add_box</mat-icon>
             <span>{{ 'DASH_NAV_PRODUCT_ADD' | translate | async }}</span>

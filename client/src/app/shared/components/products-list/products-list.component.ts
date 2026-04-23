@@ -5,10 +5,16 @@ import {
   EventEmitter,
   HostBinding,
   Input,
+  OnChanges,
   OnDestroy,
   Output,
+  SimpleChanges,
+  ViewChild,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
 import { Subscription } from 'rxjs';
 
 import { Product, ProductColorOption } from '../../models';
@@ -17,20 +23,37 @@ import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { PriceFormatPipe } from '../../../pipes/price.pipe';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateService } from '../../../services/translate.service';
 import {
   CatalogAdminGalleryDialogComponent,
   type CatalogAdminGalleryData,
 } from './catalog-admin-gallery-dialog.component';
+import { ProductQuickViewService } from '../../../services/product-quick-view.service';
 
 @Component({
   selector: 'app-products-list',
   templateUrl: './products-list.component.html',
   styleUrls: ['./products-list.component.scss'],
-  imports: [CommonModule, TranslatePipe, PriceFormatPipe, RouterLink, MatButtonModule],
+  imports: [
+    CommonModule,
+    TranslatePipe,
+    PriceFormatPipe,
+    RouterLink,
+    MatButtonModule,
+    MatIconModule,
+    MatTableModule,
+    MatSortModule,
+    MatPaginatorModule,
+    MatTooltipModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProductsListComponent implements OnDestroy {
+export class ProductsListComponent implements OnDestroy, OnChanges {
   @Input() products: Product[] = [];
   @Input() cartIds: { [productId: string]: number };
   @Input() currency: string;
@@ -44,6 +67,20 @@ export class ProductsListComponent implements OnDestroy {
   @Output() editProduct = new EventEmitter<string>();
   /** Ajuste de inventario desde el catálogo de administración. */
   @Output() stockAdjust = new EventEmitter<Product>();
+
+  readonly dataSource = new MatTableDataSource<Product>([]);
+  readonly catalogDisplayColumns: string[] = ['thumb', 'name', 'status', 'stock', 'price', 'actions'];
+  private _listDataFp = '';
+  private _paginator: MatPaginator | null = null;
+
+  @ViewChild(MatPaginator) set catalogPaginator(p: MatPaginator | undefined) {
+    this._paginator = p ?? null;
+    this.dataSource.paginator = p ?? null;
+  }
+
+  @ViewChild(MatSort) set catalogSort(s: MatSort | undefined) {
+    this.dataSource.sort = s ?? null;
+  }
 
   @HostBinding('class.products-list--admin') get _hostAdmin(): boolean {
     return this.adminMode;
@@ -63,16 +100,86 @@ export class ProductsListComponent implements OnDestroy {
     private readonly cdr: ChangeDetectorRef,
     private readonly translate: TranslateService,
     private readonly dialog: MatDialog,
+    private readonly productQuickView: ProductQuickViewService,
   ) {
     this.trSub = this.translate.translationsSub$.subscribe(() => this.cdr.markForCheck());
+    this.dataSource.sortingDataAccessor = (row, column) => {
+      if (!row) {
+        return '';
+      }
+      switch (column) {
+        case 'name':
+          return String(row.title || row.titleUrl || '').toLowerCase();
+        case 'status':
+          return row.visibility === false ? 0 : 1;
+        case 'stock': {
+          const n = Number(row.stockQty);
+          return Number.isFinite(n) ? n : 0;
+        }
+        case 'price': {
+          const n = Number(row.salePrice);
+          return Number.isFinite(n) ? n : 0;
+        }
+        default:
+          return '';
+      }
+    };
+  }
+
+  /** Evita reasignar con cada CD del padre si el listado filtrado es el mismo. */
+  private adminListFingerprint(rows: Product[] | undefined | null): string {
+    if (!rows?.length) {
+      return '0';
+    }
+    return rows
+      .map((p) => `${p?.titleUrl ?? ''}:${p?.stockQty ?? ''}:${p?.salePrice ?? ''}:${p?.visibility}`)
+      .join('|');
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!this.adminMode || this.layout !== 'list') {
+      return;
+    }
+    if (changes['layout']?.currentValue === 'list' && this.layout === 'list') {
+      this._listDataFp = '';
+    }
+    if (!('products' in changes) && !changes['layout']) {
+      return;
+    }
+    const fp = this.adminListFingerprint(this.products);
+    if (fp === this._listDataFp) {
+      return;
+    }
+    this._listDataFp = fp;
+    this.dataSource.data = Array.isArray(this.products) ? [...this.products] : [];
+    queueMicrotask(() => {
+      this._paginator?.firstPage();
+    });
+    this.cdr.markForCheck();
   }
 
   ngOnDestroy(): void {
     this.trSub.unsubscribe();
   }
 
+  trackByRow(_: number, row: Product): string {
+    return row?.titleUrl || row?._id || String(_);
+  }
+
   onAddProduct(id: string): void {
     this.addProduct.emit(id);
+  }
+
+  /** Vista rápida sin salir del listado (no afecta la ficha PDP en URL). */
+  openQuickView(ev: Event, titleUrl: string | undefined): void {
+    ev.preventDefault();
+    ev.stopPropagation();
+    const slug = (titleUrl || '').trim();
+    if (!slug) {
+      return;
+    }
+    this.productQuickView.open(slug);
+    this.cdr.markForCheck();
   }
 
   onEditProduct(id: string): void {
@@ -92,6 +199,23 @@ export class ProductsListComponent implements OnDestroy {
       return '—';
     }
     return String(Math.max(0, Math.floor(Number(q))));
+  }
+
+  /** Solo estilos de listado (stock bajo / sin unidades). */
+  catalogStockIsLow(p: Product | undefined): boolean {
+    if (p?.stockQty == null) {
+      return false;
+    }
+    const n = Math.floor(Number(p.stockQty));
+    return Number.isFinite(n) && n > 0 && n < 5;
+  }
+
+  catalogStockIsOut(p: Product | undefined): boolean {
+    if (p?.stockQty == null) {
+      return false;
+    }
+    const n = Math.floor(Number(p.stockQty));
+    return Number.isFinite(n) && n <= 0;
   }
 
   onOpenAdminGallery(p: Product): void {

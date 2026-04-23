@@ -268,11 +268,49 @@
             class="nav-search-panel-input"
             [formControl]="query"
             [placeholder]="('GLOBAL_SEARCH_PLACEHOLDER' | translate | async) || 'Buscar prendas…'"
+            [attr.aria-describedby]="'nav-search-hint'"
           />
           <button type="button" mat-icon-button (click)="closeSearch()" aria-label="Cerrar">
             <mat-icon>close</mat-icon>
           </button>
         </div>
+        <p id="nav-search-hint" class="nav-search-hint">
+          {{ ('GLOBAL_SEARCH_HINT' | translate | async) || 'Busca por nombre, slug o etiqueta. Puedes acotar por colección.' }}
+        </p>
+        @if (searchFilterCategories().length) {
+          <div
+            class="nav-search-chips"
+            role="group"
+            [attr.aria-label]="('SEARCH_FILTER_ARIA' | translate | async) || 'Filtrar por categoría'"
+          >
+            <button
+              type="button"
+              class="nav-search-chip"
+              [class.nav-search-chip--active]="searchCategorySlug() === null"
+              (click)="setSearchCategoryFilter(null)"
+            >
+              {{ ('SEARCH_ALL_CATEGORIES' | translate | async) || 'Todas' }}
+            </button>
+            @for (c of searchFilterCategories(); track c.titleUrl) {
+              <button
+                type="button"
+                class="nav-search-chip"
+                [class.nav-search-chip--active]="searchCategorySlug() === c.titleUrl"
+                (click)="setSearchCategoryFilter(c.titleUrl)"
+              >
+                {{ c.title }}
+              </button>
+            }
+          </div>
+        }
+        @if (query.value?.trim()?.length) {
+          <div class="nav-search-actions">
+            <button type="button" mat-stroked-button color="primary" class="nav-search-see-all" (click)="goToCatalogSearch()">
+              <mat-icon class="nav-search-see-all__ico" aria-hidden="true">open_in_new</mat-icon>
+              {{ ('SEARCH_SEE_ALL_CATALOG' | translate | async) || 'Ver todos en catálogo' }}
+            </button>
+          </div>
+        }
         <div class="nav-search-hits">
           @for (p of productSearchHits(); track trackHit($index, p)) {
             <div class="nav-search-hit">

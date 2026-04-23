@@ -4,13 +4,14 @@ import { Category } from '../../models';
 import { CarouselComponent } from '../carousel/carousel.component';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 @Component({
     selector: 'app-categories-list',
     templateUrl: './categories-list.component.html',
     styleUrls: ['./categories-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [CarouselComponent, RouterLink, CommonModule]
+    imports: [CarouselComponent, RouterLink, CommonModule, TranslatePipe]
 })
 export class CategoriesListComponent {
   @Input() categories: Category[] = [];

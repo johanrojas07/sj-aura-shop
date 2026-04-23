@@ -4,6 +4,24 @@
   box-sizing: border-box;
   padding: clamp(10px, 2vw, 18px) clamp(6px, 1.5vw, 12px);
 
+  .categories-carousel-wrap {
+    width: 100%;
+  }
+
+  .categories-carousel-hint {
+    margin: 0 0 0.4rem;
+    text-align: center;
+    font-size: 0.7rem;
+    line-height: 1.3;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+
+    @media (min-width: 768px) {
+      display: none;
+    }
+  }
+
   .categories-list {
     width: 100%;
     display: flex;
@@ -111,6 +129,7 @@
       background-color: #ece8ea;
       background-size: cover !important;
       cursor: pointer;
+      touch-action: manipulation;
       overflow: hidden;
       z-index: 2;
       display: block;
@@ -143,4 +162,14 @@
     margin: 0 auto;
     flex: none;
   }
+
+  ::ng-deep app-carousel .slider-container {
+    @media (max-width: 640px) {
+      padding-bottom: 4px;
+    }
+  }
+}
+
+:host(.home-embed) {
+  padding: clamp(4px, 1vw, 10px) 0;
 }

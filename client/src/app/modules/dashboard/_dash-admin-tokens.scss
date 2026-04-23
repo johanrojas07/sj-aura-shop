@@ -1,0 +1,26 @@
+/**
+ * Tokens visuales del admin AURA (importar en `dashboard-layout.component.scss`).
+ * Paleta inspirada en dashboards SaaS: superficies neutras, acento índigo, foco claro.
+ */
+.dash-shell {
+  --admin-bg: #f1f5f9;
+  --admin-surface: #ffffff;
+  --admin-surface-elevated: #ffffff;
+  --admin-border: #e2e8f0;
+  --admin-border-strong: #cbd5e1;
+  --admin-text: #0f172a;
+  --admin-text-muted: #64748b;
+  --admin-accent: #4f46e5;
+  --admin-accent-hover: #4338ca;
+  --admin-accent-soft: rgba(79, 70, 229, 0.1);
+  --admin-success: #059669;
+  --admin-success-soft: rgba(5, 150, 105, 0.12);
+  --admin-danger: #dc2626;
+  --admin-danger-soft: rgba(220, 38, 38, 0.1);
+  --admin-radius-sm: 8px;
+  --admin-radius-md: 12px;
+  --admin-radius-lg: 16px;
+  --admin-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --admin-shadow-md: 0 4px 24px rgba(15, 23, 42, 0.06);
+  --admin-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}

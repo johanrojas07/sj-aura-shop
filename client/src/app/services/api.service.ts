@@ -81,7 +81,18 @@ export class ApiService {
   }
 
   getProducts(req) {
-    const { lang, page, sort, category, categories, maxPrice, minPrice, ofertas, promo } = req;
+    const {
+      lang,
+      page,
+      sort,
+      category,
+      categories,
+      maxPrice,
+      minPrice,
+      ofertas,
+      promo,
+      search,
+    } = req;
     const addCategory = category ? { category } : {};
     const catsJoined =
       Array.isArray(categories) && categories.length
@@ -98,6 +109,9 @@ export class ApiService {
     const minPriceQuery = minPrice ? '&minPrice=' + encodeURIComponent(String(minPrice)) : '';
     const ofertasQuery = ofertas ? '&ofertas=' + encodeURIComponent(String(ofertas)) : '';
     const promoQuery = promo ? '&promo=' + encodeURIComponent(String(promo)) : '';
+    const rawSearch = typeof search === 'string' ? search.trim() : '';
+    const searchQuery =
+      rawSearch.length > 0 ? '&search=' + encodeURIComponent(rawSearch) : '';
     const productsUrl =
       this.apiUrl +
       '/api/products?lang=' +
@@ -111,7 +125,8 @@ export class ApiService {
       priceQuery +
       minPriceQuery +
       ofertasQuery +
-      promoQuery;
+      promoQuery +
+      searchQuery;
     return this.http.get(productsUrl, this.requestOptions).pipe(
       map((data: any) => {
         const list = Array.isArray(data.all) ? data.all : [];
@@ -156,14 +171,26 @@ export class ApiService {
     );
   }
 
-  getProductsSearchPreview(query: string, limit = 12) {
+  getProductsSearchPreview(
+    query: string,
+    limit = 12,
+    filters?: { category?: string; categories?: string },
+  ) {
     const q = encodeURIComponent((query || '').trim());
-    const productUrl =
+    let productUrl =
       this.apiUrl +
       '/api/products/search-preview?query=' +
       q +
       '&limit=' +
       limit;
+    if (filters?.category?.trim()) {
+      productUrl +=
+        '&category=' + encodeURIComponent(filters.category.trim());
+    }
+    if (filters?.categories?.trim()) {
+      productUrl +=
+        '&categories=' + encodeURIComponent(filters.categories.trim());
+    }
     return this.http.get(productUrl, this.requestOptions).pipe(
       map((response: any) => (Array.isArray(response) ? response : [])),
       catchError((error: Error) => of([])),
@@ -500,6 +527,86 @@ export class ApiService {
   removeConfig(titleUrl: string) {
     const configUrl = this.apiUrl + '/api/eshop/config/' + titleUrl;
     return this.http.delete(configUrl, this.requestOptions).pipe(
+      map((response: any) => response),
+      catchError((error: Error) => of({ error })),
+    );
+  }
+
+  listAdminLoyaltyCustomers(params: {
+    page?: number;
+    pageSize?: number;
+    sort?: string;
+    type?: string;
+    q?: string;
+    minPoints?: number;
+    maxPoints?: number;
+  }) {
+    const p = new URLSearchParams();
+    p.set('page', String(params.page ?? 1));
+    p.set('pageSize', String(params.pageSize ?? 20));
+    if (params.sort) {
+      p.set('sort', params.sort);
+    }
+    if (params.type) {
+      p.set('type', params.type);
+    }
+    if (params.q?.trim()) {
+      p.set('q', params.q.trim());
+    }
+    if (params.minPoints !== undefined && params.minPoints !== null) {
+      p.set('minPoints', String(params.minPoints));
+    }
+    if (params.maxPoints !== undefined && params.maxPoints !== null) {
+      p.set('maxPoints', String(params.maxPoints));
+    }
+    const url = `${this.apiUrl}/api/admin/loyalty/customers?${p.toString()}`;
+    return this.http.get(url, this.buildRequestOptions()).pipe(
+      map((response: any) => response),
+      catchError((error: Error) => of({ error })),
+    );
+  }
+
+  getAdminLoyaltyCustomerDetail(ref: string) {
+    const url =
+      this.apiUrl +
+      '/api/admin/loyalty/customers/detail?ref=' +
+      encodeURIComponent(ref);
+    return this.http.get(url, this.buildRequestOptions()).pipe(
+      map((response: any) => response),
+      catchError((error: Error) => of({ error })),
+    );
+  }
+
+  /** Vista previa: cliente existente o nuevo invitado (misma lógica que compra manual). */
+  getAdminLoyaltyLookupPhone(phone: string) {
+    const q = new URLSearchParams();
+    q.set('phone', String(phone ?? '').trim());
+    const url = `${this.apiUrl}/api/admin/loyalty/customers/lookup-phone?${q.toString()}`;
+    return this.http.get(url, this.buildRequestOptions()).pipe(
+      map((response: any) => response),
+      catchError((error: Error) => of({ error })),
+    );
+  }
+
+  adminLoyaltyManualPurchase(body: Record<string, unknown>) {
+    const url = this.apiUrl + '/api/admin/loyalty/manual-purchase';
+    return this.http.post(url, body, this.buildRequestOptions()).pipe(
+      map((response: any) => response),
+      catchError((error: Error) => of({ error })),
+    );
+  }
+
+  adminLoyaltyAdjust(body: Record<string, unknown>) {
+    const url = this.apiUrl + '/api/admin/loyalty/adjust';
+    return this.http.post(url, body, this.buildRequestOptions()).pipe(
+      map((response: any) => response),
+      catchError((error: Error) => of({ error })),
+    );
+  }
+
+  adminLoyaltyTransfer(body: Record<string, unknown>) {
+    const url = this.apiUrl + '/api/admin/loyalty/transfer';
+    return this.http.post(url, body, this.buildRequestOptions()).pipe(
       map((response: any) => response),
       catchError((error: Error) => of({ error })),
     );

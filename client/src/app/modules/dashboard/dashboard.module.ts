@@ -16,8 +16,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSliderModule } from '@angular/material/slider';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 import { ProductsEditComponent } from './products-edit/products-edit.component';
 import { ProductImageCropDialogComponent } from './products-edit/product-image-crop-dialog.component';
@@ -33,8 +36,12 @@ import { CategoriesEditComponent } from './categories-edit/categories-edit.compo
 import { OrderComponentsModule } from '../order/components/order-components.module';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { PriceFormatPipe } from '../../pipes/price.pipe';
+import { RelativeTimePipe } from '../../pipes/relative-time.pipe';
 import { ProductsListComponent } from '../../shared/components/products-list/products-list.component';
 import { DashboardLayoutComponent } from './dashboard-layout/dashboard-layout.component';
+import { LoyaltyCustomersComponent } from './loyalty-customers/loyalty-customers.component';
+import { LoyaltyCustomerDetailComponent } from './loyalty-customer-detail/loyalty-customer-detail.component';
+import { LoyaltyManualPurchaseComponent } from './loyalty-manual-purchase/loyalty-manual-purchase.component';
 
 const DASHBOARD_ROUTER: Routes = [
   {
@@ -45,6 +52,9 @@ const DASHBOARD_ROUTER: Routes = [
       { path: 'catalog', component: AllProductsComponent },
       { path: 'orders', component: OrdersEditComponent },
       { path: 'orders/:id', component: OrderEditComponent },
+      { path: 'loyalty', component: LoyaltyCustomersComponent },
+      { path: 'loyalty/manual', component: LoyaltyManualPurchaseComponent },
+      { path: 'loyalty/detail', component: LoyaltyCustomerDetailComponent },
       { path: 'translations', component: TranslationsEditComponent },
       { path: 'categories', component: CategoriesEditComponent },
       { path: 'theme', component: ThemeEditComponent },
@@ -70,6 +80,7 @@ const DASHBOARD_ROUTER: Routes = [
     ReactiveFormsModule,
     TranslatePipe,
     PriceFormatPipe,
+    RelativeTimePipe,
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
@@ -89,6 +100,9 @@ const DASHBOARD_ROUTER: Routes = [
     MatButtonToggleModule,
     MatTooltipModule,
     MatSliderModule,
+    MatCheckboxModule,
+    MatTableModule,
+    MatPaginatorModule,
     ProductsListComponent,
   ],
   providers: [{ provide: ROUTES, multi: true, useValue: DASHBOARD_ROUTER }],
@@ -104,6 +118,9 @@ const DASHBOARD_ROUTER: Routes = [
     TinyEditorComponent,
     TranslationsEditComponent,
     ThemeEditComponent,
+    LoyaltyCustomersComponent,
+    LoyaltyCustomerDetailComponent,
+    LoyaltyManualPurchaseComponent,
   ],
 })
 export class DashboardModule {}

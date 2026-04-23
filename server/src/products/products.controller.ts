@@ -58,12 +58,20 @@ export class ProductsController {
   getSearchPreview(
     @Query('query') query: string,
     @Query('limit') limit: string,
-    @Headers('lang') headerLang: string,
+    @Query('category') category?: string,
+    @Query('categories') categories?: string,
+    @Headers('lang') headerLang?: string,
     @Query('lang') queryLang?: string,
   ): Promise<Product[]> {
     const lang = headerLang || queryLang || 'es';
     const n = limit ? parseInt(limit, 10) : 10;
-    return this.productService.getProductsSearchPreview(query, lang, n);
+    return this.productService.getProductsSearchPreview(
+      query,
+      lang,
+      n,
+      category,
+      categories,
+    );
   }
 
   @UseGuards(FirebaseAuthGuard, RolesGuard)

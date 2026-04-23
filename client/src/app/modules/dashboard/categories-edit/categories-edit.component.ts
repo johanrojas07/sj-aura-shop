@@ -11,10 +11,10 @@ import { SignalStore } from '../../../store/signal.store';
 import { SignalStoreSelectors } from '../../../store/signal.store.selectors';
 
 @Component({
-    selector: 'app-categories-edit',
-    templateUrl: './categories-edit.component.html',
-    styleUrls: ['./categories-edit.component.scss'],
-    standalone: false
+  selector: 'app-categories-edit',
+  templateUrl: './categories-edit.component.html',
+  styleUrls: ['./categories-edit.component.scss', '../_dash-admin-forms.shared.scss'],
+  standalone: false,
 })
 export class CategoriesEditComponent {
   categoryEditForm: FormGroup;

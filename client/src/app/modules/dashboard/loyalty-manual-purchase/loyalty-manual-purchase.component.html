@@ -1,0 +1,286 @@
+<div class="dash-loyalty-manual dash-admin-form-page">
+  <button mat-button type="button" class="dash-loyalty-manual__back dash-admin-btn-ghost" (click)="back()">
+    <mat-icon>arrow_back</mat-icon>
+    {{ 'DASH_LOYALTY_BACK' | translate | async }}
+  </button>
+
+  <header class="dash-admin-page-header dash-loyalty-manual__hero">
+    <div class="dash-admin-page-header__text">
+      <p class="dash-admin-page-kicker">{{ 'DASH_NAV_LOYALTY_MANUAL' | translate | async }}</p>
+      <h1 class="dash-admin-page-title">{{ 'DASH_LOYALTY_MANUAL_TITLE' | translate | async }}</h1>
+      <p class="dash-admin-page-lead">{{ 'DASH_LOYALTY_MANUAL_LEAD' | translate | async }}</p>
+      <p class="dash-loyalty-manual__rule-pill">{{ 'DASH_LOYALTY_MANUAL_RULE' | translate | async }}</p>
+    </div>
+  </header>
+
+  <nav class="dash-loyalty-manual__step-track" [attr.aria-label]="'DASH_LOYALTY_MANUAL_STEPS_ARIA' | translate | async">
+    <span class="dash-loyalty-manual__step-node" [class.dash-loyalty-manual__step-node--done]="!!selectedRef">
+      <span class="dash-loyalty-manual__step-num">1</span>
+      {{ 'DASH_LOYALTY_MANUAL_STEP_1' | translate | async }}
+    </span>
+    <span class="dash-loyalty-manual__step-sep" aria-hidden="true"></span>
+    <span class="dash-loyalty-manual__step-node dash-loyalty-manual__step-node--current">
+      <span class="dash-loyalty-manual__step-num">2</span>
+      {{ 'DASH_LOYALTY_MANUAL_STEP_2' | translate | async }}
+    </span>
+    <span class="dash-loyalty-manual__step-sep" aria-hidden="true"></span>
+    <span class="dash-loyalty-manual__step-node" [class.dash-loyalty-manual__step-node--done]="form.controls.confirm.value === true">
+      <span class="dash-loyalty-manual__step-num">3</span>
+      {{ 'DASH_LOYALTY_MANUAL_STEP_3' | translate | async }}
+    </span>
+  </nav>
+
+  <div class="dash-loyalty-manual__layout">
+    <mat-card appearance="outlined" class="dash-loyalty-manual__panel dash-admin-card">
+      <mat-card-header class="dash-loyalty-manual__card-head">
+        <div mat-card-avatar class="dash-loyalty-manual__avatar" aria-hidden="true">
+          <mat-icon>person_search</mat-icon>
+        </div>
+        <mat-card-title>{{ 'DASH_LOYALTY_MANUAL_SEARCH' | translate | async }}</mat-card-title>
+        <mat-card-subtitle>{{ 'DASH_LOYALTY_MANUAL_CARD_SEARCH_SUB' | translate | async }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="dash-loyalty-manual__hint">{{ 'DASH_LOYALTY_MANUAL_SEARCH_HINT' | translate | async }}</p>
+        <mat-form-field
+          appearance="outline"
+          floatLabel="always"
+          class="dash-admin-field dash-loyalty-manual__search-field"
+          subscriptSizing="dynamic"
+        >
+          <mat-label>{{ 'DASH_LOYALTY_FILTER_SEARCH' | translate | async }}</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput [ngModel]="searchQuery" (ngModelChange)="onSearchInput($event)" name="loyaltySearch" autocomplete="off" />
+        </mat-form-field>
+        @if (searchLoading) {
+          <mat-progress-bar mode="indeterminate" class="dash-loyalty-manual__search-progress"></mat-progress-bar>
+        }
+        @if (searchItems.length) {
+          <ul class="dash-loyalty-manual__hits" role="listbox">
+            @for (row of searchItems; track row.ref) {
+              <li>
+                <button mat-stroked-button type="button" class="dash-loyalty-manual__hit-btn" (click)="pickCustomer(row)">
+                  <span class="dash-loyalty-manual__hit-name">{{ row.name || row.email || '—' }}</span>
+                  <span class="dash-loyalty-manual__hit-meta">{{ row.kind }} · {{ row.phoneMasked }} · {{ row.points }} pts</span>
+                </button>
+              </li>
+            }
+          </ul>
+        }
+        @if (selectedRef) {
+          <div class="dash-loyalty-manual__selected">
+            <mat-icon aria-hidden="true">verified</mat-icon>
+            <div class="dash-loyalty-manual__selected-text">
+              <strong>{{ 'DASH_LOYALTY_MANUAL_SELECTED' | translate | async }}</strong>
+              <span>{{ selectedLabel }}</span>
+              <span class="dash-loyalty-manual__selected-hint">{{ 'DASH_LOYALTY_MANUAL_SELECTED_HINT' | translate | async }}</span>
+            </div>
+            <button mat-stroked-button type="button" color="primary" (click)="clearSelection()">
+              {{ 'DASH_LOYALTY_MANUAL_CLEAR_SEL' | translate | async }}
+            </button>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <div class="dash-loyalty-manual__stack">
+      <mat-card appearance="outlined" class="dash-loyalty-manual__panel dash-admin-card">
+        <mat-card-header class="dash-loyalty-manual__card-head">
+          <div mat-card-avatar class="dash-loyalty-manual__avatar dash-loyalty-manual__avatar--purchase" aria-hidden="true">
+            <mat-icon>payments</mat-icon>
+          </div>
+          <mat-card-title>{{ 'DASH_LOYALTY_MANUAL_CARD_PURCHASE' | translate | async }}</mat-card-title>
+          <mat-card-subtitle>{{ 'DASH_LOYALTY_MANUAL_CARD_PURCHASE_SUB' | translate | async }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="form" (ngSubmit)="submit()" class="dash-loyalty-manual__form">
+            @if (!selectedRef) {
+              <mat-form-field
+                appearance="outline"
+                floatLabel="always"
+                class="dash-admin-field dash-admin-field--compact dash-loyalty-manual__phone-field"
+                subscriptSizing="dynamic"
+              >
+                <mat-label>{{ 'DASH_LOYALTY_MANUAL_PHONE' | translate | async }}</mat-label>
+                <mat-icon matPrefix>phone_iphone</mat-icon>
+                <input
+                  matInput
+                  formControlName="phone"
+                  autocomplete="tel"
+                  (blur)="onPhoneBlur()"
+                />
+                @if (form.controls.phone.touched && form.controls.phone.invalid) {
+                  <mat-error>
+                    @if (form.controls.phone.hasError('required')) {
+                      {{ 'DASH_LOYALTY_MANUAL_ERR_PHONE' | translate | async }}
+                    } @else if (form.controls.phone.hasError('minlength')) {
+                      {{ 'DASH_LOYALTY_MANUAL_ERR_PHONE_LEN' | translate | async }}
+                    }
+                  </mat-error>
+                }
+              </mat-form-field>
+              @if (phoneLookupLoading) {
+                <div class="dash-loyalty-manual__phone-status dash-loyalty-manual__phone-status--loading" role="status">
+                  <mat-icon class="dash-loyalty-manual__status-ico" aria-hidden="true">hourglass_top</mat-icon>
+                  <span>{{ 'DASH_LOYALTY_MANUAL_LOOKUP_LOADING' | translate | async }}</span>
+                  <mat-progress-bar mode="indeterminate" class="dash-loyalty-manual__phone-progress"></mat-progress-bar>
+                </div>
+              }
+              @if (phoneLookupError && !phoneLookupLoading) {
+                <div class="dash-loyalty-manual__phone-status dash-loyalty-manual__phone-status--warn" role="status">
+                  <mat-icon class="dash-loyalty-manual__status-ico" aria-hidden="true">cloud_off</mat-icon>
+                  <span>{{ 'DASH_LOYALTY_MANUAL_LOOKUP_ERR' | translate | async }}</span>
+                </div>
+              }
+              @if (phoneLookup && !phoneLookupLoading && !phoneLookupError && phoneLookup.valid) {
+                @if (phoneLookup.found) {
+                  <div class="dash-loyalty-manual__phone-status dash-loyalty-manual__phone-status--found" role="status">
+                    <div class="dash-loyalty-manual__status-row">
+                      <mat-icon class="dash-loyalty-manual__status-ico" aria-hidden="true">person_pin</mat-icon>
+                      <div class="dash-loyalty-manual__status-body">
+                        <span class="dash-loyalty-manual__status-kicker">{{ 'DASH_LOYALTY_MANUAL_LOOKUP_FOUND_TITLE' | translate | async }}</span>
+                        <p class="dash-loyalty-manual__status-lead">
+                          {{ tr('DASH_LOYALTY_MANUAL_LOOKUP_HAS_POINTS', { points: phoneLookup.points }) }}
+                        </p>
+                        <ul class="dash-loyalty-manual__status-meta">
+                          @if (phoneLookup.name) {
+                            <li>
+                              <mat-icon class="dash-loyalty-manual__inline-ico">badge</mat-icon>
+                              <span class="dash-loyalty-manual__meta-k">{{ 'DASH_LOYALTY_MANUAL_LOOKUP_NAME_LABEL' | translate | async }}:</span>
+                              {{ phoneLookup.name }}
+                            </li>
+                          }
+                          <li>
+                            <mat-icon class="dash-loyalty-manual__inline-ico">phone_android</mat-icon>
+                            <span class="dash-loyalty-manual__meta-dim">{{ phoneLookup.phoneMasked }}</span>
+                          </li>
+                          <li>
+                            <mat-icon class="dash-loyalty-manual__inline-ico">workspace_premium</mat-icon>
+                            <span class="dash-loyalty-manual__meta-k">{{ 'DASH_LOYALTY_MANUAL_LOOKUP_POINTS_LABEL' | translate | async }}:</span>
+                            <strong>{{ phoneLookup.points }}</strong>
+                            <span class="dash-loyalty-manual__chip-kind" [class.dash-loyalty-manual__chip-kind--g]="phoneLookup.kind === 'guest'">
+                              {{
+                                (phoneLookup.kind === 'registered'
+                                  ? 'DASH_LOYALTY_MANUAL_LOOKUP_KIND_USER'
+                                  : 'DASH_LOYALTY_MANUAL_LOOKUP_KIND_GUEST'
+                                )
+                                  | translate
+                                  | async
+                              }}
+                            </span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="dash-loyalty-manual__phone-status dash-loyalty-manual__phone-status--new" role="status">
+                    <div class="dash-loyalty-manual__status-row">
+                      <mat-icon class="dash-loyalty-manual__status-ico" aria-hidden="true">person_add_alt</mat-icon>
+                      <div class="dash-loyalty-manual__status-body">
+                        <span class="dash-loyalty-manual__status-kicker">{{ 'DASH_LOYALTY_MANUAL_LOOKUP_NEW_TITLE' | translate | async }}</span>
+                        <p class="dash-loyalty-manual__status-lead">{{ 'DASH_LOYALTY_MANUAL_LOOKUP_NEW_TEXT' | translate | async }}</p>
+                        <p class="dash-loyalty-manual__status-meta-line">
+                          <mat-icon class="dash-loyalty-manual__inline-ico">phone_android</mat-icon>
+                          {{ phoneLookup.phoneMasked }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                }
+              }
+            }
+
+            <div class="dash-loyalty-manual__grid">
+              <mat-form-field appearance="outline" floatLabel="always" class="dash-admin-field dash-admin-field--compact" subscriptSizing="dynamic">
+                <mat-label>{{ 'DASH_LOYALTY_MANUAL_NAME' | translate | async }}</mat-label>
+                <mat-icon matPrefix>badge</mat-icon>
+                <input matInput formControlName="displayName" autocomplete="name" />
+                <mat-hint class="dash-loyalty-manual__name-hint" align="start"
+                  >{{ nameFieldHintKey() | translate | async }}</mat-hint
+                >
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" floatLabel="always" class="dash-admin-field dash-admin-field--compact" subscriptSizing="dynamic">
+                <mat-label>{{ 'DASH_LOYALTY_MANUAL_AMOUNT' | translate | async }}</mat-label>
+                <mat-icon matPrefix>payments</mat-icon>
+                <input matInput formControlName="amountCop" inputmode="numeric" />
+                @if (form.controls.amountCop.touched && form.controls.amountCop.invalid) {
+                  <mat-error>
+                    @if (form.controls.amountCop.hasError('required')) {
+                      {{ 'DASH_LOYALTY_MANUAL_ERR_AMOUNT' | translate | async }}
+                    } @else if (form.controls.amountCop.hasError('pattern')) {
+                      {{ 'DASH_LOYALTY_MANUAL_ERR_AMOUNT_NUM' | translate | async }}
+                    } @else if (form.controls.amountCop.hasError('lowPurchase')) {
+                      {{ 'DASH_LOYALTY_MANUAL_ERR_POINTS_ZERO' | translate | async }}
+                    }
+                  </mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" floatLabel="always" class="dash-admin-field dash-loyalty-manual__field--wide" subscriptSizing="dynamic">
+                <mat-label>{{ 'DASH_LOYALTY_MANUAL_NOTE' | translate | async }}</mat-label>
+                <mat-icon matPrefix>sticky_note_2</mat-icon>
+                <input matInput formControlName="note" />
+              </mat-form-field>
+            </div>
+
+            <div
+              class="dash-loyalty-manual__points-strip"
+              [class.dash-loyalty-manual__points-strip--active]="previewPoints() > 0"
+              role="status"
+            >
+              <div class="dash-loyalty-manual__points-strip-head">
+                <mat-icon aria-hidden="true">workspace_premium</mat-icon>
+                <span>{{ 'DASH_LOYALTY_MANUAL_POINTS_STRIP_TITLE' | translate | async }}</span>
+              </div>
+              @if (previewPoints() > 0) {
+                <div class="dash-loyalty-manual__points-big">+{{ previewPoints() }}</div>
+                <p class="dash-loyalty-manual__points-caption">
+                  {{ tr('DASH_LOYALTY_MANUAL_LOOKUP_GENERATE', { points: previewPoints() }) }}
+                </p>
+                <p class="dash-loyalty-manual__points-hint-legend">{{ 'DASH_LOYALTY_MANUAL_PREVIEW' | translate | async }}</p>
+                @if (totalPointsAfterHint(); as h) {
+                  <p class="dash-loyalty-manual__points-total-hint">
+                    <mat-icon class="dash-loyalty-manual__inline-ico" aria-hidden="true">trending_up</mat-icon>
+                    {{ tr('DASH_LOYALTY_MANUAL_LOOKUP_TOTAL_HINT', { current: h.current, add: h.add, total: h.total }) }}
+                  </p>
+                }
+              } @else {
+                <p class="dash-loyalty-manual__points-caption">{{ 'DASH_LOYALTY_MANUAL_POINTS_STRIP_EMPTY' | translate | async }}</p>
+              }
+            </div>
+
+            <div class="dash-loyalty-manual__confirm-row">
+              <mat-checkbox formControlName="confirm">{{ 'DASH_LOYALTY_MANUAL_CONFIRM' | translate | async }}</mat-checkbox>
+              @if (form.controls.confirm.touched && form.controls.confirm.invalid) {
+                <span class="dash-loyalty-manual__inline-err">{{ 'DASH_LOYALTY_MANUAL_ERR_CONFIRM' | translate | async }}</span>
+              }
+            </div>
+
+            <div class="dash-loyalty-manual__actions">
+              <button mat-stroked-button type="button" class="dash-loyalty-manual__btn-secondary" (click)="back()">
+                {{ 'DASH_LOYALTY_MANUAL_CANCEL' | translate | async }}
+              </button>
+              <button mat-flat-button color="primary" type="submit" class="dash-loyalty-manual__submit" [disabled]="busy">
+                <mat-icon>check_circle</mat-icon>
+                {{ 'DASH_LOYALTY_MANUAL_BTN' | translate | async }}
+              </button>
+            </div>
+          </form>
+
+          @if (bannerKey) {
+            <div
+              class="dash-admin-alert dash-loyalty-manual__banner"
+              [class.dash-admin-alert--success]="bannerType === 'success'"
+              [class.dash-admin-alert--error]="bannerType === 'error'"
+              role="status"
+            >
+              <mat-icon aria-hidden="true">{{ bannerType === 'success' ? 'check_circle' : 'error_outline' }}</mat-icon>
+              <span>{{ bannerKey | translate | async }}</span>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

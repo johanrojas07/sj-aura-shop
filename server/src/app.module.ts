@@ -7,6 +7,7 @@ import { OrdersModule } from './orders/orders.module';
 import { TranslationsModule } from './translations/translations.module';
 import { AdminModule } from './admin/admin.module';
 import { EshopModule } from './eshop/eshop.module';
+import { LoyaltyModule } from './loyalty/loyalty.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
@@ -21,6 +22,7 @@ import { ConfigModule } from '@nestjs/config';
     OrdersModule,
     TranslationsModule,
     AuthModule,
+    LoyaltyModule,
     AdminModule,
     EshopModule,
   ],

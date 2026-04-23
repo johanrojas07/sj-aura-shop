@@ -50,8 +50,16 @@ export class ProductsService {
         .filter((p) => !!(p[lang] as { visibility?: boolean })?.visibility);
 
       if (search) {
-        const s = search.toLowerCase();
-        list = list.filter((p) => (p.titleUrl || '').toLowerCase().includes(s));
+        const s = String(search).toLowerCase().trim();
+        list = list.filter((p) => {
+          const slug = (p.titleUrl || '').toLowerCase().includes(s);
+          const loc = p[lang] as { title?: string } | undefined;
+          const title = (loc?.title || '').toLowerCase();
+          const tagMatch = (p.tags || []).some((t) =>
+            String(t).toLowerCase().includes(s),
+          );
+          return slug || title.includes(s) || tagMatch;
+        });
       }
       const multiCats = (categories || '')
         .split(',')
@@ -257,11 +265,13 @@ export class ProductsService {
     }, []);
   }
 
-  /** Vista previa global: título, imagen, precio, id (para carrito). */
+  /** Vista previa global: título, imagen, precio, id (para carrito). Opcional filtro por categoría (`tags`). */
   async getProductsSearchPreview(
     search: string,
     lang: string,
     limit = 10,
+    category?: string,
+    categories?: string,
   ): Promise<Product[]> {
     return this.firebase.readQuietly(
       'products.getProductsSearchPreview',
@@ -272,16 +282,41 @@ export class ProductsService {
         }
         const lim = Math.min(Math.max(1, limit), 24);
         const snap = await this.productsCol().get();
-        const hits = snap.docs
+        let list = snap.docs
           .map((d) => docWithId<Product>(d)!)
           .filter((p) => !!(p[lang] as { visibility?: boolean })?.visibility)
           .filter((p) => {
             const slug = (p.titleUrl || '').toLowerCase().includes(s);
             const loc = p[lang] as { title?: string } | undefined;
             const title = (loc?.title || '').toLowerCase();
-            return slug || title.includes(s);
-          })
-          .slice(0, lim);
+            const tagMatch = (p.tags || []).some((t) =>
+              String(t).toLowerCase().includes(s),
+            );
+            return slug || title.includes(s) || tagMatch;
+          });
+
+        const multiCats = (categories || '')
+          .split(',')
+          .map((x) => x.trim().toLowerCase())
+          .filter((x) => x.length > 0);
+        const cat = (category || '').trim().toLowerCase();
+        if (multiCats.length) {
+          const tagFilters = await this.expandCategorySlugsForFilter(multiCats);
+          list = list.filter((p) =>
+            tagFilters.some((c) =>
+              (p.tags || []).some((t) => String(t).toLowerCase().includes(c)),
+            ),
+          );
+        } else if (cat) {
+          const tagFilters = await this.expandCategorySlugsForFilter([cat]);
+          list = list.filter((p) =>
+            tagFilters.some((c) =>
+              (p.tags || []).some((t) => String(t).toLowerCase().includes(c)),
+            ),
+          );
+        }
+
+        const hits = list.slice(0, lim);
         return hits.map((p) => prepareProduct(p, lang, true));
       },
       [],
