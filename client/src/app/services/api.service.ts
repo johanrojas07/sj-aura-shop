@@ -346,6 +346,18 @@ export class ApiService {
     );
   }
 
+  /**
+   * Sustituye el carrito en servidor con las líneas (id + qty) enviadas.
+   * Más fiable que GET /add consecutivos cuando la cookie de sesión no se reutiliza.
+   */
+  syncCartLines(lines: Array<{ id: string; qty: number }>) {
+    const url = this.apiUrl + '/api/cart/sync';
+    return this.http.post(url, { lines }, this.buildRequestOptions()).pipe(
+      map((response: any) => response),
+      catchError((error: Error) => of({ error })),
+    );
+  }
+
   /** Fija cantidad de una línea (0 = quitar) en una sola petición. */
   setCartLineQty(params: string) {
     this.ranNumber = this.ranNumber + 1;

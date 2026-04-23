@@ -1,6 +1,6 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
-import { catchError, concatMap, finalize, from, map, of, switchMap, tap, Observable } from 'rxjs';
+import { catchError, from, map, of, switchMap, tap, Observable } from 'rxjs';
 
 import { SignalStoreSelectors } from './signal.store.selectors';
 import { ApiService } from '../services/api.service';
@@ -111,9 +111,67 @@ export class SignalStore {
     }
   }
 
+  /** Mapea el carrito actual a líneas { id, qty } (fuente: estado en cliente). */
+  private lineKey(row: { id?: string; item?: { _id?: string } }): string {
+    return String(row?.id || row?.item?._id || '')
+      .trim();
+  }
+
+  private buildLinesMapFromCart(c: Cart | null | undefined): Map<string, number> {
+    const m = new Map<string, number>();
+    for (const row of c?.items ?? []) {
+      const r = row as { id?: string; qty?: number; item?: { _id?: string } };
+      const id = this.lineKey(r);
+      if (!id) {
+        continue;
+      }
+      const q = Math.max(1, Math.min(999, Math.floor(Number(r?.qty) || 1)));
+      m.set(id, q);
+    }
+    return m;
+  }
+
+  private mapToSyncLines(m: Map<string, number>): Array<{ id: string; qty: number }> {
+    return [...m.entries()].map(([id, qty]) => ({ id, qty }));
+  }
+
+  private parseCartQuery(payload: string): { id: string; lang: string } {
+    const q = (payload || '').replace(/^\?/, '');
+    const p = new URLSearchParams(q);
+    return {
+      id: (p.get('id') || '').trim(),
+      lang: (p.get('lang') || '').trim(),
+    };
+  }
+
+  /** Alinea `id` de la petición con la clave que usamos en línea (id, _id, titleUrl pueden coincidir). */
+  private resolveLineIdForMutation(requested: string, cart: Cart | null | undefined): string {
+    const req = String(requested).trim();
+    if (!req) {
+      return '';
+    }
+    for (const row of cart?.items ?? []) {
+      const r = row as { id?: string; item?: { _id?: string; titleUrl?: string } };
+      const k = this.lineKey(r);
+      if (!k) {
+        continue;
+      }
+      if (k === req || r.id === req) {
+        return k;
+      }
+      const p = r.item;
+      if (p?._id && String(p._id) === req) {
+        return k;
+      }
+      if (p?.titleUrl && p.titleUrl === req) {
+        return k;
+      }
+    }
+    return req;
+  }
+
   /**
-   * Rehace el carrito en servidor desde localStorage: una línea → un add + setLineQty (menos peticiones
-   * que N×add y menos riesgo si algo reintenta).
+   * Rehace el carrito en servidor desde localStorage con un solo POST /api/cart/sync.
    */
   private restoreCartFromBackup(lines: { id: string; qty: number }[], lang: string): void {
     const normalized = lines
@@ -128,52 +186,19 @@ export class SignalStore {
       return;
     }
     this.bumpCartReadGeneration();
-    let lastOk: Cart | null = null;
-    from(normalized)
-      .pipe(
-        concatMap((line) =>
-          this.apiService
-            .addToCart(`?id=${encodeURIComponent(line.id)}&lang=${encodeURIComponent(lang)}`)
-            .pipe(
-              catchError(() => of(null)),
-              switchMap((c: (Cart & { error?: unknown }) | null) => {
-                if (!c || c.error) {
-                  return of(c);
-                }
-                lastOk = c;
-                if (line.qty <= 1) {
-                  return of(c);
-                }
-                const params = `?id=${encodeURIComponent(line.id)}&lang=${encodeURIComponent(lang)}&qty=${line.qty}`;
-                return this.apiService.setCartLineQty(params).pipe(
-                  tap((c2: Cart & { error?: unknown }) => {
-                    if (c2 && !c2.error) {
-                      lastOk = c2;
-                    }
-                  }),
-                  catchError(() => of(c)),
-                );
-              }),
-            ),
-        ),
-        finalize(() => {
-          this.cartRestoreFromBackupInFlight = false;
-        }),
-      )
-      .subscribe({
-        complete: () => {
-          if (lastOk) {
-            this.applyCartResponse(lastOk);
-          } else {
-            try {
-              localStorage.removeItem(cartLinesBackupKey);
-            } catch {
-              /* ignore */
-            }
-            this.applyCartResponse({ items: [], totalQty: 0, totalPrice: 0 });
-          }
-        },
-      });
+    this.apiService.syncCartLines(normalized).subscribe((response: Cart & { error?: unknown }) => {
+      this.cartRestoreFromBackupInFlight = false;
+      if (response && !response.error) {
+        this.applyCartResponse(response);
+        return;
+      }
+      try {
+        localStorage.removeItem(cartLinesBackupKey);
+      } catch {
+        /* ignore */
+      }
+      this.applyCartResponse({ items: [], totalQty: 0, totalPrice: 0 });
+    });
   }
 
   /** Tras Firebase: token → perfil API; actualiza estado y emite si la sesión quedó válida. */
@@ -484,42 +509,84 @@ getCart = (payload) => {
   });
 };
 
-addToCart = (payload) => {
+addToCart = (payload: string) => {
   this.bumpCartReadGeneration();
-  this.apiService.addToCart(payload).subscribe((response: any) => {
+  const { id } = this.parseCartQuery(payload);
+  if (!id) {
+    return;
+  }
+  const c = this.selectors.productState().cart;
+  const m = this.buildLinesMapFromCart(c);
+  const key = this.resolveLineIdForMutation(id, c) || id;
+  m.set(key, Math.min(999, (m.get(key) || 0) + 1));
+  this.apiService.syncCartLines(this.mapToSyncLines(m)).subscribe((response: any) => {
     this.applyCartResponse(response);
   });
 };
 
-removeFromCart = (payload) => {
+/** Misma lógica que el GET /api/cart/remove: resta 1 unidad, no toda la línea. */
+removeFromCart = (payload: string) => {
   this.bumpCartReadGeneration();
-  this.apiService.removeFromCart(payload).subscribe((response: any) => {
+  const { id } = this.parseCartQuery(payload);
+  if (!id) {
+    return;
+  }
+  const c = this.selectors.productState().cart;
+  const m = this.buildLinesMapFromCart(c);
+  const key = this.resolveLineIdForMutation(id, c) || id;
+  const cur = m.get(key) || 0;
+  if (cur <= 1) {
+    m.delete(key);
+  } else {
+    m.set(key, cur - 1);
+  }
+  this.apiService.syncCartLines(this.mapToSyncLines(m)).subscribe((response: any) => {
     this.applyCartResponse(response);
   });
 };
 
-setCartLineQty = (id: string, lang: string, qty: number) => {
+setCartLineQty = (id: string, _lang: string, qty: number) => {
   this.bumpCartReadGeneration();
+  if (!id) {
+    return;
+  }
   const q = Math.max(0, Math.min(999, Math.floor(qty)));
-  const params = `?id=${encodeURIComponent(id)}&lang=${encodeURIComponent(lang)}&qty=${q}`;
-  this.apiService.setCartLineQty(params).subscribe((response: any) => {
+  const c = this.selectors.productState().cart;
+  const m = this.buildLinesMapFromCart(c);
+  const key = this.resolveLineIdForMutation(id, c) || id;
+  if (q <= 0) {
+    m.delete(key);
+  } else {
+    m.set(key, q);
+  }
+  this.apiService.syncCartLines(this.mapToSyncLines(m)).subscribe((response: any) => {
     this.applyCartResponse(response);
   });
 };
 
-/** Quita una línea completa del carrito (varias llamadas remove, -1 unidad c/u). */
-removeCartLineCompletely = (id: string, lang: string, qty: number) => {
+/** Resta unidades a una línea; si pasa a 0 o menos, se elimina. */
+removeCartLineCompletely = (id: string, _lang: string, qty: number) => {
   this.bumpCartReadGeneration();
-  const step = (remaining: number) => {
-    if (remaining <= 0 || !id) {
-      return;
-    }
-    this.apiService.removeFromCart(`?id=${id}&lang=${lang}&r=${Math.random()}`).subscribe((response: any) => {
-      this.applyCartResponse(response);
-      step(remaining - 1);
-    });
-  };
-  step(Math.max(0, Math.floor(qty)));
+  if (!id) {
+    return;
+  }
+  const n = Math.max(0, Math.floor(qty));
+  if (n <= 0) {
+    return;
+  }
+  const c = this.selectors.productState().cart;
+  const m = this.buildLinesMapFromCart(c);
+  const key = this.resolveLineIdForMutation(id, c) || id;
+  const cur = m.get(key) || 0;
+  const next = cur - n;
+  if (next <= 0) {
+    m.delete(key);
+  } else {
+    m.set(key, next);
+  }
+  this.apiService.syncCartLines(this.mapToSyncLines(m)).subscribe((response: any) => {
+    this.applyCartResponse(response);
+  });
 };
 
 makeOrder = (payload) => {

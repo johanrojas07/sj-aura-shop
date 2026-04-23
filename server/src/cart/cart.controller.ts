@@ -1,6 +1,8 @@
 import {
+  Body,
   Controller,
   Get,
+  Post,
   Query,
   ValidationPipe,
   Session,
@@ -9,6 +11,7 @@ import {
 
 import { CartService } from './cart.service';
 import { GetCartChangeDto } from './dto/cart-change.dto';
+import type { CartSyncBody } from './dto/sync-cart.dto';
 import { CartModel } from './models/cart.model';
 
 @Controller('api/cart')
@@ -20,7 +23,26 @@ export class CartController {
     @Session() session,
     @Headers('lang') lang: string,
   ): Promise<CartModel> {
-    return this.cartService.getCart(session, lang);
+    return this.cartService.getCart(session, (lang && String(lang).trim()) || 'es');
+  }
+
+  /** Sincroniza el carrito completo en un POST (líneas id+qty). Robusto si la sesión no se reutiliza entre peticiones. */
+  @Post('/sync')
+  async syncCart(
+    @Session() session,
+    @Body() body: CartSyncBody,
+    @Headers('lang') lang: string,
+  ): Promise<CartModel> {
+    const lines = Array.isArray(body?.lines) ? body!.lines! : [];
+    const { newCart, langCart } = await this.cartService.syncFromLines(
+      session,
+      lines,
+      (lang && String(lang).trim()) || 'es',
+    );
+    if (session) {
+      session.cart = newCart;
+    }
+    return langCart;
   }
 
   @Get('/add')
