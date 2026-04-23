@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Post,
   Query,
   ValidationPipe,
@@ -19,6 +20,7 @@ export class CartController {
   constructor(private cartService: CartService) {}
 
   @Get()
+  @Header('Cache-Control', 'no-store, no-cache, must-revalidate, private')
   getCart(
     @Session() session,
     @Headers('lang') lang: string,
@@ -28,6 +30,7 @@ export class CartController {
 
   /** Sincroniza el carrito completo en un POST (líneas id+qty). Robusto si la sesión no se reutiliza entre peticiones. */
   @Post('/sync')
+  @Header('Cache-Control', 'no-store, no-cache, must-revalidate, private')
   async syncCart(
     @Session() session,
     @Body() body: CartSyncBody,
@@ -46,6 +49,7 @@ export class CartController {
   }
 
   @Get('/add')
+  @Header('Cache-Control', 'no-store, no-cache, must-revalidate, private')
   async addToCart(
     @Session() session,
     @Query(ValidationPipe) getCartChangeDto: GetCartChangeDto,
@@ -81,6 +85,7 @@ export class CartController {
 
   /** Establece la cantidad de una línea (0 = quitar) en una sola petición. */
   @Get('/line-qty')
+  @Header('Cache-Control', 'no-store, no-cache, must-revalidate, private')
   async setLineQty(
     @Session() session,
     @Query('id') id: string,

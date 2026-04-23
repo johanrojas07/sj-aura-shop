@@ -112,21 +112,46 @@ export class SignalStore {
   }
 
   /** Mapea el carrito actual a líneas { id, qty } (fuente: estado en cliente). */
-  private lineKey(row: { id?: string; item?: { _id?: string } }): string {
-    return String(row?.id || row?.item?._id || '')
+  private lineKey(row: { id?: string; item?: { _id?: string; titleUrl?: string } }): string {
+    return String(row?.id || row?.item?._id || row?.item?.titleUrl || '')
       .trim();
   }
 
   private buildLinesMapFromCart(c: Cart | null | undefined): Map<string, number> {
     const m = new Map<string, number>();
     for (const row of c?.items ?? []) {
-      const r = row as { id?: string; qty?: number; item?: { _id?: string } };
+      const r = row as { id?: string; qty?: number; item?: { _id?: string; titleUrl?: string } };
       const id = this.lineKey(r);
       if (!id) {
         continue;
       }
       const q = Math.max(1, Math.min(999, Math.floor(Number(r?.qty) || 1)));
       m.set(id, q);
+    }
+    return m;
+  }
+
+  /**
+   * Base para el próximo `sync`: memoria + líneas faltantes desde el backup (mismo idioma).
+   * Así no enviamos solo 1 producto al servidor si el store quedó vacío o atrasado frente a localStorage.
+   */
+  private buildLinesMapForSyncMutation(
+    c: Cart | null | undefined,
+    langForCompare: string,
+  ): Map<string, number> {
+    const m = this.buildLinesMapFromCart(c);
+    if (!isPlatformBrowser(this.platformId)) {
+      return m;
+    }
+    const resolved = (String(langForCompare || '').trim() || this.selectors.appLang() || 'es') as string;
+    const backup = this.readCartBackup();
+    if (!backup || !resolved || backup.lang !== resolved) {
+      return m;
+    }
+    for (const l of backup.lines) {
+      if (l.id && !m.has(l.id)) {
+        m.set(l.id, l.qty);
+      }
     }
     return m;
   }
@@ -511,15 +536,19 @@ getCart = (payload) => {
 
 addToCart = (payload: string) => {
   this.bumpCartReadGeneration();
-  const { id } = this.parseCartQuery(payload);
+  const { id, lang: plLang } = this.parseCartQuery(payload);
   if (!id) {
     return;
   }
+  const lang = (plLang && plLang.trim()) || this.selectors.appLang() || 'es';
   const c = this.selectors.productState().cart;
-  const m = this.buildLinesMapFromCart(c);
+  const m = this.buildLinesMapForSyncMutation(c, lang);
   const key = this.resolveLineIdForMutation(id, c) || id;
   m.set(key, Math.min(999, (m.get(key) || 0) + 1));
   this.apiService.syncCartLines(this.mapToSyncLines(m)).subscribe((response: any) => {
+    if (response?.error) {
+      return;
+    }
     this.applyCartResponse(response);
   });
 };
@@ -527,12 +556,13 @@ addToCart = (payload: string) => {
 /** Misma lógica que el GET /api/cart/remove: resta 1 unidad, no toda la línea. */
 removeFromCart = (payload: string) => {
   this.bumpCartReadGeneration();
-  const { id } = this.parseCartQuery(payload);
+  const { id, lang: plLang } = this.parseCartQuery(payload);
   if (!id) {
     return;
   }
+  const lang = (plLang && plLang.trim()) || this.selectors.appLang() || 'es';
   const c = this.selectors.productState().cart;
-  const m = this.buildLinesMapFromCart(c);
+  const m = this.buildLinesMapForSyncMutation(c, lang);
   const key = this.resolveLineIdForMutation(id, c) || id;
   const cur = m.get(key) || 0;
   if (cur <= 1) {
@@ -541,6 +571,9 @@ removeFromCart = (payload: string) => {
     m.set(key, cur - 1);
   }
   this.apiService.syncCartLines(this.mapToSyncLines(m)).subscribe((response: any) => {
+    if (response?.error) {
+      return;
+    }
     this.applyCartResponse(response);
   });
 };
@@ -552,7 +585,8 @@ setCartLineQty = (id: string, _lang: string, qty: number) => {
   }
   const q = Math.max(0, Math.min(999, Math.floor(qty)));
   const c = this.selectors.productState().cart;
-  const m = this.buildLinesMapFromCart(c);
+  const lang = (_lang && String(_lang).trim()) || this.selectors.appLang() || 'es';
+  const m = this.buildLinesMapForSyncMutation(c, lang);
   const key = this.resolveLineIdForMutation(id, c) || id;
   if (q <= 0) {
     m.delete(key);
@@ -560,6 +594,9 @@ setCartLineQty = (id: string, _lang: string, qty: number) => {
     m.set(key, q);
   }
   this.apiService.syncCartLines(this.mapToSyncLines(m)).subscribe((response: any) => {
+    if (response?.error) {
+      return;
+    }
     this.applyCartResponse(response);
   });
 };
@@ -575,7 +612,8 @@ removeCartLineCompletely = (id: string, _lang: string, qty: number) => {
     return;
   }
   const c = this.selectors.productState().cart;
-  const m = this.buildLinesMapFromCart(c);
+  const lang = (_lang && String(_lang).trim()) || this.selectors.appLang() || 'es';
+  const m = this.buildLinesMapForSyncMutation(c, lang);
   const key = this.resolveLineIdForMutation(id, c) || id;
   const cur = m.get(key) || 0;
   const next = cur - n;
@@ -585,6 +623,9 @@ removeCartLineCompletely = (id: string, _lang: string, qty: number) => {
     m.set(key, next);
   }
   this.apiService.syncCartLines(this.mapToSyncLines(m)).subscribe((response: any) => {
+    if (response?.error) {
+      return;
+    }
     this.applyCartResponse(response);
   });
 };
