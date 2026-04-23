@@ -6,7 +6,7 @@ import { logStartupBanner, logFirebaseYFirestoreTrasInit } from './startup-diagn
 
 let cached: NestExpressApplication | null = null;
 
-/** Arranca Nest (una vez) para `main` o para Vercel. En Vercel hace falta `init()` sin `listen()`. */
+/** Arranca Nest (una vez) para `main` o despliegue serverless. En Vercel hace falta `init()` sin `listen()`; en producción el API vive p. ej. en Render. */
 export async function createNestServer(): Promise<NestExpressApplication> {
   if (cached) {
     return cached;
@@ -17,7 +17,7 @@ export async function createNestServer(): Promise<NestExpressApplication> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: isVercel ? (['error', 'warn', 'log'] as const) : undefined,
   });
-  setAppDB(app);
+  await setAppDB(app);
   if (isVercel) {
     await app.init();
   }

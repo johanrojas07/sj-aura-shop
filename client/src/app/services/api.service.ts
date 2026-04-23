@@ -36,7 +36,7 @@ export class ApiService {
 
       if (isPlatformBrowser(this.platformId)) {
         const fromEnv = (environment as { apiUrl?: string }).apiUrl?.trim();
-        /* Con API en Vercel y front en Firebase: rellena `apiUrl` en `environment.prod.ts` (misma clave al build). */
+        /* Con API en Render (u otro origen) y front en Firebase: rellena `apiUrl` en `environment.prod.ts` (build producción). */
         this.apiUrl = fromEnv && fromEnv.length > 0 ? fromEnv : this._window.location.origin || '';
       }
     }
@@ -320,7 +320,7 @@ export class ApiService {
   getCart(lang?: string) {
     const withLangQuery = lang ? '?lang=' + lang : '';
     const cartUrl = this.apiUrl + '/api/cart' + withLangQuery;
-    return this.http.get(cartUrl, this.requestOptions).pipe(
+    return this.http.get(cartUrl, this.buildRequestOptions()).pipe(
       map((response: any) => response),
       catchError((error: Error) => of({ error })),
     );
@@ -330,7 +330,7 @@ export class ApiService {
     this.ranNumber = this.ranNumber + 1;
     const randomNum = '&random=' + this.ranNumber;
     const addToCartUrl = this.apiUrl + '/api/cart/add' + params + randomNum;
-    return this.http.get(addToCartUrl, this.requestOptions).pipe(
+    return this.http.get(addToCartUrl, this.buildRequestOptions()).pipe(
       map((response: any) => response),
       catchError((error: Error) => of({ error })),
     );
@@ -340,7 +340,7 @@ export class ApiService {
     this.ranNumber = this.ranNumber + 1;
     const randomNum = '&random=' + this.ranNumber;
     const removeFromCartUrl = this.apiUrl + '/api/cart/remove' + params + randomNum;
-    return this.http.get(removeFromCartUrl, this.requestOptions).pipe(
+    return this.http.get(removeFromCartUrl, this.buildRequestOptions()).pipe(
       map((response: any) => response),
       catchError((error: Error) => of({ error })),
     );
@@ -351,7 +351,7 @@ export class ApiService {
     this.ranNumber = this.ranNumber + 1;
     const randomNum = '&random=' + this.ranNumber;
     const url = this.apiUrl + '/api/cart/line-qty' + params + randomNum;
-    return this.http.get(url, this.requestOptions).pipe(
+    return this.http.get(url, this.buildRequestOptions()).pipe(
       map((response: any) => response),
       catchError((error: Error) => of({ error })),
     );
@@ -613,6 +613,7 @@ export class ApiService {
   }
 
   setHeaders() {
+    this.requestOptions = this.buildRequestOptions();
     combineLatest([toObservable(this.selectors.appLang), toObservable(this.selectors.user)]).subscribe(([_lang, user]) => {
       if (user && user.accessToken && isPlatformBrowser(this.platformId)) {
         localStorage.setItem(accessTokenKey, user.accessToken);
