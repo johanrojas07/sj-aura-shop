@@ -42,6 +42,11 @@ export const TRANSLATION_DEFAULTS: Record<string, Record<string, string>> = {
     RECENTLY_VIEWED: 'Visto recientemente',
     GO_TO_LAST_VIEWED: 'Ir al último visto',
     GO_TO_LAST_VIEWED_SHORT: 'Último visto',
+    WHATSAPP_FAB_ARIA: 'Escribir por WhatsApp',
+    WHATSAPP_FAB_TOOLTIP: 'Contáctanos por WhatsApp',
+    TIKTOK_FAB_ARIA: 'Abrir perfil de TikTok',
+    TIKTOK_FAB_TOOLTIP: 'Síguenos en TikTok',
+    SOCIAL_FAB_GROUP: 'Redes sociales y contacto',
     CART_DRAWER_EMPTY: 'Tu bolsa está vacía. Cuando añadas piezas, las verás aquí al instante.',
     CART_DRAWER_BROWSE: 'Explorar productos',
     CART_DRAWER_CHECKOUT_HINT:
@@ -627,6 +632,11 @@ export const TRANSLATION_DEFAULTS: Record<string, Record<string, string>> = {
     RECENTLY_VIEWED: 'Recently viewed',
     GO_TO_LAST_VIEWED: 'Go to last viewed',
     GO_TO_LAST_VIEWED_SHORT: 'Last viewed',
+    WHATSAPP_FAB_ARIA: 'Message us on WhatsApp',
+    WHATSAPP_FAB_TOOLTIP: 'Chat with us on WhatsApp',
+    TIKTOK_FAB_ARIA: 'Open TikTok profile',
+    TIKTOK_FAB_TOOLTIP: 'Follow us on TikTok',
+    SOCIAL_FAB_GROUP: 'Social and contact',
     CART_DRAWER_EMPTY: 'Your bag is empty. Items you add will show up here right away.',
     CART_DRAWER_BROWSE: 'Browse products',
     CART_DRAWER_CHECKOUT_HINT:

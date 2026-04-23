@@ -1,3 +1,12 @@
+/* Hermano del `mat-sidenav` (p. ej. botón fijo) sin quedar atrapado en el `transform` del content. */
+.app-root {
+  display: block;
+  width: 100%;
+  min-height: 100%;
+  height: 100%;
+  position: relative;
+}
+
 /* Panel carrito: ancho al contenido; altura forzada a viewport (evita media panel en móvil). */
 .cart-drawer-sidenav {
   width: fit-content !important;

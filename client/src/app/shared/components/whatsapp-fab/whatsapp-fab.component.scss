@@ -1,0 +1,139 @@
+:host {
+  display: block;
+  position: static;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* Cinta fija, estética “glass” + marcas, sin competir con el catálogo. */
+.social-fab {
+  --fab-size: 52px;
+  --fab-icon: 28px;
+  --fab-gap: 12px;
+  position: fixed !important;
+  z-index: 100150 !important;
+  right: max(12px, env(safe-area-inset-right, 0px));
+  bottom: max(20px, env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--fab-gap);
+  pointer-events: auto;
+  user-select: none;
+}
+
+@media (max-width: 480px) {
+  .social-fab {
+    --fab-size: 50px;
+    --fab-icon: 26px;
+    --fab-gap: 10px;
+    right: max(10px, env(safe-area-inset-right, 0px));
+    bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.social-fab__btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--fab-size);
+  height: var(--fab-size);
+  border-radius: 50%;
+  text-decoration: none;
+  color: #fff;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  transition:
+    transform 0.2s cubic-bezier(0.34, 1.2, 0.64, 1),
+    box-shadow 0.25s ease,
+    filter 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+
+  &:hover {
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: var(--fab-shadow-hover) !important;
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.97);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 3px;
+  }
+}
+
+.social-fab__btn--wa {
+  --fab-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset, 0 2px 8px rgba(0, 0, 0, 0.1),
+    0 6px 18px rgba(18, 140, 126, 0.28);
+  --fab-shadow-hover: 0 1px 0 rgba(255, 255, 255, 0.45) inset, 0 3px 12px rgba(0, 0, 0, 0.1),
+    0 10px 26px rgba(18, 140, 126, 0.4);
+  background: linear-gradient(150deg, #2fe688 0%, #25d366 42%, #128c7e 100%);
+  box-shadow: var(--fab-shadow);
+}
+
+.social-fab__btn--tiktok {
+  --fab-shadow: 0 1px 0 rgba(255, 255, 255, 0.1) inset, 0 2px 8px rgba(0, 0, 0, 0.18),
+    0 5px 16px rgba(0, 0, 0, 0.2);
+  --fab-shadow-hover: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 4px 12px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 242, 234, 0.35),
+    0 0 0 2px rgba(255, 0, 80, 0.2), 0 8px 22px rgba(0, 0, 0, 0.32);
+  background: linear-gradient(150deg, #1a1a1e 0%, #0d0d0f 100%);
+  box-shadow: var(--fab-shadow);
+
+  .social-fab__shine {
+    background: conic-gradient(from 130deg, rgba(255, 0, 80, 0.2), rgba(0, 242, 234, 0.18), rgba(255, 0, 80, 0.1));
+  }
+
+  &:hover {
+    color: #fff;
+    filter: brightness(1.05);
+  }
+}
+
+.social-fab__shine {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: conic-gradient(from 200deg, rgba(255, 255, 255, 0.25), transparent 45%, rgba(255, 255, 255, 0.1));
+  pointer-events: none;
+  opacity: 0.5;
+  animation: socialFabPulse 2.4s ease-in-out infinite;
+}
+
+.social-fab__icon {
+  position: relative;
+  z-index: 1;
+  width: var(--fab-icon);
+  height: var(--fab-icon);
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+  shape-rendering: geometricPrecision;
+}
+
+@keyframes socialFabPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.18;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .social-fab__shine {
+    animation: none;
+    opacity: 0.3;
+  }
+
+  .social-fab__btn {
+    transition: box-shadow 0.2s ease;
+  }
+
+  .social-fab__btn:hover {
+    transform: none;
+  }
+}

@@ -18,9 +18,21 @@
     </div>
 
     <div class="nav-brand-logo">
+      <span class="nav-brand-sparkle" aria-hidden="true">
+        <svg class="nav-brand-sparkle__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <g class="nav-brand-sparkle__rays" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" opacity="0.92">
+            <line x1="8" y1="1" x2="8" y2="15" />
+            <line x1="1" y1="8" x2="15" y2="8" />
+            <line x1="2.1" y1="2.1" x2="13.9" y2="13.9" />
+            <line x1="13.9" y1="2.1" x2="2.1" y2="13.9" />
+          </g>
+          <circle class="nav-brand-sparkle__core" cx="8" cy="8" r="0.6" fill="currentColor" />
+        </svg>
+      </span>
       <a class="nav-brand-link" [routerLink]="['/']" (click)="scrollToTop(); closeMobileNav()" [attr.aria-label]="brandName + ' — inicio'">
         <span class="nav-brand-lockup">
           <span class="nav-brand-wordmark">{{ brandWordmark }}</span>
+          <span class="nav-brand-ornament" aria-hidden="true"></span>
           <span class="nav-brand-tagline">{{ brandTagline }}</span>
         </span>
       </a>
@@ -153,8 +165,11 @@
     >
       <div class="nav-mobile-drawer-head">
         <div class="nav-mobile-drawer-head-text">
-          <span class="nav-mobile-drawer-kicker">{{ brandWordmark }}</span>
-          <span class="nav-mobile-drawer-title">{{ brandTagline }}</span>
+          <div class="nav-mobile-drawer-lockup">
+            <span class="nav-mobile-drawer-kicker">{{ brandWordmark }}</span>
+            <span class="nav-mobile-drawer-ornament" aria-hidden="true"></span>
+            <span class="nav-mobile-drawer-title">{{ brandTagline }}</span>
+          </div>
         </div>
         <button type="button" mat-icon-button class="nav-mobile-drawer-close" (click)="closeMobileNav()" aria-label="Cerrar menú">
           <mat-icon>close</mat-icon>

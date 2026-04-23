@@ -28,10 +28,11 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { CartDrawerComponent } from './shared/components/cart-drawer/cart-drawer.component';
 import { CartDrawerService } from './services/cart-drawer.service';
 import { ProductQuickViewComponent } from './shared/components/product-quick-view/product-quick-view.component';
+import { WhatsappFabComponent } from './shared/components/whatsapp-fab/whatsapp-fab.component';
 
 @Component({
     selector: 'eshop-mean-app',
-    imports: [CommonModule, RouterOutlet, FooterComponent, HeaderHostComponent, MatSidenavModule, CartDrawerComponent, ProductQuickViewComponent],
+    imports: [CommonModule, RouterOutlet, FooterComponent, HeaderHostComponent, MatSidenavModule, CartDrawerComponent, ProductQuickViewComponent, WhatsappFabComponent],
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss']
 })

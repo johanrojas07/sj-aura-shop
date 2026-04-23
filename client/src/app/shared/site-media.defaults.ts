@@ -17,6 +17,36 @@ export const SITE_HERO_BANNER_PATH = '/assets/img/BANNER-ENTERIZOS-DESKTOP.webp'
 /** Logo para JSON-LD, Open Graph y favicon (`index.html`). Misma ruta que sube `seed:firestore` si existe `logo.png` local. */
 export const SITE_LOGO_PATH = '/assets/img/logo.png';
 
+/**
+ * Número de WhatsApp (solo dígitos, con código de país, sin +).
+ * Si hace falta más de 7 dígitos para formar un número, el botón no se muestra.
+ * Ej. Colombia: 57 + 10 dígitos móviles = 12 dígitos.
+ * Sustituye el valor de ejemplo por tu celular con WhatsApp.
+ */
+export const SITE_WHATSAPP_E164 = '573143133009';
+
+/**
+ * Texto opcional al abrir el chat (`wa.me/.../text=...`). Dejar vacío para abrir solo el chat.
+ */
+export const SITE_WHATSAPP_DEFAULT_TEXT = '';
+
+/** URL de chat de WhatsApp o `null` si no hay número configurado. */
+export function siteWhatsAppChatUrl(): string | null {
+  const raw = (SITE_WHATSAPP_E164 || '').replace(/\D/g, '');
+  if (raw.length < 8) {
+    return null;
+  }
+  const base = `https://wa.me/${raw}`;
+  const t = (SITE_WHATSAPP_DEFAULT_TEXT || '').trim();
+  if (!t) {
+    return base;
+  }
+  return `${base}?text=${encodeURIComponent(t)}`;
+}
+
+/** Enlace al perfil de TikTok (botón flotante en tienda). */
+export const SITE_TIKTOK_URL = 'https://www.tiktok.com/@tefasg4';
+
 /** Patrón local opcional antes de cargar Firestore; el seed prioriza `img/products/*` subido a Storage. */
 export function siteLocalProductImagePath(index: number): string {
   const n = (Math.abs(Math.floor(index)) % 20) + 1;
