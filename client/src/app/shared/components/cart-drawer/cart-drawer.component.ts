@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -48,6 +48,9 @@ export class CartDrawerComponent {
 
   readonly cart = this.selectors.cart;
 
+  /** `true` si hay líneas. No cambia de 1 → 2 ítems (sigue en true) para no re-disparar el `effect` y cancelar fetches. */
+  private readonly cartHasItems = computed(() => (this.cart()?.items?.length ?? 0) > 0);
+
   /** Solo mientras carga o hay sugerencias visibles (no en bolsa). */
   readonly similarRailVisible = computed(
     () => this.relatedLoading() || this.relatedProducts().length > 0,
@@ -76,8 +79,9 @@ export class CartDrawerComponent {
   readonly relatedLoading = signal(false);
 
   private relatedSub?: Subscription;
-  /** Una sola carga de sugerencias por apertura del drawer; el carrito solo filtra sobre el pool. */
+  /** Una sola carga de sugerencias por apertura + idioma; el listado reacciona a cart vía `relatedProducts`. */
   private similarFetchedThisOpen = false;
+  private lastRelatedPoolLang: string | null = null;
 
   readonly quickViewOpen = signal(false);
   readonly quickViewLoading = signal(false);
@@ -102,27 +106,35 @@ export class CartDrawerComponent {
   constructor() {
     effect((onCleanup) => {
       const open = this.drawer.isOpen();
-      const c = this.cart();
       const lang = this.lang();
+      const hasItems = this.cartHasItems();
 
-      if (!open || !c?.items?.length) {
+      if (!open || !hasItems) {
         this.relatedSub?.unsubscribe();
         this.relatedSub = undefined;
         this.relatedProductPool.set([]);
         this.relatedLoading.set(false);
         this.similarFetchedThisOpen = false;
+        this.lastRelatedPoolLang = null;
         this.closeQuickView();
         return;
       }
 
-      if (this.similarFetchedThisOpen) {
+      if (this.lastRelatedPoolLang !== null && this.lastRelatedPoolLang !== lang) {
+        this.similarFetchedThisOpen = false;
+      }
+      if (this.similarFetchedThisOpen && this.lastRelatedPoolLang === lang) {
         return;
       }
 
       this.relatedSub?.unsubscribe();
+      this.relatedSub = undefined;
 
+      const c = untracked(() => this.cart());
+      if (!c?.items?.length) {
+        return;
+      }
       const slugs = this.collectCategorySlugsFromCart(c);
-
       this.relatedLoading.set(true);
 
       const requests = slugs.map((slug) =>
@@ -148,16 +160,19 @@ export class CartDrawerComponent {
           this.relatedProductPool.set(list);
           this.relatedLoading.set(false);
           this.similarFetchedThisOpen = true;
+          this.lastRelatedPoolLang = lang;
         },
         error: () => {
           this.relatedProductPool.set([]);
           this.relatedLoading.set(false);
           this.similarFetchedThisOpen = true;
+          this.lastRelatedPoolLang = lang;
         },
       });
 
       onCleanup(() => {
         this.relatedSub?.unsubscribe();
+        this.relatedSub = undefined;
       });
     });
   }
